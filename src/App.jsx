@@ -193,64 +193,64 @@ export default function App() {
   ];
 
   return (
-    <div dir={t.dir} style={{display:"flex",minHeight:"100vh",background:darkMode?DARK.bg:LIGHT.bg,fontFamily:t.font,color:darkMode?DARK.text:LIGHT.text}}>
+    <div dir={t.dir} style={{display:"flex",minHeight:"100vh",background:DARK.bg,fontFamily:t.font,color:DARK.text}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&family=DM+Sans:wght@400;500;600;700&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
         ::-webkit-scrollbar{width:4px;height:4px}
-        ::-webkit-scrollbar-track{background:${darkMode?DARK.sidebar:LIGHT.sidebar}}
-        ::-webkit-scrollbar-thumb{background:${darkMode?DARK.accent:LIGHT.accent}66;border-radius:4px}
+        ::-webkit-scrollbar-track{background:${DARK.sidebar}}
+        ::-webkit-scrollbar-thumb{background:${DARK.accent}66;border-radius:4px}
         .btn{border:none;cursor:pointer;border-radius:7px;font-family:inherit;font-weight:600;transition:all .16s;display:inline-flex;align-items:center;gap:5px}
         .btn:active{transform:scale(.97)}
-        .btn-primary{background:linear-gradient(135deg,${darkMode?DARK.accent:LIGHT.accent},${darkMode?DARK.accentDark:LIGHT.accentDark});color:#080b14;padding:8px 18px;font-size:13px}
-        .btn-primary:hover{filter:brightness(1.1);box-shadow:0 4px 16px ${darkMode?DARK.accent:LIGHT.accent}44}
-        .btn-secondary{background:${darkMode?DARK.card:LIGHT.card};color:${darkMode?DARK.muted:LIGHT.muted};padding:8px 14px;font-size:13px;border:1px solid ${darkMode?DARK.border:LIGHT.border}}
-        .btn-secondary:hover{color:${darkMode?DARK.text:LIGHT.text};border-color:#3a4060}
+        .btn-primary{background:linear-gradient(135deg,${DARK.accent},${DARK.accentDark});color:#080b14;padding:8px 18px;font-size:13px}
+        .btn-primary:hover{filter:brightness(1.1);box-shadow:0 4px 16px ${DARK.accent}44}
+        .btn-secondary{background:${DARK.card};color:${DARK.muted};padding:8px 14px;font-size:13px;border:1px solid ${DARK.border}}
+        .btn-secondary:hover{color:${DARK.text};border-color:#3a4060}
         .btn-sm-e{background:#0f2a4a;color:#60a5fa;padding:4px 11px;font-size:12px;border:1px solid #1e3a6033;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
         .btn-sm-e:hover{background:#1e3a6033}
         .btn-sm-d{background:#2a0f0f;color:#f87171;padding:4px 11px;font-size:12px;border:1px solid #dc262633;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
         .btn-sm-d:hover{background:#dc262622}
-        input,select{background:${darkMode?DARK.surface:LIGHT.surface};border:1px solid ${darkMode?DARK.border:LIGHT.border};color:${darkMode?DARK.text:LIGHT.text};border-radius:7px;padding:8px 12px;font-family:inherit;font-size:13px;width:100%;outline:none;transition:border .16s}
-        input:focus,select:focus{border-color:${darkMode?DARK.accent:LIGHT.accent};box-shadow:0 0 0 3px ${darkMode?DARK.accent:LIGHT.accent}15}
+        input,select{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.text};border-radius:7px;padding:8px 12px;font-family:inherit;font-size:13px;width:100%;outline:none;transition:border .16s}
+        input:focus,select:focus{border-color:${DARK.accent};box-shadow:0 0 0 3px ${DARK.accent}15}
         input::placeholder{color:#2e3a55}
         input[type=number]{-moz-appearance:textfield}
-        input[type=checkbox]{width:auto;cursor:pointer;accent-color:${darkMode?DARK.accent:LIGHT.accent}}
-        .lbl{font-size:11px;color:${darkMode?DARK.muted:LIGHT.muted};margin-bottom:4px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+        input[type=checkbox]{width:auto;cursor:pointer;accent-color:${DARK.accent}}
+        .lbl{font-size:11px;color:${DARK.muted};margin-bottom:4px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
         .err{color:#f87171;font-size:11px;margin-top:3px}
-        .card{background:${darkMode?DARK.card:LIGHT.card};border:1px solid ${darkMode?DARK.border:LIGHT.border};border-radius:12px}
+        .card{background:${DARK.card};border:1px solid ${DARK.border};border-radius:12px}
         .overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(8px);padding:16px}
-        .modal{background:${darkMode?DARK.card:LIGHT.card};border:1px solid ${darkMode?DARK.border:LIGHT.border};border-radius:16px;padding:24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+        .modal{background:${DARK.card};border:1px solid ${DARK.border};border-radius:16px;padding:24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
         .modal-lg{max-width:720px}
         .toast{position:fixed;bottom:18px;${lang==="ar"?"right":"left"}:18px;padding:10px 16px;border-radius:9px;font-size:13px;font-weight:600;z-index:300;animation:su .22s ease;pointer-events:none}
         .toast.success{background:#053d2a;color:#4ade80;border:1px solid #16a34a}
         .toast.error{background:#3d0505;color:#fca5a5;border:1px solid #dc2626}
         .toast.warning{background:#3d2205;color:#fcd34d;border:1px solid #ca8a04}
         @keyframes su{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-        th{padding:10px 13px;text-align:${lang==="ar"?"right":"left"};font-size:10px;font-weight:700;color:${darkMode?DARK.muted:LIGHT.muted};text-transform:uppercase;letter-spacing:.06em;background:${darkMode?DARK.surface:LIGHT.surface};white-space:nowrap}
-        td{padding:10px 13px;border-bottom:1px solid ${darkMode?DARK.border:LIGHT.border}22;vertical-align:middle;font-size:13px}
+        th{padding:10px 13px;text-align:${lang==="ar"?"right":"left"};font-size:10px;font-weight:700;color:${DARK.muted};text-transform:uppercase;letter-spacing:.06em;background:${DARK.surface};white-space:nowrap}
+        td{padding:10px 13px;border-bottom:1px solid ${DARK.border}22;vertical-align:middle;font-size:13px}
         tr:last-child td{border-bottom:none}
-        tr:hover td{background:${darkMode?DARK.surface:LIGHT.surface}77}
+        tr:hover td{background:${DARK.surface}77}
         .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
         .badge-kg{background:#0f2040;color:#60a5fa}
         .badge-liter{background:#062018;color:#4ade80}
         .badge-piece{background:#1a0f33;color:#a78bfa}
         .badge-cls{background:#1a1a33;color:#94a3b8;border:1px solid #2a2a4a}
-        .filter-btn{background:${darkMode?DARK.surface:LIGHT.surface};border:1px solid ${darkMode?DARK.border:LIGHT.border};color:${darkMode?DARK.muted:LIGHT.muted};padding:5px 12px;font-size:12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
-        .filter-btn.active{background:${darkMode?DARK.accent:LIGHT.accent}20;border-color:${darkMode?DARK.accent:LIGHT.accent}66;color:${darkMode?DARK.accent:LIGHT.accent}}
-        .divider{height:1px;background:${darkMode?DARK.border:LIGHT.border};margin:14px 0}
-        .nav-item{display:flex;align-items:center;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:${darkMode?DARK.muted:LIGHT.muted};transition:all .14s;border:none;background:transparent;font-family:inherit;width:100%;text-align:${lang==="ar"?"right":"left"}}
-        .nav-item:hover{background:${darkMode?DARK.surface:LIGHT.surface};color:${darkMode?DARK.text:LIGHT.text}}
-        .nav-item.active{background:${darkMode?DARK.accent:LIGHT.accent}18;color:${darkMode?DARK.accent:LIGHT.accent};border-${lang==="ar"?"right":"left"}:3px solid ${darkMode?DARK.accent:LIGHT.accent}}
-        .perm-box{display:flex;gap:12px;align-items:center;padding:10px 14px;background:${darkMode?DARK.surface:LIGHT.surface};border-radius:8px;border:1px solid ${darkMode?DARK.border:LIGHT.border};margin-bottom:6px}
-        .bar-bg{background:${darkMode?DARK.surface:LIGHT.surface};border-radius:3px;height:6px;flex:1}
+        .filter-btn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
+        .filter-btn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
+        .divider{height:1px;background:${DARK.border};margin:14px 0}
+        .nav-item{display:flex;align-items:center;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:${DARK.muted};transition:all .14s;border:none;background:transparent;font-family:inherit;width:100%;text-align:${lang==="ar"?"right":"left"}}
+        .nav-item:hover{background:${DARK.surface};color:${DARK.text}}
+        .nav-item.active{background:${DARK.accent}18;color:${DARK.accent};border-${lang==="ar"?"right":"left"}:3px solid ${DARK.accent}}
+        .perm-box{display:flex;gap:12px;align-items:center;padding:10px 14px;background:${DARK.surface};border-radius:8px;border:1px solid ${DARK.border};margin-bottom:6px}
+        .bar-bg{background:${DARK.surface};border-radius:3px;height:6px;flex:1}
         .bar-fill{height:6px;border-radius:3px;transition:width .4s ease}
-        .section-hd{font-size:14px;font-weight:700;color:${darkMode?DARK.text:LIGHT.text};margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid ${darkMode?DARK.border:LIGHT.border}}
-        .top-n-btn{background:${darkMode?DARK.surface:LIGHT.surface};border:1px solid ${darkMode?DARK.border:LIGHT.border};color:${darkMode?DARK.muted:LIGHT.muted};padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .14s}
-        .top-n-btn.active{background:${darkMode?DARK.accent:LIGHT.accent}20;border-color:${darkMode?DARK.accent:LIGHT.accent}66;color:${darkMode?DARK.accent:LIGHT.accent}}
+        .section-hd{font-size:14px;font-weight:700;color:${DARK.text};margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid ${DARK.border}}
+        .top-n-btn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .14s}
+        .top-n-btn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
       `}</style>
 
       {/* SIDEBAR */}
-      <div style={{width:sideOpen?220:0,minWidth:sideOpen?220:0,background:darkMode?DARK.sidebar:LIGHT.sidebar,borderRight:`1px solid ${darkMode?DARK.border:LIGHT.border}`,display:"flex",flexDirection:"column",transition:"all .2s",overflow:"hidden",position:"sticky",top:0,height:"100vh",flexShrink:0}}>
+      <div style={{width:sideOpen?220:0,minWidth:sideOpen?220:0,background:DARK.sidebar,borderRight:`1px solid ${DARK.border}`,display:"flex",flexDirection:"column",transition:"all .2s",overflow:"hidden",position:"sticky",top:0,height:"100vh",flexShrink:0}}>
         <div style={{padding:"20px 16px 12px"}}>
           <div style={{fontWeight:900,fontSize:16,color:C.accent,letterSpacing:"1px"}}>{t.appName}</div>
           <div style={{fontSize:10,color:C.muted,marginTop:2,letterSpacing:".5px"}}>SYSTEM v1.0</div>
@@ -261,7 +261,7 @@ export default function App() {
             <button key={n.id} className={`nav-item${tab===n.id?" active":""}`} onClick={()=>setTab(n.id)}>{n.label}</button>
           ))}
         </div>
-        <div style={{padding:"12px 8px",borderTop:`1px solid ${darkMode?DARK.border:LIGHT.border}`}}>
+        <div style={{padding:"12px 8px",borderTop:`1px solid ${DARK.border}`}}>
           <div style={{padding:"8px 14px",fontSize:12,color:C.muted,marginBottom:6}}>
             <div style={{fontWeight:700,color:C.text,fontSize:13}}>{currentUser.name}</div>
             <div style={{fontSize:11}}>{currentUser.role==="admin"?t.admin:t.user}</div>
@@ -273,7 +273,7 @@ export default function App() {
       {/* MAIN */}
       <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
         {/* TOPBAR */}
-        <div style={{background:darkMode?DARK.sidebar:LIGHT.sidebar,borderBottom:`1px solid ${darkMode?DARK.border:LIGHT.border}`,padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:50}}>
+        <div style={{background:DARK.sidebar,borderBottom:`1px solid ${DARK.border}`,padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:50}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <button onClick={()=>setSideOpen(o=>!o)} style={{background:"transparent",border:"none",cursor:"pointer",color:C.muted,fontSize:18,padding:"2px 6px",borderRadius:5,transition:"color .14s"}} onMouseOver={e=>e.currentTarget.style.color=C.text} onMouseOut={e=>e.currentTarget.style.color=C.muted}>☰</button>
             <span style={{fontWeight:700,fontSize:14,color:C.text}}>{navItems.find(n=>n.id===tab)?.label||""}</span>
@@ -281,8 +281,8 @@ export default function App() {
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
             <button
               onClick={()=>setDarkMode(d=>!d)}
-              style={{background:"transparent",border:`1px solid ${darkMode?DARK.border:LIGHT.border}`,
-                color:darkMode?DARK.muted:LIGHT.muted,padding:"6px 13px",fontSize:12,borderRadius:7,
+              style={{background:"transparent",border:`1px solid ${DARK.border}`,
+                color:DARK.muted,padding:"6px 13px",fontSize:12,borderRadius:7,
                 cursor:"pointer",fontFamily:"inherit",fontWeight:600,transition:"all .16s"}}
             >{darkMode ? (lang==="ar"?"فاتح":"Light") : (lang==="ar"?"غامق":"Dark")}</button>
             <button className="btn btn-secondary" style={{padding:"6px 13px",fontSize:12}} onClick={()=>{ const u=users.find(u=>u.id===currentUser.id); if(u){ const newLang=u.lang==="ar"?"en":"ar"; setUsers(prev=>prev.map(x=>x.id===u.id?{...x,lang:newLang}:x)); } }}>
@@ -843,7 +843,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
           <button className="btn btn-secondary" style={{padding:"5px 12px",fontSize:12}} onClick={addI}>+ {t.addIngredient}</button>
         </div>
         {form.ingredients.map(ing=>(
-          <div key={ing.id} style={{display:"grid",gap:7,gridTemplateColumns:"2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:C.surface,padding:9,borderRadius:8,border:`1px solid ${darkMode?DARK.border:LIGHT.border}`}}>
+          <div key={ing.id} style={{display:"grid",gap:7,gridTemplateColumns:"2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
             <div><label className="lbl">{t.ingredient}</label><select value={ing.rawId} onChange={e=>updI(ing.id,"rawId",e.target.value)}><option value="">—</option>{rawList.map(r=><option key={r.id} value={r.id}>{r.name} ({r.code})</option>)}</select></div>
             <div><label className="lbl">{t.qty} g/ml</label><input type="number" min="0" step="0.1" value={ing.qty} onChange={e=>updI(ing.id,"qty",e.target.value)} placeholder="0"/></div>
             <div><label className="lbl">{t.waste}</label><input type="number" min="0" max="100" step="0.1" value={ing.waste} onChange={e=>updI(ing.id,"waste",e.target.value)} placeholder="0"/></div>
@@ -931,7 +931,7 @@ function ProductsTab({t,lang,prodList,setProdList,rawList,prepList,classes,calcP
           <button className="btn btn-secondary" style={{padding:"5px 12px",fontSize:12}} onClick={addI}>+ {t.addIngredient}</button>
         </div>
         {form.ingredients.map(ing=>(
-          <div key={ing.id} style={{display:"grid",gap:7,gridTemplateColumns:"1fr 2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:C.surface,padding:9,borderRadius:8,border:`1px solid ${darkMode?DARK.border:LIGHT.border}`}}>
+          <div key={ing.id} style={{display:"grid",gap:7,gridTemplateColumns:"1fr 2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
             <div><label className="lbl">{t.source}</label><select value={ing.source} onChange={e=>updI(ing.id,"source",e.target.value)}><option value="raw">{t.rawMat}</option><option value="prep">{t.prepItem}</option></select></div>
             <div><label className="lbl">{t.ingredient}</label><select value={ing.srcId} onChange={e=>updI(ing.id,"srcId",e.target.value)}><option value="">—</option>{srcOpts(ing.source).map(r=><option key={r.id} value={r.id}>{r.name} ({r.code})</option>)}</select></div>
             <div><label className="lbl">{t.qty} g/ml</label><input type="number" min="0" step="0.1" value={ing.qty} onChange={e=>updI(ing.id,"qty",e.target.value)} placeholder="0"/></div>
@@ -972,7 +972,7 @@ function ClassesTab({t,lang,classes,setClasses,showToast,hasPerm,mod}) {
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:7}}>
             {(classes[sec.key]||[]).map((cls,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,padding:"9px 12px",borderRadius:8,border:`1px solid ${darkMode?DARK.border:LIGHT.border}`}}>
+              <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,padding:"9px 12px",borderRadius:8,border:`1px solid ${DARK.border}`}}>
                 {et===sec.key&&ei===i
                   ?<div style={{display:"flex",gap:7,flex:1}}><input value={val} onChange={e=>setVal(e.target.value)} style={{flex:1}}/><button className="btn btn-primary" style={{padding:"4px 11px",fontSize:12}} onClick={save}>{t.save}</button><button className="btn btn-secondary" style={{padding:"4px 9px",fontSize:12}} onClick={cancel}>x</button></div>
                   :<><span className="badge badge-cls" style={{fontSize:12}}>{cls}</span><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>startEdit(sec.key,i)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>del(sec.key,i)}>{t.delete}</button>}</div></>
