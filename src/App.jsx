@@ -141,40 +141,50 @@ export default function App() {
   const lang = currentUser?.lang || "ar";
   const t = T[lang];
 
-  const calcPrepCost = useCallback((prep)=>{
-    if(!prep.ingredients?.length) return {yieldKg:0,costPerUnit:0};
-    let cost=0, yg=0;
+  const calcPrepCostFn = (prep, depth=0)=>{
+    if(!prep.ingredients?.length||depth>5) return {totalCost:0,yieldKg:0,costPerUnit:0};
+    let totalCost=0, yieldG=0;
     prep.ingredients.forEach(ing=>{
-      const raw=rawList.find(r=>String(r.id)===String(ing.rawId)); if(!raw) return;
       const qty=parseFloat(ing.qty)||0;
       const waste=(parseFloat(ing.waste)||0)/100;
-      // gross qty to buy = qty × (1 + waste%)
-      const grossQty = qty*(1+waste);
-      cost+=(raw.unit==="piece"?grossQty:grossQty/1000)*raw.price;
-      // yield = raw qty entered (what goes into recipe)
-      yg+=qty;
+      const netQty=qty*(1-waste); // qty after waste (goes into yield)
+      if(ing.source==="prep"){
+        // prep inside prep
+        const subPrep=prepList.find(p=>String(p.id)===String(ing.rawId||ing.srcId||ing.prepId));
+        if(!subPrep) return;
+        const sub=calcPrepCostFn(subPrep,depth+1);
+        // cost = qty × costPerUnit (buy raw qty, pay for it)
+        totalCost+=(subPrep.unit==="piece"?qty:qty/1000)*sub.costPerUnit;
+      } else {
+        const raw=rawList.find(r=>String(r.id)===String(ing.rawId));
+        if(!raw) return;
+        // cost = raw qty × price (no waste adjustment on cost)
+        totalCost+=(raw.unit==="piece"?qty:qty/1000)*raw.price;
+      }
+      // yield = net qty after waste
+      yieldG+=netQty;
     });
-    const yieldKg=prep.yieldOverride&&parseFloat(prep.yieldOverride)>0?parseFloat(prep.yieldOverride):(yg/1000);
-    return {yieldKg, costPerUnit:yieldKg>0?cost/yieldKg:0};
-  },[rawList]);
+    const yieldKg=prep.yieldOverride&&parseFloat(prep.yieldOverride)>0
+      ?parseFloat(prep.yieldOverride)
+      :(yieldG/1000);
+    return {totalCost, yieldKg, costPerUnit:yieldKg>0?totalCost/yieldKg:0};
+  };
+  const calcPrepCost = useCallback((prep)=>calcPrepCostFn(prep),[rawList,prepList]);
 
   const calcProductCost = useCallback((prod)=>{
     if(!prod.ingredients?.length) return {totalCost:0,margin:0};
     let cost=0;
     prod.ingredients.forEach(ing=>{
+      const qty2=parseFloat(ing.qty)||0;
+      const waste2=(parseFloat(ing.waste)||0)/100;
       if(ing.source==="raw"){
         const raw=rawList.find(r=>String(r.id)===String(ing.srcId)); if(!raw) return;
-        const qty2=parseFloat(ing.qty)||0;
-        const waste2=(parseFloat(ing.waste)||0)/100;
-        const gross2=qty2*(1+waste2);
-        cost+=(raw.unit==="piece"?gross2:gross2/1000)*raw.price;
+        // cost on raw qty (before waste)
+        cost+=(raw.unit==="piece"?qty2:qty2/1000)*raw.price;
       } else {
         const prep=prepList.find(p=>String(p.id)===String(ing.srcId)); if(!prep) return;
         const {costPerUnit}=calcPrepCost(prep);
-        const qty2=parseFloat(ing.qty)||0;
-        const waste2=(parseFloat(ing.waste)||0)/100;
-        const gross2=qty2*(1+waste2);
-        cost+=(prep.unit==="piece"?gross2:gross2/1000)*costPerUnit;
+        cost+=(prep.unit==="piece"?qty2:qty2/1000)*costPerUnit;
       }
     });
     const sp=parseFloat(prod.sellingPrice)||0;
@@ -717,16 +727,25 @@ function DashboardTab({t,lang,rawList,prepList,prodList,calcPrepCost,calcProduct
 // ═══════════════════════════════════════════════════════════════
 // INGREDIENT ROW — self-contained with per-row search
 // ═══════════════════════════════════════════════════════════════
-function IngRow({ing, sourceList, lang, t, onUpdate, onRemove}) {
+function IngRow({ing, rawList, prepList, lang, t, onUpdate, onRemove}) {
   const [q,setQ] = useState("");
   const [open,setOpen] = useState(false);
-  const filtered = sourceList.filter(r=>
+  const srcList = ing.source==="prep" ? (prepList||[]) : (rawList||[]);
+  const filtered = srcList.filter(r=>
     r.name.toLowerCase().includes(q.toLowerCase()) ||
     r.code?.toLowerCase().includes(q.toLowerCase())
   );
-  const selected = sourceList.find(r=>String(r.id)===String(ing.rawId||ing.srcId));
+  const selected = srcList.find(r=>String(r.id)===String(ing.rawId||ing.srcId));
   return (
-    <div style={{display:"grid",gap:7,gridTemplateColumns:"2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
+    <div style={{display:"grid",gap:7,gridTemplateColumns:"1fr 2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
+      <div>
+        <label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.source}</label>
+        <select value={ing.source||"raw"} onChange={e=>{ onUpdate("source",e.target.value); onUpdate("rawId",""); }}
+          style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}>
+          <option value="raw">{lang==="ar"?"مادة خام":"Raw"}</option>
+          <option value="prep">{lang==="ar"?"بريب":"Prep"}</option>
+        </select>
+      </div>
       <div style={{position:"relative"}}>
         <label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.ingredient}</label>
         <div
@@ -743,28 +762,20 @@ function IngRow({ing, sourceList, lang, t, onUpdate, onRemove}) {
           <div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:100,background:DARK.card,
             border:"1px solid "+DARK.border,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.5)",marginTop:3}}>
             <div style={{padding:7}}>
-              <input
-                autoFocus
-                placeholder={lang==="ar"?"بحث...":"Search..."}
-                value={q} onChange={e=>setQ(e.target.value)}
+              <input autoFocus placeholder={lang==="ar"?"بحث...":"Search..."} value={q} onChange={e=>setQ(e.target.value)}
                 onClick={e=>e.stopPropagation()}
-                style={{width:"100%",background:DARK.surface,border:"1px solid "+DARK.border,
-                  color:DARK.text,borderRadius:6,padding:"7px 10px",fontSize:12,outline:"none"}}
-              />
+                style={{width:"100%",background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:6,padding:"7px 10px",fontSize:12,outline:"none"}}/>
             </div>
             <div style={{maxHeight:180,overflowY:"auto"}}>
-              <div
-                onClick={()=>{onUpdate(ing.rawId!==undefined?"rawId":"srcId","");setOpen(false);setQ("");}}
-                style={{padding:"8px 12px",cursor:"pointer",fontSize:13,color:DARK.muted}}
-              >—</div>
+              <div onClick={()=>{onUpdate("rawId","");setOpen(false);setQ("");}}
+                style={{padding:"8px 12px",cursor:"pointer",fontSize:13,color:DARK.muted}}>—</div>
               {filtered.map(r=>(
-                <div key={r.id}
-                  onClick={()=>{onUpdate(ing.rawId!==undefined?"rawId":"srcId",r.id);setOpen(false);setQ("");}}
+                <div key={r.id} onClick={()=>{onUpdate("rawId",r.id);setOpen(false);setQ("");}}
                   style={{padding:"8px 12px",cursor:"pointer",fontSize:13,
-                    color:String(r.id)===String(ing.rawId||ing.srcId)?DARK.accent:DARK.text,
-                    background:String(r.id)===String(ing.rawId||ing.srcId)?DARK.accent+"15":"transparent"}}
+                    color:String(r.id)===String(ing.rawId)?DARK.accent:DARK.text,
+                    background:String(r.id)===String(ing.rawId)?DARK.accent+"15":"transparent"}}
                   onMouseOver={e=>e.currentTarget.style.background=DARK.surface}
-                  onMouseOut={e=>e.currentTarget.style.background=String(r.id)===String(ing.rawId||ing.srcId)?DARK.accent+"15":"transparent"}
+                  onMouseOut={e=>e.currentTarget.style.background=String(r.id)===String(ing.rawId)?DARK.accent+"15":"transparent"}
                 >
                   {r.name} <span style={{color:DARK.muted,fontSize:11}}>({r.code})</span>
                 </div>
@@ -929,7 +940,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
   const [ingSearch,setIngSearch]=useState("");
   const [viewItem,setViewItem]=useState(null);
   const cls=classes.prep||[];
-  const blank=()=>({id:Date.now()+Math.random(),rawId:"",qty:"",waste:"0"});
+  const blank=()=>({id:Date.now()+Math.random(),source:"raw",rawId:"",qty:"",waste:"0"});
   const reset=()=>{ setForm({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
   const ok=()=>{ const e={}; if(!form.name.trim())e.name=t.required; setErrs(e); return !Object.keys(e).length; };
   const save=()=>{ if(!ok()) return; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); const ings=form.ingredients.filter(i=>i.rawId&&parseFloat(i.qty)>0); if(editId!==null) setPrepList(p=>p.map(m=>m.id===editId?{...m,name:form.name.trim(),unit:form.unit,class:form.class,yieldOverride:form.yieldOverride,ingredients:ings,lastUpdated:now}:m)); else { const code=genCode("Prep",prepList); setPrepList(p=>[...p,{id:Date.now(),code,name:form.name.trim(),unit:form.unit,class:form.class,yieldOverride:form.yieldOverride,ingredients:ings,lastUpdated:now}]); } reset(); showToast(t.savedOk); };
@@ -958,8 +969,13 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
       } else {
         ings.forEach(ing=>{
           let ingCode="", ingName="", ingType="";
-          const raw=rawList.find(r=>String(r.id)===String(ing.rawId));
-          if(raw){ ingCode=raw.code; ingName=raw.name; ingType=lang==="ar"?"مادة خام":"Raw"; }
+          if(ing.source==="prep"){
+            const p=prepList.find(p=>String(p.id)===String(ing.rawId));
+            if(p){ ingCode=p.code; ingName=p.name; ingType=lang==="ar"?"بريب":"Prep"; }
+          } else {
+            const raw=rawList.find(r=>String(r.id)===String(ing.rawId));
+            if(raw){ ingCode=raw.code; ingName=raw.name; ingType=lang==="ar"?"مادة خام":"Raw"; }
+          }
           rows.push({
             [lang==="ar"?"كود Prep":"Prep Code"]:p.code,
             [lang==="ar"?"اسم Prep":"Prep Name"]:p.name,
@@ -1005,8 +1021,14 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
           const waste=parseFloat(row[lang==="ar"?"الهدر %":"Waste %"]||row["Waste %"]||row["الهدر %"]||0);
           if(ingCode||ingName){
             // find raw material by code or name
-            const raw=rawList.find(r=>r.code===ingCode||r.name.toLowerCase()===ingName.toLowerCase());
-            if(raw) prepGroups[key].ingredients.push({id:Date.now()+Math.random(),rawId:raw.id,qty,waste});
+            const isPrep = ingType.includes("prep") || ingType.includes("بريب");
+            if(isPrep){
+              const p=prepList.find(p=>p.code===ingCode||p.name.toLowerCase()===ingName.toLowerCase());
+              if(p) prepGroups[key].ingredients.push({id:Date.now()+Math.random(),source:"prep",rawId:p.id,qty,waste});
+            } else {
+              const raw=rawList.find(r=>r.code===ingCode||r.name.toLowerCase()===ingName.toLowerCase());
+              if(raw) prepGroups[key].ingredients.push({id:Date.now()+Math.random(),source:"raw",rawId:raw.id,qty,waste});
+            }
           }
         });
         setPrepList(prev=>{
@@ -1118,7 +1140,8 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
                       if(!raw) return null;
                       const qty=parseFloat(ing.qty)||0;
                       const waste=(parseFloat(ing.waste)||0)/100;
-                      const grossQty=qty*(1+waste);
+                      const grossQty=qty; // raw qty (cost basis)
+                      const netQty=qty*(1-waste); // after waste
                       const ingCost=(raw.unit==="piece"?grossQty:grossQty/1000)*raw.price;
                       const unit=raw.unit==="kg"?"g":raw.unit==="liter"?"ml":"pcs";
                       return(
@@ -1135,7 +1158,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
                               : <span style={{color:DARK.muted}}>0%</span>
                             }
                           </td>
-                          <td style={{padding:"11px 13px",color:DARK.text,fontWeight:600}}>{grossQty.toFixed(0)} {unit}</td>
+                          <td style={{padding:"11px 13px",color:DARK.green,fontWeight:600}}>{netQty.toFixed(0)} {unit}</td>
                           <td style={{padding:"11px 13px",color:DARK.muted}}>{raw.price.toFixed(2)}/{unitLbl(raw.unit,t)}</td>
                           <td style={{padding:"11px 13px",color:DARK.accent,fontWeight:700}}>{ingCost.toFixed(4)}</td>
                         </tr>
@@ -1146,7 +1169,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
                       <td colSpan={2} style={{padding:"12px 13px",fontWeight:800,color:DARK.text,fontSize:13}}>
                         {lang==="ar"?"الإجمالي":"Total"}
                       </td>
-                      <td style={{padding:"12px 13px",fontWeight:700,color:DARK.green}}>
+                      <td style={{padding:"12px 13px",fontWeight:700,color:DARK.text}}>
                         {((viewItem.ingredients||[]).reduce((a,i)=>a+(parseFloat(i.qty)||0),0)).toFixed(0)} g
                       </td>
                       <td/>
@@ -1154,7 +1177,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
                         {((viewItem.ingredients||[]).reduce((a,ing)=>{
                           const w=(parseFloat(ing.waste)||0)/100;
                           const q=parseFloat(ing.qty)||0;
-                          return a+(w<1?q/(1-w):q);
+                          return a+q*(1-w);
                         },0)).toFixed(0)} g
                       </td>
                       <td/>
@@ -1193,7 +1216,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
           <button className="btn btn-secondary" style={{padding:"5px 12px",fontSize:12}} onClick={addI}>+ {t.addIngredient}</button>
         </div>
         {form.ingredients.map(ing=>(
-          <IngRow key={ing.id} ing={ing} sourceList={rawList} lang={lang} t={t}
+          <IngRow key={ing.id} ing={ing} rawList={rawList} prepList={prepList} lang={lang} t={t}
             onUpdate={(field,val)=>updI(ing.id,field,val)}
             onRemove={()=>remI(ing.id)}
           />
