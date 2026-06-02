@@ -706,6 +706,144 @@ function DashboardTab({t,lang,rawList,prepList,prodList,calcPrepCost,calcProduct
   );
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+// INGREDIENT ROW — self-contained with per-row search
+// ═══════════════════════════════════════════════════════════════
+function IngRow({ing, sourceList, lang, t, onUpdate, onRemove}) {
+  const [q,setQ] = useState("");
+  const [open,setOpen] = useState(false);
+  const filtered = sourceList.filter(r=>
+    r.name.toLowerCase().includes(q.toLowerCase()) ||
+    r.code?.toLowerCase().includes(q.toLowerCase())
+  );
+  const selected = sourceList.find(r=>String(r.id)===String(ing.rawId||ing.srcId));
+  return (
+    <div style={{display:"grid",gap:7,gridTemplateColumns:"2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
+      <div style={{position:"relative"}}>
+        <label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.ingredient}</label>
+        <div
+          onClick={()=>setOpen(o=>!o)}
+          style={{background:DARK.surface,border:"1px solid "+(open?DARK.accent:DARK.border),borderRadius:7,padding:"8px 12px",cursor:"pointer",
+            fontSize:13,color:selected?DARK.text:DARK.muted,display:"flex",justifyContent:"space-between",alignItems:"center",transition:"border .16s"}}
+        >
+          <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+            {selected ? selected.name+" ("+selected.code+")" : "—"}
+          </span>
+          <span style={{color:DARK.muted,fontSize:10,marginRight:4}}>▼</span>
+        </div>
+        {open && (
+          <div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:100,background:DARK.card,
+            border:"1px solid "+DARK.border,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.5)",marginTop:3}}>
+            <div style={{padding:7}}>
+              <input
+                autoFocus
+                placeholder={lang==="ar"?"بحث...":"Search..."}
+                value={q} onChange={e=>setQ(e.target.value)}
+                onClick={e=>e.stopPropagation()}
+                style={{width:"100%",background:DARK.surface,border:"1px solid "+DARK.border,
+                  color:DARK.text,borderRadius:6,padding:"7px 10px",fontSize:12,outline:"none"}}
+              />
+            </div>
+            <div style={{maxHeight:180,overflowY:"auto"}}>
+              <div
+                onClick={()=>{onUpdate(ing.rawId!==undefined?"rawId":"srcId","");setOpen(false);setQ("");}}
+                style={{padding:"8px 12px",cursor:"pointer",fontSize:13,color:DARK.muted}}
+              >—</div>
+              {filtered.map(r=>(
+                <div key={r.id}
+                  onClick={()=>{onUpdate(ing.rawId!==undefined?"rawId":"srcId",r.id);setOpen(false);setQ("");}}
+                  style={{padding:"8px 12px",cursor:"pointer",fontSize:13,
+                    color:String(r.id)===String(ing.rawId||ing.srcId)?DARK.accent:DARK.text,
+                    background:String(r.id)===String(ing.rawId||ing.srcId)?DARK.accent+"15":"transparent"}}
+                  onMouseOver={e=>e.currentTarget.style.background=DARK.surface}
+                  onMouseOut={e=>e.currentTarget.style.background=String(r.id)===String(ing.rawId||ing.srcId)?DARK.accent+"15":"transparent"}
+                >
+                  {r.name} <span style={{color:DARK.muted,fontSize:11}}>({r.code})</span>
+                </div>
+              ))}
+              {filtered.length===0&&<div style={{padding:"8px 12px",color:DARK.muted,fontSize:12}}>{t.noData}</div>}
+            </div>
+          </div>
+        )}
+      </div>
+      <div><label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.qty} g/ml</label><input type="number" min="0" step="0.1" value={ing.qty} onChange={e=>onUpdate("qty",e.target.value)} placeholder="0" style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}/></div>
+      <div><label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.waste}</label><input type="number" min="0" max="100" step="0.1" value={ing.waste} onChange={e=>onUpdate("waste",e.target.value)} placeholder="0" style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}/></div>
+      <button className="btn-sm-d" style={{marginTop:22,alignSelf:"end"}} onClick={onRemove}>x</button>
+    </div>
+  );
+}
+
+function IngRowProd({ing, rawList, prepList, lang, t, onUpdate, onRemove}) {
+  const [q,setQ] = useState("");
+  const [open,setOpen] = useState(false);
+  const srcList = ing.source==="raw" ? rawList : prepList;
+  const filtered = srcList.filter(r=>
+    r.name.toLowerCase().includes(q.toLowerCase()) ||
+    r.code?.toLowerCase().includes(q.toLowerCase())
+  );
+  const selected = srcList.find(r=>String(r.id)===String(ing.srcId));
+  return (
+    <div style={{display:"grid",gap:7,gridTemplateColumns:"1fr 2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
+      <div>
+        <label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.source}</label>
+        <select value={ing.source} onChange={e=>onUpdate("source",e.target.value)} style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}>
+          <option value="raw">{t.rawMat}</option>
+          <option value="prep">{t.prepItem}</option>
+        </select>
+      </div>
+      <div style={{position:"relative"}}>
+        <label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.ingredient}</label>
+        <div
+          onClick={()=>setOpen(o=>!o)}
+          style={{background:DARK.surface,border:"1px solid "+(open?DARK.accent:DARK.border),borderRadius:7,padding:"8px 12px",cursor:"pointer",
+            fontSize:13,color:selected?DARK.text:DARK.muted,display:"flex",justifyContent:"space-between",alignItems:"center",transition:"border .16s"}}
+        >
+          <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+            {selected ? selected.name+" ("+selected.code+")" : "—"}
+          </span>
+          <span style={{color:DARK.muted,fontSize:10,marginRight:4}}>▼</span>
+        </div>
+        {open && (
+          <div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:100,background:DARK.card,
+            border:"1px solid "+DARK.border,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.5)",marginTop:3}}>
+            <div style={{padding:7}}>
+              <input
+                autoFocus
+                placeholder={lang==="ar"?"بحث...":"Search..."}
+                value={q} onChange={e=>setQ(e.target.value)}
+                onClick={e=>e.stopPropagation()}
+                style={{width:"100%",background:DARK.surface,border:"1px solid "+DARK.border,
+                  color:DARK.text,borderRadius:6,padding:"7px 10px",fontSize:12,outline:"none"}}
+              />
+            </div>
+            <div style={{maxHeight:180,overflowY:"auto"}}>
+              <div onClick={()=>{onUpdate("srcId","");setOpen(false);setQ("");}}
+                style={{padding:"8px 12px",cursor:"pointer",fontSize:13,color:DARK.muted}}>—</div>
+              {filtered.map(r=>(
+                <div key={r.id}
+                  onClick={()=>{onUpdate("srcId",r.id);setOpen(false);setQ("");}}
+                  style={{padding:"8px 12px",cursor:"pointer",fontSize:13,
+                    color:String(r.id)===String(ing.srcId)?DARK.accent:DARK.text,
+                    background:String(r.id)===String(ing.srcId)?DARK.accent+"15":"transparent"}}
+                  onMouseOver={e=>e.currentTarget.style.background=DARK.surface}
+                  onMouseOut={e=>e.currentTarget.style.background=String(r.id)===String(ing.srcId)?DARK.accent+"15":"transparent"}
+                >
+                  {r.name} <span style={{color:DARK.muted,fontSize:11}}>({r.code})</span>
+                </div>
+              ))}
+              {filtered.length===0&&<div style={{padding:"8px 12px",color:DARK.muted,fontSize:12}}>{t.noData}</div>}
+            </div>
+          </div>
+        )}
+      </div>
+      <div><label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.qty} g/ml</label><input type="number" min="0" step="0.1" value={ing.qty} onChange={e=>onUpdate("qty",e.target.value)} placeholder="0" style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}/></div>
+      <div><label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.waste}</label><input type="number" min="0" max="100" step="0.1" value={ing.waste} onChange={e=>onUpdate("waste",e.target.value)} placeholder="0" style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}/></div>
+      <button className="btn-sm-d" style={{marginTop:22,alignSelf:"end"}} onClick={onRemove}>x</button>
+    </div>
+  );
+}
+
 // ═══════════════════════════════════════════════════════════════
 // RAW MATERIALS
 // ═══════════════════════════════════════════════════════════════
@@ -844,19 +982,10 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
           <button className="btn btn-secondary" style={{padding:"5px 12px",fontSize:12}} onClick={addI}>+ {t.addIngredient}</button>
         </div>
         {form.ingredients.map(ing=>(
-          <div key={ing.id} style={{display:"grid",gap:7,gridTemplateColumns:"2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
-            <div>
-              <label className="lbl">{t.ingredient}</label>
-              <input placeholder={lang==="ar"?"بحث...":"Search..."} value={ingSearch} onChange={e=>setIngSearch(e.target.value)} style={{marginBottom:4}}/>
-              <select value={ing.rawId} onChange={e=>updI(ing.id,"rawId",e.target.value)}>
-                <option value="">—</option>
-                {rawList.filter(r=>r.name.toLowerCase().includes(ingSearch.toLowerCase())||r.code?.toLowerCase().includes(ingSearch.toLowerCase())).map(r=><option key={r.id} value={r.id}>{r.name} ({r.code})</option>)}
-              </select>
-            </div>
-            <div><label className="lbl">{t.qty} g/ml</label><input type="number" min="0" step="0.1" value={ing.qty} onChange={e=>updI(ing.id,"qty",e.target.value)} placeholder="0"/></div>
-            <div><label className="lbl">{t.waste}</label><input type="number" min="0" max="100" step="0.1" value={ing.waste} onChange={e=>updI(ing.id,"waste",e.target.value)} placeholder="0"/></div>
-            <button className="btn-sm-d" style={{marginTop:18}} onClick={()=>remI(ing.id)}>x</button>
-          </div>
+          <IngRow key={ing.id} ing={ing} sourceList={rawList} lang={lang} t={t}
+            onUpdate={(field,val)=>updI(ing.id,field,val)}
+            onRemove={()=>remI(ing.id)}
+          />
         ))}
         <div style={{background:C.bg,borderRadius:8,padding:"10px 13px",marginTop:8,display:"flex",gap:16,flexWrap:"wrap"}}>
           <span style={{fontSize:12,color:C.muted}}>{t.yieldWeight}: <strong style={{color:C.green}}>{live.yieldKg.toFixed(3)}</strong></span>
@@ -940,13 +1069,10 @@ function ProductsTab({t,lang,prodList,setProdList,rawList,prepList,classes,calcP
           <button className="btn btn-secondary" style={{padding:"5px 12px",fontSize:12}} onClick={addI}>+ {t.addIngredient}</button>
         </div>
         {form.ingredients.map(ing=>(
-          <div key={ing.id} style={{display:"grid",gap:7,gridTemplateColumns:"1fr 2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
-            <div><label className="lbl">{t.source}</label><select value={ing.source} onChange={e=>updI(ing.id,"source",e.target.value)}><option value="raw">{t.rawMat}</option><option value="prep">{t.prepItem}</option></select></div>
-            <div><label className="lbl">{t.ingredient}</label><select value={ing.srcId} onChange={e=>updI(ing.id,"srcId",e.target.value)}><option value="">—</option>{srcOpts(ing.source).map(r=><option key={r.id} value={r.id}>{r.name} ({r.code})</option>)}</select></div>
-            <div><label className="lbl">{t.qty} g/ml</label><input type="number" min="0" step="0.1" value={ing.qty} onChange={e=>updI(ing.id,"qty",e.target.value)} placeholder="0"/></div>
-            <div><label className="lbl">{t.waste}</label><input type="number" min="0" max="100" step="0.1" value={ing.waste} onChange={e=>updI(ing.id,"waste",e.target.value)} placeholder="0"/></div>
-            <button className="btn-sm-d" style={{marginTop:18}} onClick={()=>remI(ing.id)}>x</button>
-          </div>
+          <IngRowProd key={ing.id} ing={ing} rawList={rawList} prepList={prepList} lang={lang} t={t}
+            onUpdate={(field,val)=>updI(ing.id,field,val)}
+            onRemove={()=>remI(ing.id)}
+          />
         ))}
         <div style={{background:C.bg,borderRadius:8,padding:"10px 13px",marginTop:8,display:"flex",gap:16,flexWrap:"wrap"}}>
           <span style={{fontSize:12,color:C.muted}}>{t.totalCost}: <strong style={{color:C.red}}>{live.totalCost.toFixed(4)}</strong></span>
