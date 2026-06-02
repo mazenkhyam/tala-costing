@@ -145,13 +145,13 @@ export default function App() {
     if(!prep.ingredients?.length) return {yieldKg:0,costPerUnit:0};
     let cost=0, yg=0;
     prep.ingredients.forEach(ing=>{
-      const raw=rawList.find(r=>r.id===ing.rawId); if(!raw) return;
+      const raw=rawList.find(r=>String(r.id)===String(ing.rawId)); if(!raw) return;
       const wf=1+(parseFloat(ing.waste)||0)/100;
       const aq=(parseFloat(ing.qty)||0)*wf;
       cost+=(raw.unit==="piece"?aq:aq/1000)*raw.price;
       yg+=parseFloat(ing.qty)||0;
     });
-    const yieldKg=prep.yieldOverride?parseFloat(prep.yieldOverride):(yg/1000);
+    const yieldKg=prep.yieldOverride&&parseFloat(prep.yieldOverride)>0?parseFloat(prep.yieldOverride):(yg/1000);
     return {yieldKg, costPerUnit:yieldKg>0?cost/yieldKg:0};
   },[rawList]);
 
@@ -162,10 +162,10 @@ export default function App() {
       const wf=1+(parseFloat(ing.waste)||0)/100;
       const aq=(parseFloat(ing.qty)||0)*wf;
       if(ing.source==="raw"){
-        const raw=rawList.find(r=>r.id===ing.srcId); if(!raw) return;
+        const raw=rawList.find(r=>String(r.id)===String(ing.srcId)); if(!raw) return;
         cost+=(raw.unit==="piece"?aq:aq/1000)*raw.price;
       } else {
-        const prep=prepList.find(p=>p.id===ing.srcId); if(!prep) return;
+        const prep=prepList.find(p=>String(p.id)===String(ing.srcId)); if(!prep) return;
         const {costPerUnit}=calcPrepCost(prep);
         cost+=(prep.unit==="piece"?aq:aq/1000)*costPerUnit;
       }
@@ -781,6 +781,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); const [errs,setErrs]=useState({});
   const [delId,setDelId]=useState(null); const fileRef=useRef();
+  const [ingSearch,setIngSearch]=useState("");
   const cls=classes.prep||[];
   const blank=()=>({id:Date.now()+Math.random(),rawId:"",qty:"",waste:"0"});
   const reset=()=>{ setForm({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
@@ -844,7 +845,14 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
         </div>
         {form.ingredients.map(ing=>(
           <div key={ing.id} style={{display:"grid",gap:7,gridTemplateColumns:"2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
-            <div><label className="lbl">{t.ingredient}</label><select value={ing.rawId} onChange={e=>updI(ing.id,"rawId",e.target.value)}><option value="">—</option>{rawList.map(r=><option key={r.id} value={r.id}>{r.name} ({r.code})</option>)}</select></div>
+            <div>
+              <label className="lbl">{t.ingredient}</label>
+              <input placeholder={lang==="ar"?"بحث...":"Search..."} value={ingSearch} onChange={e=>setIngSearch(e.target.value)} style={{marginBottom:4}}/>
+              <select value={ing.rawId} onChange={e=>updI(ing.id,"rawId",e.target.value)}>
+                <option value="">—</option>
+                {rawList.filter(r=>r.name.toLowerCase().includes(ingSearch.toLowerCase())||r.code?.toLowerCase().includes(ingSearch.toLowerCase())).map(r=><option key={r.id} value={r.id}>{r.name} ({r.code})</option>)}
+              </select>
+            </div>
             <div><label className="lbl">{t.qty} g/ml</label><input type="number" min="0" step="0.1" value={ing.qty} onChange={e=>updI(ing.id,"qty",e.target.value)} placeholder="0"/></div>
             <div><label className="lbl">{t.waste}</label><input type="number" min="0" max="100" step="0.1" value={ing.waste} onChange={e=>updI(ing.id,"waste",e.target.value)} placeholder="0"/></div>
             <button className="btn-sm-d" style={{marginTop:18}} onClick={()=>remI(ing.id)}>x</button>
@@ -869,6 +877,7 @@ function ProductsTab({t,lang,prodList,setProdList,rawList,prepList,classes,calcP
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:"",class:"",sellingPrice:"",ingredients:[]}); const [errs,setErrs]=useState({});
   const [delId,setDelId]=useState(null); const fileRef=useRef();
+  const [ingSearch,setIngSearch]=useState("");
   const cls=[...(classes.raw||[]),...(classes.prep||[])];
   const blank=()=>({id:Date.now()+Math.random(),source:"raw",srcId:"",qty:"",waste:"0"});
   const reset=()=>{ setForm({name:"",class:"",sellingPrice:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
