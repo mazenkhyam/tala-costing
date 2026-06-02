@@ -146,10 +146,13 @@ export default function App() {
     let cost=0, yg=0;
     prep.ingredients.forEach(ing=>{
       const raw=rawList.find(r=>String(r.id)===String(ing.rawId)); if(!raw) return;
-      const wf=1+(parseFloat(ing.waste)||0)/100;
-      const aq=(parseFloat(ing.qty)||0)*wf;
-      cost+=(raw.unit==="piece"?aq:aq/1000)*raw.price;
-      yg+=parseFloat(ing.qty)||0;
+      const qty=parseFloat(ing.qty)||0;
+      const waste=(parseFloat(ing.waste)||0)/100;
+      // raw material to buy = qty / (1 - waste%)  e.g. need 1000g to get 500g after 50% waste
+      const rawNeeded = waste<1 ? qty/(1-waste) : qty;
+      cost+=(raw.unit==="piece"?rawNeeded:rawNeeded/1000)*raw.price;
+      // yield weight = actual qty used in recipe
+      yg+=qty;
     });
     const yieldKg=prep.yieldOverride&&parseFloat(prep.yieldOverride)>0?parseFloat(prep.yieldOverride):(yg/1000);
     return {yieldKg, costPerUnit:yieldKg>0?cost/yieldKg:0};
@@ -159,15 +162,19 @@ export default function App() {
     if(!prod.ingredients?.length) return {totalCost:0,margin:0};
     let cost=0;
     prod.ingredients.forEach(ing=>{
-      const wf=1+(parseFloat(ing.waste)||0)/100;
-      const aq=(parseFloat(ing.qty)||0)*wf;
       if(ing.source==="raw"){
         const raw=rawList.find(r=>String(r.id)===String(ing.srcId)); if(!raw) return;
-        cost+=(raw.unit==="piece"?aq:aq/1000)*raw.price;
+        const qty2=parseFloat(ing.qty)||0;
+        const waste2=(parseFloat(ing.waste)||0)/100;
+        const rawNeeded2=waste2<1?qty2/(1-waste2):qty2;
+        cost+=(raw.unit==="piece"?rawNeeded2:rawNeeded2/1000)*raw.price;
       } else {
         const prep=prepList.find(p=>String(p.id)===String(ing.srcId)); if(!prep) return;
         const {costPerUnit}=calcPrepCost(prep);
-        cost+=(prep.unit==="piece"?aq:aq/1000)*costPerUnit;
+        const qty2=parseFloat(ing.qty)||0;
+        const waste2=(parseFloat(ing.waste)||0)/100;
+        const prepNeeded2=waste2<1?qty2/(1-waste2):qty2;
+        cost+=(prep.unit==="piece"?prepNeeded2:prepNeeded2/1000)*costPerUnit;
       }
     });
     const sp=parseFloat(prod.sellingPrice)||0;
