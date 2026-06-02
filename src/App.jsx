@@ -293,12 +293,12 @@ export default function App() {
 
         {/* CONTENT */}
         <div style={{flex:1,overflowY:"auto",padding:"20px"}}>
-          {tab==="dashboard" && <DashboardTab t={t} lang={lang} rawList={rawList} prepList={prepList} prodList={prodList} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost}/>}
-          {tab==="raw"       && (hasPerm("raw","view") ? <RawTab t={t} lang={lang} rawList={rawList} setRawList={setRawList} classes={classes} showToast={showToast} hasPerm={hasPerm} mod="raw"/> : <NoPerm t={t}/>)}
-          {tab==="prep"      && (hasPerm("prep","view") ? <PrepTab t={t} lang={lang} prepList={prepList} setPrepList={setPrepList} rawList={rawList} classes={classes} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="prep"/> : <NoPerm t={t}/>)}
-          {tab==="products"  && (hasPerm("products","view") ? <ProductsTab t={t} lang={lang} prodList={prodList} setProdList={setProdList} rawList={rawList} prepList={prepList} classes={classes} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost} showToast={showToast} hasPerm={hasPerm} mod="products"/> : <NoPerm t={t}/>)}
-          {tab==="classes"   && (hasPerm("classes","view") ? <ClassesTab t={t} lang={lang} classes={classes} setClasses={setClasses} showToast={showToast} hasPerm={hasPerm} mod="classes"/> : <NoPerm t={t}/>)}
-          {tab==="users"     && currentUser.role==="admin" && <UsersTab t={t} lang={lang} users={users} setUsers={setUsers} showToast={showToast} currentUserId={currentUser.id}/>}
+          {tab==="dashboard" && <DashboardTab t={t} lang={lang} dm={darkMode} rawList={rawList} prepList={prepList} prodList={prodList} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost}/>}
+          {tab==="raw"       && (hasPerm("raw","view") ? <RawTab t={t} lang={lang} dm={darkMode} rawList={rawList} setRawList={setRawList} classes={classes} showToast={showToast} hasPerm={hasPerm} mod="raw"/> : <NoPerm t={t}/>)}
+          {tab==="prep"      && (hasPerm("prep","view") ? <PrepTab t={t} lang={lang} dm={darkMode} prepList={prepList} setPrepList={setPrepList} rawList={rawList} classes={classes} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="prep"/> : <NoPerm t={t}/>)}
+          {tab==="products"  && (hasPerm("products","view") ? <ProductsTab t={t} lang={lang} dm={darkMode} prodList={prodList} setProdList={setProdList} rawList={rawList} prepList={prepList} classes={classes} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost} showToast={showToast} hasPerm={hasPerm} mod="products"/> : <NoPerm t={t}/>)}
+          {tab==="classes"   && (hasPerm("classes","view") ? <ClassesTab t={t} lang={lang} dm={darkMode} classes={classes} setClasses={setClasses} showToast={showToast} hasPerm={hasPerm} mod="classes"/> : <NoPerm t={t}/>)}
+          {tab==="users"     && currentUser.role==="admin" && <UsersTab t={t} lang={lang} dm={darkMode} users={users} setUsers={setUsers} showToast={showToast} currentUserId={currentUser.id}/>}
         </div>
       </div>
 
@@ -422,8 +422,8 @@ function LoginScreen({users,onLogin}) {
 
         {/* LEFT BRAND PANEL */}
         <div style={{
-          flex:1, display:"flex", flexDirection:"column", justifyContent:"center",
-          padding:"60px 80px", display: window.innerWidth < 700 ? "none" : "flex"
+          flex:1, flexDirection:"column", justifyContent:"center",
+          padding:"60px 80px", display: (typeof window !== 'undefined' && window.innerWidth < 700) ? "none" : "flex"
         }}>
           <div className="lf-wrap">
             <div style={{
@@ -445,12 +445,12 @@ function LoginScreen({users,onLogin}) {
 
         {/* RIGHT LOGIN PANEL */}
         <div style={{
-          width: window.innerWidth < 700 ? "100%" : 480,
-          minWidth: window.innerWidth < 700 ? "100%" : 480,
+          width: (typeof window !== 'undefined' && window.innerWidth < 700) ? "100%" : 480,
+          minWidth: (typeof window !== 'undefined' && window.innerWidth < 700) ? "100%" : 480,
           display:"flex", flexDirection:"column", justifyContent:"center",
-          padding: window.innerWidth < 700 ? "40px 28px" : "60px 56px",
+          padding: (typeof window !== 'undefined' && window.innerWidth < 700) ? "40px 28px" : "60px 56px",
           background:"#0a0d1a",
-          borderLeft: window.innerWidth < 700 ? "none" : "1px solid #1e2540",
+          borderLeft: (typeof window !== 'undefined' && window.innerWidth < 700) ? "none" : "1px solid #1e2540",
           position:"relative"
         }}>
           {/* corner accent */}
