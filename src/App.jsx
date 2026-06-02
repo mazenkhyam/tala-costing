@@ -927,6 +927,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
   const [form,setForm]=useState({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); const [errs,setErrs]=useState({});
   const [delId,setDelId]=useState(null); const fileRef=useRef();
   const [ingSearch,setIngSearch]=useState("");
+  const [viewItem,setViewItem]=useState(null);
   const cls=classes.prep||[];
   const blank=()=>({id:Date.now()+Math.random(),rawId:"",qty:"",waste:"0"});
   const reset=()=>{ setForm({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
@@ -969,12 +970,128 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
                 <td style={{color:C.muted}}>{m.ingredients?.length||0}</td>
                 <td style={{color:C.muted}}>{yieldKg.toFixed(3)}</td>
                 <td style={{color:C.accent,fontWeight:700}}>{costPerUnit.toFixed(4)}</td>
-                {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<td><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}</div></td>}
+                {<td><div style={{display:"flex",gap:5}}>
+                <button style={{background:"#0a2a3a",color:"#38bdf8",padding:"4px 11px",fontSize:12,border:"1px solid #0ea5e933",borderRadius:6,cursor:"pointer",fontFamily:"inherit",fontWeight:600}} onClick={()=>setViewItem(m)}>{lang==="ar"?"عرض":"View"}</button>
+                {hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}
+                {hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}
+              </div></td>}
               </tr>
             );})}
           </tbody>
         </table>
       </div></div>
+
+      {/* VIEW MODAL */}
+      {viewItem&&(()=>{
+        const {costPerUnit,yieldKg}=calcPrepCost(viewItem);
+        const totalCost=costPerUnit*yieldKg;
+        return(
+          <div className="overlay" onClick={e=>e.target===e.currentTarget&&setViewItem(null)}>
+            <div className="modal modal-lg" style={{maxWidth:820}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+                <div>
+                  <div style={{fontWeight:800,fontSize:16,color:DARK.accent}}>{viewItem.name}</div>
+                  <div style={{fontSize:12,color:DARK.muted,marginTop:2}}>{viewItem.code} · {viewItem.class||"—"} · {unitLbl(viewItem.unit,t)}</div>
+                </div>
+                <button onClick={()=>setViewItem(null)} style={{background:"transparent",border:"none",color:DARK.muted,fontSize:20,cursor:"pointer"}}>✕</button>
+              </div>
+
+              {/* summary cards */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>
+                {[
+                  {l:lang==="ar"?"عدد المكونات":"Ingredients", v:viewItem.ingredients?.length||0, c:DARK.blue},
+                  {l:lang==="ar"?"وزن الناتج":"Yield Weight",  v:yieldKg.toFixed(3)+" "+unitLbl(viewItem.unit,t), c:DARK.green},
+                  {l:lang==="ar"?"تكلفة/وحدة":"Cost/Unit",    v:costPerUnit.toFixed(4), c:DARK.accent},
+                ].map((s,i)=>(
+                  <div key={i} style={{background:DARK.surface,borderRadius:10,padding:"12px 16px",border:"1px solid "+DARK.border}}>
+                    <div style={{fontSize:11,color:DARK.muted,marginBottom:4,textTransform:"uppercase",letterSpacing:".05em"}}>{s.l}</div>
+                    <div style={{fontSize:18,fontWeight:800,color:s.c}}>{s.v}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ingredients table */}
+              <div style={{overflowX:"auto"}}>
+                <table style={{width:"100%",borderCollapse:"collapse"}}>
+                  <thead>
+                    <tr style={{background:DARK.surface}}>
+                      {["#",
+                        lang==="ar"?"المادة":"Material",
+                        lang==="ar"?"الكمية الصافية":"Net Qty",
+                        lang==="ar"?"الهدر %":"Wastage %",
+                        lang==="ar"?"الكمية الإجمالية":"Gross Qty",
+                        lang==="ar"?"سعر/وحدة":"Cost/Unit",
+                        lang==="ar"?"إجمالي التكلفة":"Total Cost"
+                      ].map((h,i)=><th key={i} style={{padding:"10px 13px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:DARK.muted,textTransform:"uppercase",letterSpacing:".06em",whiteSpace:"nowrap"}}>{h}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(viewItem.ingredients||[]).map((ing,i)=>{
+                      const raw=rawList.find(r=>String(r.id)===String(ing.rawId));
+                      if(!raw) return null;
+                      const qty=parseFloat(ing.qty)||0;
+                      const waste=(parseFloat(ing.waste)||0)/100;
+                      const grossQty=waste<1?qty/(1-waste):qty;
+                      const ingCost=(raw.unit==="piece"?grossQty:grossQty/1000)*raw.price;
+                      const unit=raw.unit==="kg"?"g":raw.unit==="liter"?"ml":"pcs";
+                      return(
+                        <tr key={i} style={{borderBottom:"1px solid "+DARK.border+"22"}}>
+                          <td style={{padding:"11px 13px",color:DARK.muted,fontSize:11}}>{i+1}</td>
+                          <td style={{padding:"11px 13px",fontWeight:600,color:DARK.text}}>
+                            {raw.name}
+                            <span style={{color:DARK.muted,fontSize:11,marginRight:6}}> ({raw.code})</span>
+                          </td>
+                          <td style={{padding:"11px 13px",color:DARK.text}}>{qty.toFixed(0)} {unit}</td>
+                          <td style={{padding:"11px 13px"}}>
+                            {ing.waste>0
+                              ? <span style={{background:DARK.yellow+"22",color:DARK.yellow,padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700}}>{ing.waste}%</span>
+                              : <span style={{color:DARK.muted}}>0%</span>
+                            }
+                          </td>
+                          <td style={{padding:"11px 13px",color:DARK.text,fontWeight:600}}>{grossQty.toFixed(0)} {unit}</td>
+                          <td style={{padding:"11px 13px",color:DARK.muted}}>{raw.price.toFixed(2)}/{unitLbl(raw.unit,t)}</td>
+                          <td style={{padding:"11px 13px",color:DARK.accent,fontWeight:700}}>{ingCost.toFixed(4)}</td>
+                        </tr>
+                      );
+                    })}
+                    {/* totals row */}
+                    <tr style={{background:DARK.surface,borderTop:"2px solid "+DARK.border}}>
+                      <td colSpan={2} style={{padding:"12px 13px",fontWeight:800,color:DARK.text,fontSize:13}}>
+                        {lang==="ar"?"الإجمالي":"Total"}
+                      </td>
+                      <td style={{padding:"12px 13px",fontWeight:700,color:DARK.green}}>
+                        {((viewItem.ingredients||[]).reduce((a,i)=>a+(parseFloat(i.qty)||0),0)).toFixed(0)} g
+                      </td>
+                      <td/>
+                      <td style={{padding:"12px 13px",fontWeight:700,color:DARK.green}}>
+                        {((viewItem.ingredients||[]).reduce((a,ing)=>{
+                          const w=(parseFloat(ing.waste)||0)/100;
+                          const q=parseFloat(ing.qty)||0;
+                          return a+(w<1?q/(1-w):q);
+                        },0)).toFixed(0)} g
+                      </td>
+                      <td/>
+                      <td style={{padding:"12px 13px",fontWeight:800,color:DARK.accent,fontSize:14}}>{totalCost.toFixed(4)}</td>
+                    </tr>
+                    {/* cost per unit row */}
+                    <tr style={{background:DARK.accent+"10"}}>
+                      <td colSpan={6} style={{padding:"10px 13px",fontWeight:700,color:DARK.text,fontSize:13,textAlign:lang==="ar"?"right":"left"}}>
+                        {lang==="ar"?"تكلفة الكيلو الواحد":"Cost per "+unitLbl(viewItem.unit,t)}
+                      </td>
+                      <td style={{padding:"10px 13px",fontWeight:900,color:DARK.accent,fontSize:16}}>{costPerUnit.toFixed(4)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{display:"flex",justifyContent:"flex-end",marginTop:16}}>
+                <button className="btn btn-secondary" onClick={()=>setViewItem(null)}>{t.cancel}</button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.prepItem}</h2>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:12}}>
