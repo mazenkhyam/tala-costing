@@ -148,10 +148,10 @@ export default function App() {
       const raw=rawList.find(r=>String(r.id)===String(ing.rawId)); if(!raw) return;
       const qty=parseFloat(ing.qty)||0;
       const waste=(parseFloat(ing.waste)||0)/100;
-      // raw material to buy = qty / (1 - waste%)  e.g. need 1000g to get 500g after 50% waste
-      const rawNeeded = waste<1 ? qty/(1-waste) : qty;
-      cost+=(raw.unit==="piece"?rawNeeded:rawNeeded/1000)*raw.price;
-      // yield weight = actual qty used in recipe
+      // gross qty to buy = qty × (1 + waste%)
+      const grossQty = qty*(1+waste);
+      cost+=(raw.unit==="piece"?grossQty:grossQty/1000)*raw.price;
+      // yield = raw qty entered (what goes into recipe)
       yg+=qty;
     });
     const yieldKg=prep.yieldOverride&&parseFloat(prep.yieldOverride)>0?parseFloat(prep.yieldOverride):(yg/1000);
@@ -166,15 +166,15 @@ export default function App() {
         const raw=rawList.find(r=>String(r.id)===String(ing.srcId)); if(!raw) return;
         const qty2=parseFloat(ing.qty)||0;
         const waste2=(parseFloat(ing.waste)||0)/100;
-        const rawNeeded2=waste2<1?qty2/(1-waste2):qty2;
-        cost+=(raw.unit==="piece"?rawNeeded2:rawNeeded2/1000)*raw.price;
+        const gross2=qty2*(1+waste2);
+        cost+=(raw.unit==="piece"?gross2:gross2/1000)*raw.price;
       } else {
         const prep=prepList.find(p=>String(p.id)===String(ing.srcId)); if(!prep) return;
         const {costPerUnit}=calcPrepCost(prep);
         const qty2=parseFloat(ing.qty)||0;
         const waste2=(parseFloat(ing.waste)||0)/100;
-        const prepNeeded2=waste2<1?qty2/(1-waste2):qty2;
-        cost+=(prep.unit==="piece"?prepNeeded2:prepNeeded2/1000)*costPerUnit;
+        const gross2=qty2*(1+waste2);
+        cost+=(prep.unit==="piece"?gross2:gross2/1000)*costPerUnit;
       }
     });
     const sp=parseFloat(prod.sellingPrice)||0;
@@ -939,8 +939,95 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
   const remI=id=>setForm(f=>({...f,ingredients:f.ingredients.filter(i=>i.id!==id)}));
   const updI=(id,k,v)=>setForm(f=>({...f,ingredients:f.ingredients.map(i=>i.id===id?{...i,[k]:v}:i)}));
   const live=calcPrepCost({ingredients:form.ingredients,unit:form.unit,yieldOverride:form.yieldOverride});
-  const doExport=()=>{ const rows=prepList.map((p,i)=>{ const {costPerUnit,yieldKg}=calcPrepCost(p); return {"#":i+1,[t.code]:p.code,[t.name]:p.name,[t.class]:p.class||"",[t.unit]:p.unit,[t.yieldWeight]:yieldKg.toFixed(3),[t.costPerUnit]:costPerUnit.toFixed(4)}; }); const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,t.prepItem); XLSX.writeFile(wb,`prep_${Date.now()}.xlsx`); };
-  const doImport=e=>{ const file=e.target.files[0]; if(!file) return; const r=new FileReader(); r.onload=ev=>{ try{ const wb=XLSX.read(ev.target.result,{type:"binary"}); const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]); let n=0; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); setPrepList(prev=>{ const u=[...prev]; rows.forEach(row=>{ const rn=String(row[t.name]||row.Name||row["الاسم"]||"").trim(); const rc=String(row[t.code]||row.Code||row["الكود"]||"").trim(); let i=u.findIndex(m=>m.name.toLowerCase()===rn.toLowerCase()); if(i===-1) i=u.findIndex(m=>m.code===rc); if(i!==-1){u[i]={...u[i],lastUpdated:now};n++;} }); return u; }); showToast(n>0?`${t.importedOk} ${n} ${t.importedItems}`:t.noMatch,n>0?"success":"warning"); }catch{ showToast("error","error"); } }; r.readAsBinaryString(file); e.target.value=""; };
+  const doExport=()=>{
+    const rows=[];
+    prepList.forEach(p=>{
+      const ings=p.ingredients||[];
+      if(ings.length===0){
+        rows.push({
+          [lang==="ar"?"كود Prep":"Prep Code"]:p.code,
+          [lang==="ar"?"اسم Prep":"Prep Name"]:p.name,
+          [lang==="ar"?"الكلاس":"Class"]:p.class||"",
+          [lang==="ar"?"الوحدة":"Unit"]:p.unit,
+          [lang==="ar"?"نوع المكون":"Ingredient Type"]:"",
+          [lang==="ar"?"كود المكون":"Ingredient Code"]:"",
+          [lang==="ar"?"اسم المكون":"Ingredient Name"]:"",
+          [lang==="ar"?"الكمية (g/ml)":"Qty (g/ml)"]:"",
+          [lang==="ar"?"الهدر %":"Waste %"]:"",
+        });
+      } else {
+        ings.forEach(ing=>{
+          let ingCode="", ingName="", ingType="";
+          const raw=rawList.find(r=>String(r.id)===String(ing.rawId));
+          if(raw){ ingCode=raw.code; ingName=raw.name; ingType=lang==="ar"?"مادة خام":"Raw"; }
+          rows.push({
+            [lang==="ar"?"كود Prep":"Prep Code"]:p.code,
+            [lang==="ar"?"اسم Prep":"Prep Name"]:p.name,
+            [lang==="ar"?"الكلاس":"Class"]:p.class||"",
+            [lang==="ar"?"الوحدة":"Unit"]:p.unit,
+            [lang==="ar"?"نوع المكون":"Ingredient Type"]:ingType,
+            [lang==="ar"?"كود المكون":"Ingredient Code"]:ingCode,
+            [lang==="ar"?"اسم المكون":"Ingredient Name"]:ingName,
+            [lang==="ar"?"الكمية (g/ml)":"Qty (g/ml)"]:parseFloat(ing.qty)||0,
+            [lang==="ar"?"الهدر %":"Waste %"]:parseFloat(ing.waste)||0,
+          });
+        });
+      }
+    });
+    const ws=XLSX.utils.json_to_sheet(rows);
+    // set column widths
+    ws["!cols"]=[{wch:14},{wch:20},{wch:14},{wch:10},{wch:16},{wch:14},{wch:22},{wch:14},{wch:10}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,t.prepItem);
+    XLSX.writeFile(wb,`prep_items_${Date.now()}.xlsx`);
+  };
+  const doImport=e=>{
+    const file=e.target.files[0]; if(!file) return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const wb=XLSX.read(ev.target.result,{type:"binary"});
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        let updated=0;
+        const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
+        // group rows by prep code
+        const prepGroups={};
+        rows.forEach(row=>{
+          const pc=String(row[lang==="ar"?"كود Prep":"Prep Code"]||row["Prep Code"]||row["كود Prep"]||"").trim();
+          const pn=String(row[lang==="ar"?"اسم Prep":"Prep Name"]||row["Prep Name"]||row["اسم Prep"]||"").trim();
+          const key=pc||pn;
+          if(!key) return;
+          if(!prepGroups[key]) prepGroups[key]={code:pc,name:pn,ingredients:[]};
+          const ingCode=String(row[lang==="ar"?"كود المكون":"Ingredient Code"]||row["Ingredient Code"]||row["كود المكون"]||"").trim();
+          const ingName=String(row[lang==="ar"?"اسم المكون":"Ingredient Name"]||row["Ingredient Name"]||row["اسم المكون"]||"").trim();
+          const ingType=String(row[lang==="ar"?"نوع المكون":"Ingredient Type"]||row["Ingredient Type"]||row["نوع المكون"]||"raw").trim().toLowerCase();
+          const qty=parseFloat(row[lang==="ar"?"الكمية (g/ml)":"Qty (g/ml)"]||row["Qty (g/ml)"]||row["الكمية (g/ml)"]||0);
+          const waste=parseFloat(row[lang==="ar"?"الهدر %":"Waste %"]||row["Waste %"]||row["الهدر %"]||0);
+          if(ingCode||ingName){
+            // find raw material by code or name
+            const raw=rawList.find(r=>r.code===ingCode||r.name.toLowerCase()===ingName.toLowerCase());
+            if(raw) prepGroups[key].ingredients.push({id:Date.now()+Math.random(),rawId:raw.id,qty,waste});
+          }
+        });
+        setPrepList(prev=>{
+          const u=[...prev];
+          Object.values(prepGroups).forEach(pg=>{
+            // find prep by code then name
+            let idx=u.findIndex(p=>p.code===pg.code);
+            if(idx===-1) idx=u.findIndex(p=>p.name.toLowerCase()===pg.name.toLowerCase());
+            if(idx===-1) return; // only update existing
+            // smart sync ingredients
+            const newIngs=pg.ingredients;
+            u[idx]={...u[idx],ingredients:newIngs,lastUpdated:now};
+            updated++;
+          });
+          return u;
+        });
+        showToast(updated>0?`${t.importedOk} ${updated} ${t.importedItems}`:t.noMatch,updated>0?"success":"warning");
+      }catch(err){ showToast(lang==="ar"?"خطأ في الملف":"File error","error"); }
+    };
+    r.readAsBinaryString(file); e.target.value="";
+  };
   const filtered=prepList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
   return (
     <div>
@@ -1031,7 +1118,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
                       if(!raw) return null;
                       const qty=parseFloat(ing.qty)||0;
                       const waste=(parseFloat(ing.waste)||0)/100;
-                      const grossQty=waste<1?qty/(1-waste):qty;
+                      const grossQty=qty*(1+waste);
                       const ingCost=(raw.unit==="piece"?grossQty:grossQty/1000)*raw.price;
                       const unit=raw.unit==="kg"?"g":raw.unit==="liter"?"ml":"pcs";
                       return(
