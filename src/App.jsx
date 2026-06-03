@@ -1359,9 +1359,12 @@ function ProductsTab({t,lang,prodList,setProdList,rawList,prepList,classes,calcP
                 <td style={{fontWeight:600}}>{m.name}</td>
                 <td><span className="badge badge-cls">{m.class||"—"}</span></td>
                 <td style={{color:C.muted}}>{m.ingredients?.length||0}</td>
-                <td style={{color:C.red,fontWeight:600}}>{totalCost.toFixed(2)}</td>
-                <td style={{color:C.green,fontWeight:600}}>{parseFloat(m.sellingPrice||0).toFixed(2)}</td>
-                <td><span style={{color:margin>30?C.green:margin>15?C.yellow:C.red,fontWeight:700}}>{margin.toFixed(1)}%</span></td>
+                <td style={{color:"#f87171",fontWeight:600}}>{totalCost.toFixed(2)}</td>
+                <td style={{color:DARK.muted,fontWeight:500}}>{m.stdCost>0?m.stdCost.toFixed(2):"—"}</td>
+                <td>{m.stdCost>0?(()=>{const v=totalCost-m.stdCost;return <span style={{color:v>0?"#f87171":"#4ade80",fontWeight:700}}>{v>0?"+":""}{v.toFixed(2)}</span>;})():<span style={{color:DARK.muted}}>—</span>}</td>
+                <td>{m.stdCost>0?(()=>{const vp=((totalCost-m.stdCost)/m.stdCost)*100;return <span style={{color:vp>0?"#f87171":vp<0?"#4ade80":DARK.muted,fontWeight:700,background:vp>0?"#f8717115":"#4ade8015",padding:"2px 7px",borderRadius:20}}>{vp>0?"+":""}{vp.toFixed(1)}%</span>;})():<span style={{color:DARK.muted}}>—</span>}</td>
+                <td style={{color:"#4ade80",fontWeight:600}}>{parseFloat(m.sellingPrice||0).toFixed(2)}</td>
+                <td><span style={{color:margin>30?"#4ade80":margin>15?"#fbbf24":"#f87171",fontWeight:700}}>{margin.toFixed(1)}%</span></td>
                 {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<td><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}</div></td>}
               </tr>
             );})}
@@ -1370,10 +1373,11 @@ function ProductsTab({t,lang,prodList,setProdList,rawList,prepList,classes,calcP
       </div></div>
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.products}</h2>
-        <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:10,marginBottom:12}}>
+        <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:12}}>
           <div><label className="lbl">{t.productName}</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>{errs.name&&<div className="err">{errs.name}</div>}</div>
           <div><label className="lbl">{t.class}</label><select value={form.class} onChange={e=>setForm({...form,class:e.target.value})}><option value="">—</option>{cls.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
           <div><label className="lbl">{t.sellingPrice}</label><input type="number" min="0" step="0.01" value={form.sellingPrice} onChange={e=>setForm({...form,sellingPrice:e.target.value})} placeholder="0.00"/></div>
+          <div><label className="lbl">{t.stdCost}</label><input type="number" min="0" step="0.01" value={form.stdCost||""} onChange={e=>setForm({...form,stdCost:e.target.value})} placeholder="0.00"/></div>
         </div>
         <div className="divider"/>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
