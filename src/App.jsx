@@ -338,7 +338,7 @@ export default function App() {
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
             <button
               onClick={()=>setDarkMode(d=>!d)}
-              style={{background:"transparent",border:`1px solid ${darkMode?DARK.border:LIGHT.border}`,
+              style={{background:"transparent",border:`1px solid ${C.border}`,
                 color:DARK.muted,padding:"6px 13px",fontSize:12,borderRadius:7,
                 cursor:"pointer",fontFamily:"inherit",fontWeight:600,transition:"all .16s"}}
             >{darkMode ? (lang==="ar"?"فاتح":"Light") : (lang==="ar"?"غامق":"Dark")}</button>
@@ -350,12 +350,12 @@ export default function App() {
 
         {/* CONTENT */}
         <div style={{flex:1,overflowY:"auto",padding:"20px"}}>
-          {tab==="dashboard" && <DashboardTab t={t} lang={lang} dm={darkMode} rawList={rawList} prepList={prepList} prodList={prodList} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost}/>}
-          {tab==="raw"       && (hasPerm("raw","view") ? <RawTab t={t} lang={lang} dm={darkMode} rawList={rawList} setRawList={setRawList} classes={classes} prepList={prepList} prodList={prodList} showToast={showToast} hasPerm={hasPerm} mod="raw"/> : <NoPerm t={t}/>)}
-          {tab==="prep"      && (hasPerm("prep","view") ? <PrepTab t={t} lang={lang} dm={darkMode} prepList={prepList} setPrepList={setPrepList} rawList={rawList} prodList={prodList} classes={classes} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="prep"/> : <NoPerm t={t}/>)}
-          {tab==="products"  && (hasPerm("products","view") ? <ProductsTab t={t} lang={lang} dm={darkMode} prodList={prodList} setProdList={setProdList} rawList={rawList} prepList={prepList} classes={classes} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost} showToast={showToast} hasPerm={hasPerm} mod="products"/> : <NoPerm t={t}/>)}
-          {tab==="classes"   && (hasPerm("classes","view") ? <ClassesTab t={t} lang={lang} dm={darkMode} classes={classes} setClasses={setClasses} showToast={showToast} hasPerm={hasPerm} mod="classes"/> : <NoPerm t={t}/>)}
-          {tab==="users"     && currentUser.role==="admin" && <UsersTab t={t} lang={lang} dm={darkMode} users={users} setUsers={setUsers} showToast={showToast} currentUserId={currentUser.id}/>}
+          {tab==="dashboard" && <DashboardTab t={t} lang={lang} C={dm?DARK:LIGHT} rawList={rawList} prepList={prepList} prodList={prodList} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost}/>}
+          {tab==="raw"       && (hasPerm("raw","view") ? <RawTab t={t} lang={lang} C={dm?DARK:LIGHT} rawList={rawList} setRawList={setRawList} classes={classes} prepList={prepList} prodList={prodList} showToast={showToast} hasPerm={hasPerm} mod="raw"/> : <NoPerm t={t} C={dm?DARK:LIGHT}/>)}
+          {tab==="prep"      && (hasPerm("prep","view") ? <PrepTab t={t} lang={lang} C={dm?DARK:LIGHT} prepList={prepList} setPrepList={setPrepList} rawList={rawList} prodList={prodList} classes={classes} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="prep"/> : <NoPerm t={t} C={dm?DARK:LIGHT}/>)}
+          {tab==="products"  && (hasPerm("products","view") ? <ProductsTab t={t} lang={lang} C={dm?DARK:LIGHT} prodList={prodList} setProdList={setProdList} rawList={rawList} prepList={prepList} classes={classes} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost} showToast={showToast} hasPerm={hasPerm} mod="products"/> : <NoPerm t={t} C={dm?DARK:LIGHT}/>)}
+          {tab==="classes"   && (hasPerm("classes","view") ? <ClassesTab t={t} lang={lang} C={dm?DARK:LIGHT} classes={classes} setClasses={setClasses} showToast={showToast} hasPerm={hasPerm} mod="classes"/> : <NoPerm t={t} C={dm?DARK:LIGHT}/>)}
+          {tab==="users"     && currentUser.role==="admin" && <UsersTab t={t} lang={lang} C={dm?DARK:LIGHT} users={users} setUsers={setUsers} showToast={showToast} currentUserId={currentUser.id}/>}
         </div>
       </div>
 
@@ -591,14 +591,14 @@ function LoginScreen({users,onLogin}) {
   );
 }
 
-function NoPerm({t}) {
+function NoPerm({t,C=DARK}) {
   return <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:200,color:C.muted,fontSize:14}}>{t.noPermission}</div>;
 }
 
 // ═══════════════════════════════════════════════════════════════
 // DASHBOARD / ANALYTICS
 // ═══════════════════════════════════════════════════════════════
-function DashboardTab({t,lang,rawList,prepList,prodList,calcPrepCost,calcProductCost}) {
+function DashboardTab({t,lang,C,rawList,prepList,prodList,calcPrepCost,calcProductCost}) {
   const [topN,setTopN] = useState(10);
 
   const prodCalc = prodList.map(p=>({...p,...calcProductCost(p)}));
@@ -883,7 +883,7 @@ function DashboardTab({t,lang,rawList,prepList,prodList,calcPrepCost,calcProduct
 // ═══════════════════════════════════════════════════════════════
 // RAW MATERIALS
 // ═══════════════════════════════════════════════════════════════
-function RawTab({t,lang,rawList,setRawList,classes,prepList=[],prodList=[],showToast,hasPerm,mod}) {
+function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[],showToast,hasPerm,mod}) {
   const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:"",unit:"kg",price:"",class:""}); const [errs,setErrs]=useState({});
@@ -982,7 +982,7 @@ function RawTab({t,lang,rawList,setRawList,classes,prepList=[],prodList=[],showT
 // ═══════════════════════════════════════════════════════════════
 // PREP ITEMS
 // ═══════════════════════════════════════════════════════════════
-function PrepTab({t,lang,prepList,setPrepList,rawList,prodList=[],classes,calcPrepCost,showToast,hasPerm,mod}) {
+function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes,calcPrepCost,showToast,hasPerm,mod}) {
   const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); const [errs,setErrs]=useState({});
@@ -1294,7 +1294,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,prodList=[],classes,calcPr
           <button className="btn btn-secondary" style={{padding:"5px 12px",fontSize:12}} onClick={addI}>+ {t.addIngredient}</button>
         </div>
         {form.ingredients.map(ing=>(
-          <IngRow key={ing.id} ing={ing} rawList={rawList} prepList={prepList} lang={lang} t={t}
+          <IngRow key={ing.id} ing={ing} rawList={rawList} prepList={prepList} lang={lang} t={t} C={C}
             onUpdate={(field,val)=>updI(ing.id,field,val)}
             onRemove={()=>remI(ing.id)}
           />
@@ -1313,7 +1313,7 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,prodList=[],classes,calcPr
 // ═══════════════════════════════════════════════════════════════
 // PRODUCTS
 // ═══════════════════════════════════════════════════════════════
-function ProductsTab({t,lang,prodList,setProdList,rawList,prepList,classes,calcPrepCost,calcProductCost,showToast,hasPerm,mod}) {
+function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classes,calcPrepCost,calcProductCost,showToast,hasPerm,mod}) {
   const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:"",class:"",sellingPrice:"",stdCost:"",ingredients:[]}); const [errs,setErrs]=useState({});
@@ -1385,7 +1385,7 @@ function ProductsTab({t,lang,prodList,setProdList,rawList,prepList,classes,calcP
           <button className="btn btn-secondary" style={{padding:"5px 12px",fontSize:12}} onClick={addI}>+ {t.addIngredient}</button>
         </div>
         {form.ingredients.map(ing=>(
-          <IngRowProd key={ing.id} ing={ing} rawList={rawList} prepList={prepList} lang={lang} t={t}
+          <IngRowProd key={ing.id} ing={ing} rawList={rawList} prepList={prepList} lang={lang} t={t} C={C}
             onUpdate={(field,val)=>updI(ing.id,field,val)}
             onRemove={()=>remI(ing.id)}
           />
@@ -1405,7 +1405,7 @@ function ProductsTab({t,lang,prodList,setProdList,rawList,prepList,classes,calcP
 // ═══════════════════════════════════════════════════════════════
 // CLASSES
 // ═══════════════════════════════════════════════════════════════
-function ClassesTab({t,lang,classes,setClasses,showToast,hasPerm,mod}) {
+function ClassesTab({t,lang,C=DARK,classes,setClasses,showToast,hasPerm,mod}) {
   const [et,setEt]=useState(null); const [ei,setEi]=useState(null); const [val,setVal]=useState(""); const [err,setErr]=useState("");
   const secs=[{key:"raw",label:t.rawMat,cat:t.rawMatCategory},{key:"prep",label:t.prepItem,cat:t.prepCategory}];
   const startAdd=k=>{ setEt(k); setEi(null); setVal(""); setErr(""); };
@@ -1423,7 +1423,7 @@ function ClassesTab({t,lang,classes,setClasses,showToast,hasPerm,mod}) {
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:7}}>
             {(classes[sec.key]||[]).map((cls,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,padding:"9px 12px",borderRadius:8,border:`1px solid ${darkMode?DARK.border:LIGHT.border}`}}>
+              <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,padding:"9px 12px",borderRadius:8,border:`1px solid ${C.border}`}}>
                 {et===sec.key&&ei===i
                   ?<div style={{display:"flex",gap:7,flex:1}}><input value={val} onChange={e=>setVal(e.target.value)} style={{flex:1}}/><button className="btn btn-primary" style={{padding:"4px 11px",fontSize:12}} onClick={save}>{t.save}</button><button className="btn btn-secondary" style={{padding:"4px 9px",fontSize:12}} onClick={cancel}>x</button></div>
                   :<><span className="badge badge-cls" style={{fontSize:12}}>{cls}</span><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>startEdit(sec.key,i)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>del(sec.key,i)}>{t.delete}</button>}</div></>
@@ -1449,7 +1449,7 @@ function ClassesTab({t,lang,classes,setClasses,showToast,hasPerm,mod}) {
 // ═══════════════════════════════════════════════════════════════
 // USERS MANAGEMENT
 // ═══════════════════════════════════════════════════════════════
-function UsersTab({t,lang,users,setUsers,showToast,currentUserId}) {
+function UsersTab({t,lang,C=DARK,users,setUsers,showToast,currentUserId}) {
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({id:"",name:"",pin:"",role:"user",perms:{raw:{view:true,edit:false,delete:false},prep:{view:true,edit:false,delete:false},products:{view:true,edit:false,delete:false},classes:{view:false,edit:false,delete:false}}});
   const [errs,setErrs]=useState({}); const [delId,setDelId]=useState(null);
@@ -1517,7 +1517,7 @@ function UsersTab({t,lang,users,setUsers,showToast,currentUserId}) {
 // ═══════════════════════════════════════════════════════════════
 // DELETE MODAL
 // ═══════════════════════════════════════════════════════════════
-function DelModal({t,onOk,onCancel}) {
+function DelModal({t,C=DARK,onOk,onCancel}) {
   return (
     <div className="overlay">
       <div className="modal" style={{maxWidth:300,textAlign:"center"}}>
