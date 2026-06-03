@@ -480,7 +480,7 @@ function LoginScreen({users,onLogin}) {
         {/* LEFT BRAND PANEL */}
         <div style={{
           flex:1, flexDirection:"column", justifyContent:"center",
-          padding:"60px 80px", display: (typeof window !== 'undefined' && window.innerWidth < 700) ? "none" : "flex"
+          padding:"60px 80px", display: "flex"
         }}>
           <div className="lf-wrap">
             <div style={{
@@ -502,12 +502,12 @@ function LoginScreen({users,onLogin}) {
 
         {/* RIGHT LOGIN PANEL */}
         <div style={{
-          width: (typeof window !== 'undefined' && window.innerWidth < 700) ? "100%" : 480,
-          minWidth: (typeof window !== 'undefined' && window.innerWidth < 700) ? "100%" : 480,
+          width: 480,
+          minWidth: 480,
           display:"flex", flexDirection:"column", justifyContent:"center",
-          padding: (typeof window !== 'undefined' && window.innerWidth < 700) ? "40px 28px" : "60px 56px",
+          padding: "60px 56px",
           background:"#0a0d1a",
-          borderLeft: (typeof window !== 'undefined' && window.innerWidth < 700) ? "none" : "1px solid #1e2540",
+          borderLeft: "1px solid #1e2540",
           position:"relative"
         }}>
           {/* corner accent */}
