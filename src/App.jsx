@@ -39,6 +39,27 @@ const T = {
     rawHighPrice:"أعلى سعر", rawMostUsed:"الأكثر استخداماً",
     usedIn:"مستخدم في", productsCount:"منتج",
     noPermission:"ليس لديك صلاحية للوصول لهذا القسم",
+    // standard costing
+    stdCost:"التكلفة المعيارية", variance:"الانحراف", variancePct:"نسبة الانحراف",
+    aboveStd:"فوق المعياري", belowStd:"تحت المعياري", onTarget:"مطابق",
+    topCostDriver:"أعلى مكون تكلفة",
+    // usage columns
+    usedInPrep:"في Prep", usedInProducts:"في المنتجات",
+    clickToView:"اضغط للعرض",
+    relatedProducts:"المنتجات المرتبطة", relatedPreps:"Prep المرتبطة",
+    // dashboard sections
+    kpiSection:"المؤشرات الرئيسية",
+    varianceReport:"تقرير الانحراف عن المعياري",
+    marginDistribution:"توزيع هامش الربح",
+    topCostDriversReport:"أعلى مكونات التكلفة",
+    costBreakdown:"تفصيل التكلفة",
+    aboveTarget:"تجاوز المعياري", belowTarget:"دون المعياري", noTarget:"بدون معياري",
+    totalProducts:"إجمالي المنتجات", totalPrep:"إجمالي Prep", totalRaw:"إجمالي الخام",
+    avgMarginLbl:"متوسط الهامش", avgCostLbl:"متوسط التكلفة",
+    highMargin:"هامش عالي >30%", midMargin:"هامش متوسط 15-30%", lowMargin:"هامش منخفض <15%",
+    noSelling:"بدون سعر بيع",
+    productsOverBudget:"منتجات تجاوزت المعياري",
+    view:"عرض",
   },
   en: {
     dir:"ltr", font:"'DM Sans',sans-serif",
@@ -72,6 +93,24 @@ const T = {
     rawHighPrice:"Highest Price", rawMostUsed:"Most Used",
     usedIn:"Used in", productsCount:"products",
     noPermission:"You don't have permission to access this section",
+    stdCost:"Std Cost", variance:"Variance", variancePct:"Var %",
+    aboveStd:"Above Std", belowStd:"Below Std", onTarget:"On Target",
+    topCostDriver:"Top Cost Driver",
+    usedInPrep:"In Prep", usedInProducts:"In Products",
+    clickToView:"Click to view",
+    relatedProducts:"Related Products", relatedPreps:"Related Preps",
+    kpiSection:"Key Indicators",
+    varianceReport:"Variance vs Standard",
+    marginDistribution:"Margin Distribution",
+    topCostDriversReport:"Top Cost Drivers",
+    costBreakdown:"Cost Breakdown",
+    aboveTarget:"Above Target", belowTarget:"Below Target", noTarget:"No Target",
+    totalProducts:"Total Products", totalPrep:"Total Prep", totalRaw:"Total Raw",
+    avgMarginLbl:"Avg Margin", avgCostLbl:"Avg Cost",
+    highMargin:"High Margin >30%", midMargin:"Mid Margin 15-30%", lowMargin:"Low Margin <15%",
+    noSelling:"No Selling Price",
+    productsOverBudget:"Products Over Budget",
+    view:"View",
   }
 };
 
@@ -111,6 +150,7 @@ const LIGHT = {
   green:"#16a34a", red:"#dc2626", yellow:"#d97706", blue:"#2563eb",
 };
 const C = DARK;
+const getC = (dm) => dm ? DARK : LIGHT;
 
 // ═══════════════════════════════════════════════════════════════
 // APP ROOT
@@ -216,58 +256,58 @@ export default function App() {
         *{box-sizing:border-box;margin:0;padding:0;}
         ::-webkit-scrollbar{width:4px;height:4px}
         ::-webkit-scrollbar-track{background:${DARK.sidebar}}
-        ::-webkit-scrollbar-thumb{background:${DARK.accent}66;border-radius:4px}
+        ::-webkit-scrollbar-thumb{background:${darkMode?DARK.accent:LIGHT.accent}66;border-radius:4px}
         .btn{border:none;cursor:pointer;border-radius:7px;font-family:inherit;font-weight:600;transition:all .16s;display:inline-flex;align-items:center;gap:5px}
         .btn:active{transform:scale(.97)}
-        .btn-primary{background:linear-gradient(135deg,${DARK.accent},${DARK.accentDark});color:#080b14;padding:8px 18px;font-size:13px}
-        .btn-primary:hover{filter:brightness(1.1);box-shadow:0 4px 16px ${DARK.accent}44}
-        .btn-secondary{background:${DARK.card};color:${DARK.muted};padding:8px 14px;font-size:13px;border:1px solid ${DARK.border}}
-        .btn-secondary:hover{color:${DARK.text};border-color:#3a4060}
+        .btn-primary{background:linear-gradient(135deg,${darkMode?DARK.accent:LIGHT.accent},${DARK.accentDark});color:#080b14;padding:8px 18px;font-size:13px}
+        .btn-primary:hover{filter:brightness(1.1);box-shadow:0 4px 16px ${darkMode?DARK.accent:LIGHT.accent}44}
+        .btn-secondary{background:${darkMode?DARK.card:LIGHT.card};color:${darkMode?DARK.muted:LIGHT.muted};padding:8px 14px;font-size:13px;border:1px solid ${darkMode?DARK.border:LIGHT.border}}
+        .btn-secondary:hover{color:${darkMode?DARK.text:LIGHT.text};border-color:#3a4060}
         .btn-sm-e{background:#0f2a4a;color:#60a5fa;padding:4px 11px;font-size:12px;border:1px solid #1e3a6033;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
         .btn-sm-e:hover{background:#1e3a6033}
         .btn-sm-d{background:#2a0f0f;color:#f87171;padding:4px 11px;font-size:12px;border:1px solid #dc262633;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
         .btn-sm-d:hover{background:#dc262622}
-        input,select{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.text};border-radius:7px;padding:8px 12px;font-family:inherit;font-size:13px;width:100%;outline:none;transition:border .16s}
-        input:focus,select:focus{border-color:${DARK.accent};box-shadow:0 0 0 3px ${DARK.accent}15}
+        input,select{background:${darkMode?DARK.surface:LIGHT.surface};border:1px solid ${darkMode?DARK.border:LIGHT.border};color:${darkMode?DARK.text:LIGHT.text};border-radius:7px;padding:8px 12px;font-family:inherit;font-size:13px;width:100%;outline:none;transition:border .16s}
+        input:focus,select:focus{border-color:${darkMode?DARK.accent:LIGHT.accent};box-shadow:0 0 0 3px ${darkMode?DARK.accent:LIGHT.accent}15}
         input::placeholder{color:#2e3a55}
         input[type=number]{-moz-appearance:textfield}
-        input[type=checkbox]{width:auto;cursor:pointer;accent-color:${DARK.accent}}
-        .lbl{font-size:11px;color:${DARK.muted};margin-bottom:4px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+        input[type=checkbox]{width:auto;cursor:pointer;accent-color:${darkMode?DARK.accent:LIGHT.accent}}
+        .lbl{font-size:11px;color:${darkMode?DARK.muted:LIGHT.muted};margin-bottom:4px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
         .err{color:#f87171;font-size:11px;margin-top:3px}
-        .card{background:${DARK.card};border:1px solid ${DARK.border};border-radius:12px}
+        .card{background:${darkMode?DARK.card:LIGHT.card};border:1px solid ${darkMode?DARK.border:LIGHT.border};border-radius:12px}
         .overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(8px);padding:16px}
-        .modal{background:${DARK.card};border:1px solid ${DARK.border};border-radius:16px;padding:24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+        .modal{background:${darkMode?DARK.card:LIGHT.card};border:1px solid ${darkMode?DARK.border:LIGHT.border};border-radius:16px;padding:24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
         .modal-lg{max-width:720px}
         .toast{position:fixed;bottom:18px;${lang==="ar"?"right":"left"}:18px;padding:10px 16px;border-radius:9px;font-size:13px;font-weight:600;z-index:300;animation:su .22s ease;pointer-events:none}
         .toast.success{background:#053d2a;color:#4ade80;border:1px solid #16a34a}
         .toast.error{background:#3d0505;color:#fca5a5;border:1px solid #dc2626}
         .toast.warning{background:#3d2205;color:#fcd34d;border:1px solid #ca8a04}
         @keyframes su{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-        th{padding:10px 13px;text-align:${lang==="ar"?"right":"left"};font-size:10px;font-weight:700;color:${DARK.muted};text-transform:uppercase;letter-spacing:.06em;background:${DARK.surface};white-space:nowrap}
-        td{padding:10px 13px;border-bottom:1px solid ${DARK.border}22;vertical-align:middle;font-size:13px}
+        th{padding:10px 13px;text-align:${lang==="ar"?"right":"left"};font-size:10px;font-weight:700;color:${darkMode?DARK.muted:LIGHT.muted};text-transform:uppercase;letter-spacing:.06em;background:${darkMode?DARK.surface:LIGHT.surface};white-space:nowrap}
+        td{padding:10px 13px;border-bottom:1px solid ${darkMode?DARK.border:LIGHT.border}22;vertical-align:middle;font-size:13px}
         tr:last-child td{border-bottom:none}
-        tr:hover td{background:${DARK.surface}77}
+        tr:hover td{background:${darkMode?DARK.surface:LIGHT.surface}77}
         .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
         .badge-kg{background:#0f2040;color:#60a5fa}
         .badge-liter{background:#062018;color:#4ade80}
         .badge-piece{background:#1a0f33;color:#a78bfa}
         .badge-cls{background:#1a1a33;color:#94a3b8;border:1px solid #2a2a4a}
-        .filter-btn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
-        .filter-btn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
-        .divider{height:1px;background:${DARK.border};margin:14px 0}
-        .nav-item{display:flex;align-items:center;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:${DARK.muted};transition:all .14s;border:none;background:transparent;font-family:inherit;width:100%;text-align:${lang==="ar"?"right":"left"}}
-        .nav-item:hover{background:${DARK.surface};color:${DARK.text}}
-        .nav-item.active{background:${DARK.accent}18;color:${DARK.accent};border-${lang==="ar"?"right":"left"}:3px solid ${DARK.accent}}
-        .perm-box{display:flex;gap:12px;align-items:center;padding:10px 14px;background:${DARK.surface};border-radius:8px;border:1px solid ${DARK.border};margin-bottom:6px}
-        .bar-bg{background:${DARK.surface};border-radius:3px;height:6px;flex:1}
+        .filter-btn{background:${darkMode?DARK.surface:LIGHT.surface};border:1px solid ${darkMode?DARK.border:LIGHT.border};color:${darkMode?DARK.muted:LIGHT.muted};padding:5px 12px;font-size:12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
+        .filter-btn.active{background:${darkMode?DARK.accent:LIGHT.accent}20;border-color:${darkMode?DARK.accent:LIGHT.accent}66;color:${darkMode?DARK.accent:LIGHT.accent}}
+        .divider{height:1px;background:${darkMode?DARK.border:LIGHT.border};margin:14px 0}
+        .nav-item{display:flex;align-items:center;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:${darkMode?DARK.muted:LIGHT.muted};transition:all .14s;border:none;background:transparent;font-family:inherit;width:100%;text-align:${lang==="ar"?"right":"left"}}
+        .nav-item:hover{background:${darkMode?DARK.surface:LIGHT.surface};color:${darkMode?DARK.text:LIGHT.text}}
+        .nav-item.active{background:${darkMode?DARK.accent:LIGHT.accent}18;color:${darkMode?DARK.accent:LIGHT.accent};border-${lang==="ar"?"right":"left"}:3px solid ${darkMode?DARK.accent:LIGHT.accent}}
+        .perm-box{display:flex;gap:12px;align-items:center;padding:10px 14px;background:${darkMode?DARK.surface:LIGHT.surface};border-radius:8px;border:1px solid ${darkMode?DARK.border:LIGHT.border};margin-bottom:6px}
+        .bar-bg{background:${darkMode?DARK.surface:LIGHT.surface};border-radius:3px;height:6px;flex:1}
         .bar-fill{height:6px;border-radius:3px;transition:width .4s ease}
-        .section-hd{font-size:14px;font-weight:700;color:${DARK.text};margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid ${DARK.border}}
-        .top-n-btn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .14s}
-        .top-n-btn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
+        .section-hd{font-size:14px;font-weight:700;color:${darkMode?DARK.text:LIGHT.text};margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid ${darkMode?DARK.border:LIGHT.border}}
+        .top-n-btn{background:${darkMode?DARK.surface:LIGHT.surface};border:1px solid ${darkMode?DARK.border:LIGHT.border};color:${darkMode?DARK.muted:LIGHT.muted};padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .14s}
+        .top-n-btn.active{background:${darkMode?DARK.accent:LIGHT.accent}20;border-color:${darkMode?DARK.accent:LIGHT.accent}66;color:${darkMode?DARK.accent:LIGHT.accent}}
       `}</style>
 
       {/* SIDEBAR */}
-      <div style={{width:sideOpen?220:0,minWidth:sideOpen?220:0,background:DARK.sidebar,borderRight:`1px solid ${DARK.border}`,display:"flex",flexDirection:"column",transition:"all .2s",overflow:"hidden",position:"sticky",top:0,height:"100vh",flexShrink:0}}>
+      <div style={{width:sideOpen?220:0,minWidth:sideOpen?220:0,background:DARK.sidebar,borderRight:`1px solid ${darkMode?DARK.border:LIGHT.border}`,display:"flex",flexDirection:"column",transition:"all .2s",overflow:"hidden",position:"sticky",top:0,height:"100vh",flexShrink:0}}>
         <div style={{padding:"20px 16px 12px"}}>
           <div style={{fontWeight:900,fontSize:16,color:C.accent,letterSpacing:"1px"}}>{t.appName}</div>
           <div style={{fontSize:10,color:C.muted,marginTop:2,letterSpacing:".5px"}}>SYSTEM v1.0</div>
@@ -278,7 +318,7 @@ export default function App() {
             <button key={n.id} className={`nav-item${tab===n.id?" active":""}`} onClick={()=>setTab(n.id)}>{n.label}</button>
           ))}
         </div>
-        <div style={{padding:"12px 8px",borderTop:`1px solid ${DARK.border}`}}>
+        <div style={{padding:"12px 8px",borderTop:`1px solid ${darkMode?DARK.border:LIGHT.border}`}}>
           <div style={{padding:"8px 14px",fontSize:12,color:C.muted,marginBottom:6}}>
             <div style={{fontWeight:700,color:C.text,fontSize:13}}>{currentUser.name}</div>
             <div style={{fontSize:11}}>{currentUser.role==="admin"?t.admin:t.user}</div>
@@ -290,7 +330,7 @@ export default function App() {
       {/* MAIN */}
       <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
         {/* TOPBAR */}
-        <div style={{background:DARK.sidebar,borderBottom:`1px solid ${DARK.border}`,padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:50}}>
+        <div style={{background:DARK.sidebar,borderBottom:`1px solid ${darkMode?DARK.border:LIGHT.border}`,padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:50}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <button onClick={()=>setSideOpen(o=>!o)} style={{background:"transparent",border:"none",cursor:"pointer",color:C.muted,fontSize:18,padding:"2px 6px",borderRadius:5,transition:"color .14s"}} onMouseOver={e=>e.currentTarget.style.color=C.text} onMouseOut={e=>e.currentTarget.style.color=C.muted}>☰</button>
             <span style={{fontWeight:700,fontSize:14,color:C.text}}>{navItems.find(n=>n.id===tab)?.label||""}</span>
@@ -298,7 +338,7 @@ export default function App() {
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
             <button
               onClick={()=>setDarkMode(d=>!d)}
-              style={{background:"transparent",border:`1px solid ${DARK.border}`,
+              style={{background:"transparent",border:`1px solid ${darkMode?DARK.border:LIGHT.border}`,
                 color:DARK.muted,padding:"6px 13px",fontSize:12,borderRadius:7,
                 cursor:"pointer",fontFamily:"inherit",fontWeight:600,transition:"all .16s"}}
             >{darkMode ? (lang==="ar"?"فاتح":"Light") : (lang==="ar"?"غامق":"Dark")}</button>
@@ -311,8 +351,8 @@ export default function App() {
         {/* CONTENT */}
         <div style={{flex:1,overflowY:"auto",padding:"20px"}}>
           {tab==="dashboard" && <DashboardTab t={t} lang={lang} dm={darkMode} rawList={rawList} prepList={prepList} prodList={prodList} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost}/>}
-          {tab==="raw"       && (hasPerm("raw","view") ? <RawTab t={t} lang={lang} dm={darkMode} rawList={rawList} setRawList={setRawList} classes={classes} showToast={showToast} hasPerm={hasPerm} mod="raw"/> : <NoPerm t={t}/>)}
-          {tab==="prep"      && (hasPerm("prep","view") ? <PrepTab t={t} lang={lang} dm={darkMode} prepList={prepList} setPrepList={setPrepList} rawList={rawList} classes={classes} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="prep"/> : <NoPerm t={t}/>)}
+          {tab==="raw"       && (hasPerm("raw","view") ? <RawTab t={t} lang={lang} dm={darkMode} rawList={rawList} setRawList={setRawList} classes={classes} prepList={prepList} prodList={prodList} showToast={showToast} hasPerm={hasPerm} mod="raw"/> : <NoPerm t={t}/>)}
+          {tab==="prep"      && (hasPerm("prep","view") ? <PrepTab t={t} lang={lang} dm={darkMode} prepList={prepList} setPrepList={setPrepList} rawList={rawList} prodList={prodList} classes={classes} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="prep"/> : <NoPerm t={t}/>)}
           {tab==="products"  && (hasPerm("products","view") ? <ProductsTab t={t} lang={lang} dm={darkMode} prodList={prodList} setProdList={setProdList} rawList={rawList} prepList={prepList} classes={classes} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost} showToast={showToast} hasPerm={hasPerm} mod="products"/> : <NoPerm t={t}/>)}
           {tab==="classes"   && (hasPerm("classes","view") ? <ClassesTab t={t} lang={lang} dm={darkMode} classes={classes} setClasses={setClasses} showToast={showToast} hasPerm={hasPerm} mod="classes"/> : <NoPerm t={t}/>)}
           {tab==="users"     && currentUser.role==="admin" && <UsersTab t={t} lang={lang} dm={darkMode} users={users} setUsers={setUsers} showToast={showToast} currentUserId={currentUser.id}/>}
@@ -564,300 +604,278 @@ function DashboardTab({t,lang,rawList,prepList,prodList,calcPrepCost,calcProduct
   const prodCalc = prodList.map(p=>({...p,...calcProductCost(p)}));
   const prepCalc = prepList.map(p=>({...p,...calcPrepCost(p)}));
 
-  // how many products/preps each raw material is used in
-  const rawUsage = rawList.map(r=>{
-    const inPrep  = prepList.filter(p=>p.ingredients?.some(i=>i.rawId===r.id)).length;
-    const inProd  = prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&i.srcId===r.id)).length;
-    return {...r, usedIn:inPrep+inProd};
-  });
+  // KPIs
+  const totalProds = prodList.length;
+  const totalPreps = prepList.length;
+  const totalRaws  = rawList.length;
+  const avgMargin  = prodCalc.filter(p=>p.sellingPrice>0).length
+    ? prodCalc.filter(p=>p.sellingPrice>0).reduce((a,p)=>a+p.margin,0)/prodCalc.filter(p=>p.sellingPrice>0).length : 0;
+  const avgCost    = prodCalc.length ? prodCalc.reduce((a,p)=>a+p.totalCost,0)/prodCalc.length : 0;
 
-  // how many products each prep is used in
+  // Variance analysis
+  const withStd    = prodCalc.filter(p=>p.stdCost>0);
+  const overBudget = withStd.filter(p=>p.totalCost>p.stdCost);
+  const underBudget= withStd.filter(p=>p.totalCost<=p.stdCost);
+
+  // Margin distribution
+  const highMargin = prodCalc.filter(p=>p.margin>30&&p.sellingPrice>0).length;
+  const midMargin  = prodCalc.filter(p=>p.margin>=15&&p.margin<=30&&p.sellingPrice>0).length;
+  const lowMargin  = prodCalc.filter(p=>p.margin<15&&p.sellingPrice>0&&p.margin>0).length;
+  const noPrice    = prodCalc.filter(p=>!p.sellingPrice||p.sellingPrice===0).length;
+
+  // Top cost drivers across all products
+  const driverMap = {};
+  prodList.forEach(prod=>{
+    prod.ingredients?.forEach(ing=>{
+      if(ing.source==="raw"){
+        const raw=rawList.find(r=>String(r.id)===String(ing.srcId));
+        if(!raw) return;
+        const qty=parseFloat(ing.qty)||0;
+        const cost=(qty/1000)*raw.price;
+        driverMap[raw.name]=(driverMap[raw.name]||0)+cost;
+      } else {
+        const prep=prepList.find(p=>String(p.id)===String(ing.srcId));
+        if(!prep) return;
+        const {costPerUnit}=calcPrepCost(prep);
+        const qty=parseFloat(ing.qty)||0;
+        const cost=(qty/1000)*costPerUnit;
+        driverMap[prep.name]=(driverMap[prep.name]||0)+cost;
+      }
+    });
+  });
+  const drivers = Object.entries(driverMap).sort((a,b)=>b[1]-a[1]).slice(0,topN);
+  const maxDriver = drivers[0]?.[1]||1;
+
+  // Prep usage
   const prepUsage = prepCalc.map(p=>({
-    ...p, usedIn: prodList.filter(pr=>pr.ingredients?.some(i=>i.source==="prep"&&i.srcId===p.id)).length
+    ...p, usedIn:prodList.filter(pr=>pr.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(p.id))).length
   }));
 
-  const RankTable = ({data,colA,colB,colorA,colorB,fmtA,fmtB}) => (
-    <table style={{width:"100%",borderCollapse:"collapse"}}>
-      <thead><tr>
-        <th style={{width:32}}>#</th>
-        <th>{t.name}</th>
-        <th>{colA}</th>
-        {colB&&<th>{colB}</th>}
-      </tr></thead>
-      <tbody>
-        {data.slice(0,topN).map((row,i)=>(
-          <tr key={row.id||i}>
-            <td style={{color:C.muted,fontWeight:700,fontSize:11}}>{i+1}</td>
-            <td style={{fontWeight:600}}>{row.name}</td>
-            <td><span style={{color:colorA,fontWeight:700}}>{fmtA(row)}</span></td>
-            {colB&&<td><span style={{color:colorB||C.muted,fontWeight:600}}>{fmtB(row)}</span></td>}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
+  // Raw usage
+  const rawUsage = rawList.map(r=>({
+    ...r,
+    inPrep:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(r.id))).length,
+    inProd:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(r.id))).length,
+  }));
 
-  const BarList = ({data,valFn,colorFn}) => {
-    const max = Math.max(...data.slice(0,topN).map(valFn),0.001);
-    return (
-      <div>
-        {data.slice(0,topN).map((row,i)=>{
-          const val=valFn(row); const pct=(val/max)*100; const col=colorFn(row);
-          return (
-            <div key={row.id||i} style={{marginBottom:8}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                <span style={{fontSize:12,fontWeight:600,color:C.text}}>{i+1}. {row.name}</span>
-                <span style={{fontSize:12,color:col,fontWeight:700}}>{val.toFixed(2)}</span>
-              </div>
-              <div className="bar-bg"><div className="bar-fill" style={{width:pct+"%",background:col}}/></div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const Section = ({title,children}) => (
-    <div className="card" style={{padding:18,marginBottom:16}}>
-      <div className="section-hd">{title}</div>
-      {children}
+  const Card = ({label,value,sub,color})=>(
+    <div className="card" style={{padding:"14px 18px"}}>
+      <div style={{fontSize:24,fontWeight:800,color:color||DARK.accent}}>{value}</div>
+      <div style={{fontSize:12,color:DARK.muted,marginTop:3}}>{label}</div>
+      {sub&&<div style={{fontSize:11,color:DARK.muted,marginTop:2}}>{sub}</div>}
     </div>
   );
 
-  const Grid2 = ({children}) => <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>{children}</div>;
-  const Sub = ({title,children}) => <div><div style={{fontSize:12,fontWeight:700,color:C.muted,marginBottom:10,textTransform:"uppercase",letterSpacing:".05em"}}>{title}</div>{children}</div>;
+  const SectionTitle = ({children})=>(
+    <div style={{fontWeight:700,fontSize:14,color:DARK.text,marginBottom:12,paddingBottom:8,borderBottom:"1px solid "+DARK.border}}>{children}</div>
+  );
 
-  const noDataMsg = <div style={{color:C.muted,fontSize:13,textAlign:"center",padding:"20px 0"}}>{t.noData}</div>;
+  const Bar = ({val,max,color})=>(
+    <div style={{background:DARK.surface,borderRadius:3,height:6,flex:1}}>
+      <div style={{width:(val/max*100)+"%",height:6,borderRadius:3,background:color,transition:"width .4s ease"}}/>
+    </div>
+  );
+
+  const noDataMsg = <div style={{color:DARK.muted,fontSize:13,textAlign:"center",padding:"24px 0"}}>{t.noData}</div>;
 
   return (
-    <div style={{maxWidth:1000,margin:"0 auto"}}>
+    <div style={{maxWidth:1100,margin:"0 auto"}}>
       {/* Top N selector */}
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:16,justifyContent:"flex-end"}}>
-        <span style={{fontSize:12,color:C.muted}}>{t.show}</span>
-        {[10,20].map(n=>(
-          <button key={n} className={`top-n-btn${topN===n?" active":""}`} onClick={()=>setTopN(n)}>{n} {t.items}</button>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:18,justifyContent:"flex-end"}}>
+        <span style={{fontSize:12,color:DARK.muted}}>{t.show}</span>
+        {[5,10,20].map(n=>(
+          <button key={n} className={`top-n-btn${topN===n?" active":""}`} onClick={()=>setTopN(n)}>{n}</button>
         ))}
       </div>
 
-      {/* PRODUCTS */}
-      <Section title={t.secProducts}>
-        {prodCalc.length===0 ? noDataMsg : (
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:14}}>
-            <Sub title={t.highPriceLowCost}>
-              <BarList
-                data={[...prodCalc].sort((a,b)=>(parseFloat(b.sellingPrice)||0)-(parseFloat(a.sellingPrice)||0)).sort((a,b)=>a.totalCost-b.totalCost)}
-                valFn={r=>parseFloat(r.sellingPrice)||0}
-                colorFn={()=>C.green}
-              />
-            </Sub>
-            <Sub title={t.highPriceHighCost}>
-              <BarList
-                data={[...prodCalc].sort((a,b)=>(parseFloat(b.sellingPrice)||0)-(parseFloat(a.sellingPrice)||0))}
-                valFn={r=>r.totalCost}
-                colorFn={r=>r.totalCost>(parseFloat(r.sellingPrice)||0)*0.7?C.red:C.yellow}
-              />
-            </Sub>
-            <Sub title={t.highCostLowPrice}>
-              <BarList
-                data={[...prodCalc].sort((a,b)=>b.totalCost-a.totalCost).filter(p=>p.margin<20)}
-                valFn={r=>r.totalCost}
-                colorFn={()=>C.red}
-              />
-            </Sub>
+      {/* KPI CARDS */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:20}}>
+        <Card label={t.totalProducts}  value={totalProds}               color={DARK.accent}/>
+        <Card label={t.totalPrep}      value={totalPreps}               color={DARK.blue}/>
+        <Card label={t.totalRaw}       value={totalRaws}                color="#a78bfa"/>
+        <Card label={t.avgMarginLbl}   value={avgMargin.toFixed(1)+"%"} color={avgMargin>30?DARK.green:avgMargin>15?DARK.yellow:DARK.red}/>
+        <Card label={t.avgCostLbl}     value={avgCost.toFixed(2)}       color="#f87171"/>
+        <Card label={t.productsOverBudget} value={overBudget.length} sub={withStd.length>0?`/ ${withStd.length} ${lang==="ar"?"لهم معياري":"with target"}`:""} color={overBudget.length>0?DARK.red:DARK.green}/>
+      </div>
+
+      {/* MARGIN DISTRIBUTION */}
+      <div className="card" style={{padding:18,marginBottom:16}}>
+        <SectionTitle>{t.marginDistribution}</SectionTitle>
+        {prodCalc.length===0?noDataMsg:(
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10}}>
+            {[
+              {label:t.highMargin, count:highMargin, color:DARK.green,   pct:totalProds?((highMargin/totalProds)*100).toFixed(0):0},
+              {label:t.midMargin,  count:midMargin,  color:DARK.yellow,  pct:totalProds?((midMargin/totalProds)*100).toFixed(0):0},
+              {label:t.lowMargin,  count:lowMargin,  color:DARK.red,     pct:totalProds?((lowMargin/totalProds)*100).toFixed(0):0},
+              {label:t.noSelling,  count:noPrice,    color:DARK.muted,   pct:totalProds?((noPrice/totalProds)*100).toFixed(0):0},
+            ].map((s,i)=>(
+              <div key={i} style={{background:DARK.surface,borderRadius:10,padding:"12px 14px",border:"1px solid "+DARK.border}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                  <span style={{fontSize:11,color:DARK.muted,fontWeight:600}}>{s.label}</span>
+                  <span style={{fontSize:11,color:s.color,fontWeight:700}}>{s.pct}%</span>
+                </div>
+                <div style={{fontSize:22,fontWeight:800,color:s.color}}>{s.count}</div>
+                <div style={{background:DARK.border,borderRadius:3,height:4,marginTop:8}}>
+                  <div style={{width:s.pct+"%",height:4,borderRadius:3,background:s.color}}/>
+                </div>
+              </div>
+            ))}
           </div>
         )}
-      </Section>
-
-      {/* PREP */}
-      <Section title={t.secPrep}>
-        {prepCalc.length===0 ? noDataMsg : (
-          <Grid2>
-            <Sub title={t.prepHighCost}>
-              <BarList
-                data={[...prepUsage].sort((a,b)=>b.costPerUnit-a.costPerUnit)}
-                valFn={r=>r.costPerUnit}
-                colorFn={()=>C.yellow}
-              />
-            </Sub>
-            <Sub title={t.prepMostUsed}>
-              <RankTable
-                data={[...prepUsage].sort((a,b)=>b.usedIn-a.usedIn)}
-                colA={t.usedIn}
-                colB={t.costPerUnit}
-                colorA={C.blue}
-                colorB={C.yellow}
-                fmtA={r=>`${r.usedIn} ${t.productsCount}`}
-                fmtB={r=>r.costPerUnit.toFixed(3)}
-              />
-            </Sub>
-          </Grid2>
-        )}
-      </Section>
-
-      {/* RAW */}
-      <Section title={t.secRaw}>
-        {rawList.length===0 ? noDataMsg : (
-          <Grid2>
-            <Sub title={t.rawHighPrice}>
-              <BarList
-                data={[...rawUsage].sort((a,b)=>b.price-a.price)}
-                valFn={r=>r.price}
-                colorFn={()=>C.yellow}
-              />
-            </Sub>
-            <Sub title={t.rawMostUsed}>
-              <RankTable
-                data={[...rawUsage].sort((a,b)=>b.usedIn-a.usedIn)}
-                colA={t.usedIn}
-                colB={t.price}
-                colorA={C.blue}
-                colorB={C.yellow}
-                fmtA={r=>`${r.usedIn} ${t.productsCount}`}
-                fmtB={r=>r.price.toFixed(2)}
-              />
-            </Sub>
-          </Grid2>
-        )}
-      </Section>
-    </div>
-  );
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-// INGREDIENT ROW — self-contained with per-row search
-// ═══════════════════════════════════════════════════════════════
-function IngRow({ing, rawList, prepList, lang, t, onUpdate, onRemove}) {
-  const [q,setQ] = useState("");
-  const [open,setOpen] = useState(false);
-  const srcList = ing.source==="prep" ? (prepList||[]) : (rawList||[]);
-  const filtered = srcList.filter(r=>
-    r.name.toLowerCase().includes(q.toLowerCase()) ||
-    r.code?.toLowerCase().includes(q.toLowerCase())
-  );
-  const selected = srcList.find(r=>String(r.id)===String(ing.rawId||ing.srcId));
-  return (
-    <div style={{display:"grid",gap:7,gridTemplateColumns:"1fr 2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
-      <div>
-        <label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.source}</label>
-        <select value={ing.source||"raw"} onChange={e=>{ onUpdate("source",e.target.value); onUpdate("rawId",""); }}
-          style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}>
-          <option value="raw">{lang==="ar"?"مادة خام":"Raw"}</option>
-          <option value="prep">{lang==="ar"?"بريب":"Prep"}</option>
-        </select>
       </div>
-      <div style={{position:"relative"}}>
-        <label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.ingredient}</label>
-        <div
-          onClick={()=>setOpen(o=>!o)}
-          style={{background:DARK.surface,border:"1px solid "+(open?DARK.accent:DARK.border),borderRadius:7,padding:"8px 12px",cursor:"pointer",
-            fontSize:13,color:selected?DARK.text:DARK.muted,display:"flex",justifyContent:"space-between",alignItems:"center",transition:"border .16s"}}
-        >
-          <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-            {selected ? selected.name+" ("+selected.code+")" : "—"}
-          </span>
-          <span style={{color:DARK.muted,fontSize:10,marginRight:4}}>▼</span>
+
+      {/* VARIANCE REPORT */}
+      {withStd.length>0&&(
+        <div className="card" style={{padding:18,marginBottom:16}}>
+          <SectionTitle>{t.varianceReport}</SectionTitle>
+          <div style={{overflowX:"auto"}}>
+            <table style={{width:"100%",borderCollapse:"collapse"}}>
+              <thead><tr>
+                {[t.productName,t.totalCost,t.stdCost,t.variance,t.variancePct,t.topCostDriver].map((h,i)=>(
+                  <th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:DARK.muted,textTransform:"uppercase",letterSpacing:".06em",background:DARK.surface,whiteSpace:"nowrap"}}>{h}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {[...withStd].sort((a,b)=>(b.totalCost-b.stdCost)-(a.totalCost-a.stdCost)).slice(0,topN).map((p,i)=>{
+                  const v=p.totalCost-p.stdCost;
+                  const vp=((p.totalCost-p.stdCost)/p.stdCost)*100;
+                  // find top cost driver
+                  let topDriver="—"; let topCost=0;
+                  p.ingredients?.forEach(ing=>{
+                    let cost=0,name="";
+                    if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}
+                    else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}
+                    if(cost>topCost){topCost=cost;topDriver=name;}
+                  });
+                  return(
+                    <tr key={p.id} style={{borderBottom:"1px solid "+DARK.border+"22",background:v>0?DARK.red+"08":"transparent"}}>
+                      <td style={{padding:"10px 12px",fontWeight:600}}>{p.name}</td>
+                      <td style={{padding:"10px 12px",color:"#f87171",fontWeight:600}}>{p.totalCost.toFixed(2)}</td>
+                      <td style={{padding:"10px 12px",color:DARK.muted}}>{p.stdCost.toFixed(2)}</td>
+                      <td style={{padding:"10px 12px"}}><span style={{color:v>0?"#f87171":"#4ade80",fontWeight:700}}>{v>0?"+":""}{v.toFixed(2)}</span></td>
+                      <td style={{padding:"10px 12px"}}><span style={{background:v>0?"#f8717122":"#4ade8022",color:v>0?"#f87171":"#4ade80",padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700}}>{vp>0?"+":""}{vp.toFixed(1)}%</span></td>
+                      <td style={{padding:"10px 12px",color:DARK.yellow,fontSize:12,fontWeight:600}}>{topDriver}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-        {open && (
-          <div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:100,background:DARK.card,
-            border:"1px solid "+DARK.border,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.5)",marginTop:3}}>
-            <div style={{padding:7}}>
-              <input autoFocus placeholder={lang==="ar"?"بحث...":"Search..."} value={q} onChange={e=>setQ(e.target.value)}
-                onClick={e=>e.stopPropagation()}
-                style={{width:"100%",background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:6,padding:"7px 10px",fontSize:12,outline:"none"}}/>
-            </div>
-            <div style={{maxHeight:180,overflowY:"auto"}}>
-              <div onClick={()=>{onUpdate("rawId","");setOpen(false);setQ("");}}
-                style={{padding:"8px 12px",cursor:"pointer",fontSize:13,color:DARK.muted}}>—</div>
-              {filtered.map(r=>(
-                <div key={r.id} onClick={()=>{onUpdate("rawId",r.id);setOpen(false);setQ("");}}
-                  style={{padding:"8px 12px",cursor:"pointer",fontSize:13,
-                    color:String(r.id)===String(ing.rawId)?DARK.accent:DARK.text,
-                    background:String(r.id)===String(ing.rawId)?DARK.accent+"15":"transparent"}}
-                  onMouseOver={e=>e.currentTarget.style.background=DARK.surface}
-                  onMouseOut={e=>e.currentTarget.style.background=String(r.id)===String(ing.rawId)?DARK.accent+"15":"transparent"}
-                >
-                  {r.name} <span style={{color:DARK.muted,fontSize:11}}>({r.code})</span>
+      )}
+
+      {/* PRODUCTS ANALYSIS */}
+      <div className="card" style={{padding:18,marginBottom:16}}>
+        <SectionTitle>{t.secProducts}</SectionTitle>
+        {prodCalc.length===0?noDataMsg:(
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:16}}>
+            {[
+              {title:lang==="ar"?"أعلى هامش ربح":"Highest Margin", data:[...prodCalc].filter(p=>p.sellingPrice>0).sort((a,b)=>b.margin-a.margin), valFn:p=>p.margin, fmt:v=>v.toFixed(1)+"%", color:p=>p.margin>30?DARK.green:p.margin>15?DARK.yellow:DARK.red},
+              {title:lang==="ar"?"أعلى تكلفة":"Highest Cost",    data:[...prodCalc].sort((a,b)=>b.totalCost-a.totalCost),           valFn:p=>p.totalCost, fmt:v=>v.toFixed(2), color:()=>"#f87171"},
+              {title:lang==="ar"?"أقل تكلفة":"Lowest Cost",      data:[...prodCalc].filter(p=>p.totalCost>0).sort((a,b)=>a.totalCost-b.totalCost), valFn:p=>p.totalCost, fmt:v=>v.toFixed(2), color:()=>DARK.green},
+            ].map((sec,si)=>(
+              <div key={si}>
+                <div style={{fontSize:11,color:DARK.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{sec.title}</div>
+                {sec.data.slice(0,topN).map((p,i)=>{
+                  const val=sec.valFn(p);
+                  const max=sec.valFn(sec.data[0])||1;
+                  const col=sec.color(p);
+                  return(
+                    <div key={p.id} style={{marginBottom:8}}>
+                      <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                        <span style={{fontSize:12,color:DARK.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
+                        <span style={{fontSize:12,color:col,fontWeight:700,marginRight:6,minWidth:60,textAlign:"left"}}>{sec.fmt(val)}</span>
+                      </div>
+                      <Bar val={val} max={max} color={col}/>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* TOP COST DRIVERS */}
+      <div className="card" style={{padding:18,marginBottom:16}}>
+        <SectionTitle>{t.topCostDriversReport}</SectionTitle>
+        {drivers.length===0?noDataMsg:(
+          <div>
+            {drivers.map(([name,cost],i)=>(
+              <div key={i} style={{marginBottom:9}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                  <span style={{fontSize:12,fontWeight:600,color:DARK.text}}>{i+1}. {name}</span>
+                  <span style={{fontSize:12,color:DARK.yellow,fontWeight:700}}>{cost.toFixed(2)}</span>
+                </div>
+                <Bar val={cost} max={maxDriver} color={DARK.yellow}/>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* PREP ANALYSIS */}
+      <div className="card" style={{padding:18,marginBottom:16}}>
+        <SectionTitle>{t.secPrep}</SectionTitle>
+        {prepCalc.length===0?noDataMsg:(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+            <div>
+              <div style={{fontSize:11,color:DARK.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{t.prepHighCost}</div>
+              {[...prepCalc].sort((a,b)=>b.costPerUnit-a.costPerUnit).slice(0,topN).map((p,i)=>(
+                <div key={p.id} style={{marginBottom:8}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                    <span style={{fontSize:12,color:DARK.text,fontWeight:600}}>{i+1}. {p.name}</span>
+                    <span style={{fontSize:12,color:DARK.accent,fontWeight:700}}>{p.costPerUnit.toFixed(3)}</span>
+                  </div>
+                  <Bar val={p.costPerUnit} max={prepCalc[0]?.costPerUnit||1} color={DARK.accent}/>
                 </div>
               ))}
-              {filtered.length===0&&<div style={{padding:"8px 12px",color:DARK.muted,fontSize:12}}>{t.noData}</div>}
             </div>
-          </div>
-        )}
-      </div>
-      <div><label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.qty} g/ml</label><input type="number" min="0" step="0.1" value={ing.qty} onChange={e=>onUpdate("qty",e.target.value)} placeholder="0" style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}/></div>
-      <div><label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.waste}</label><input type="number" min="0" max="100" step="0.1" value={ing.waste} onChange={e=>onUpdate("waste",e.target.value)} placeholder="0" style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}/></div>
-      <button className="btn-sm-d" style={{marginTop:22,alignSelf:"end"}} onClick={onRemove}>x</button>
-    </div>
-  );
-}
-
-function IngRowProd({ing, rawList, prepList, lang, t, onUpdate, onRemove}) {
-  const [q,setQ] = useState("");
-  const [open,setOpen] = useState(false);
-  const srcList = ing.source==="raw" ? rawList : prepList;
-  const filtered = srcList.filter(r=>
-    r.name.toLowerCase().includes(q.toLowerCase()) ||
-    r.code?.toLowerCase().includes(q.toLowerCase())
-  );
-  const selected = srcList.find(r=>String(r.id)===String(ing.srcId));
-  return (
-    <div style={{display:"grid",gap:7,gridTemplateColumns:"1fr 2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:DARK.surface,padding:9,borderRadius:8,border:"1px solid "+DARK.border}}>
-      <div>
-        <label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.source}</label>
-        <select value={ing.source} onChange={e=>onUpdate("source",e.target.value)} style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}>
-          <option value="raw">{t.rawMat}</option>
-          <option value="prep">{t.prepItem}</option>
-        </select>
-      </div>
-      <div style={{position:"relative"}}>
-        <label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.ingredient}</label>
-        <div
-          onClick={()=>setOpen(o=>!o)}
-          style={{background:DARK.surface,border:"1px solid "+(open?DARK.accent:DARK.border),borderRadius:7,padding:"8px 12px",cursor:"pointer",
-            fontSize:13,color:selected?DARK.text:DARK.muted,display:"flex",justifyContent:"space-between",alignItems:"center",transition:"border .16s"}}
-        >
-          <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-            {selected ? selected.name+" ("+selected.code+")" : "—"}
-          </span>
-          <span style={{color:DARK.muted,fontSize:10,marginRight:4}}>▼</span>
-        </div>
-        {open && (
-          <div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:100,background:DARK.card,
-            border:"1px solid "+DARK.border,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.5)",marginTop:3}}>
-            <div style={{padding:7}}>
-              <input
-                autoFocus
-                placeholder={lang==="ar"?"بحث...":"Search..."}
-                value={q} onChange={e=>setQ(e.target.value)}
-                onClick={e=>e.stopPropagation()}
-                style={{width:"100%",background:DARK.surface,border:"1px solid "+DARK.border,
-                  color:DARK.text,borderRadius:6,padding:"7px 10px",fontSize:12,outline:"none"}}
-              />
-            </div>
-            <div style={{maxHeight:180,overflowY:"auto"}}>
-              <div onClick={()=>{onUpdate("srcId","");setOpen(false);setQ("");}}
-                style={{padding:"8px 12px",cursor:"pointer",fontSize:13,color:DARK.muted}}>—</div>
-              {filtered.map(r=>(
-                <div key={r.id}
-                  onClick={()=>{onUpdate("srcId",r.id);setOpen(false);setQ("");}}
-                  style={{padding:"8px 12px",cursor:"pointer",fontSize:13,
-                    color:String(r.id)===String(ing.srcId)?DARK.accent:DARK.text,
-                    background:String(r.id)===String(ing.srcId)?DARK.accent+"15":"transparent"}}
-                  onMouseOver={e=>e.currentTarget.style.background=DARK.surface}
-                  onMouseOut={e=>e.currentTarget.style.background=String(r.id)===String(ing.srcId)?DARK.accent+"15":"transparent"}
-                >
-                  {r.name} <span style={{color:DARK.muted,fontSize:11}}>({r.code})</span>
+            <div>
+              <div style={{fontSize:11,color:DARK.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{t.prepMostUsed}</div>
+              {[...prepUsage].sort((a,b)=>b.usedIn-a.usedIn).slice(0,topN).map((p,i)=>(
+                <div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:DARK.surface,borderRadius:8,marginBottom:6,border:"1px solid "+DARK.border}}>
+                  <span style={{fontSize:12,fontWeight:600,color:DARK.text}}>{i+1}. {p.name}</span>
+                  <span style={{background:DARK.blue+"22",color:DARK.blue,padding:"2px 10px",borderRadius:20,fontSize:12,fontWeight:700}}>{p.usedIn} {t.productsCount}</span>
                 </div>
               ))}
-              {filtered.length===0&&<div style={{padding:"8px 12px",color:DARK.muted,fontSize:12}}>{t.noData}</div>}
             </div>
           </div>
         )}
       </div>
-      <div><label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.qty} g/ml</label><input type="number" min="0" step="0.1" value={ing.qty} onChange={e=>onUpdate("qty",e.target.value)} placeholder="0" style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}/></div>
-      <div><label style={{fontSize:11,color:DARK.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase",letterSpacing:".04em"}}>{t.waste}</label><input type="number" min="0" max="100" step="0.1" value={ing.waste} onChange={e=>onUpdate("waste",e.target.value)} placeholder="0" style={{background:DARK.surface,border:"1px solid "+DARK.border,color:DARK.text,borderRadius:7,padding:"8px 12px",fontSize:13,width:"100%",outline:"none"}}/></div>
-      <button className="btn-sm-d" style={{marginTop:22,alignSelf:"end"}} onClick={onRemove}>x</button>
+
+      {/* RAW MATERIALS ANALYSIS */}
+      <div className="card" style={{padding:18,marginBottom:16}}>
+        <SectionTitle>{t.secRaw}</SectionTitle>
+        {rawList.length===0?noDataMsg:(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+            <div>
+              <div style={{fontSize:11,color:DARK.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{t.rawHighPrice}</div>
+              {[...rawUsage].sort((a,b)=>b.price-a.price).slice(0,topN).map((r,i)=>(
+                <div key={r.id} style={{marginBottom:8}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                    <span style={{fontSize:12,color:DARK.text,fontWeight:600}}>{i+1}. {r.name}</span>
+                    <span style={{fontSize:12,color:DARK.accent,fontWeight:700}}>{r.price.toFixed(2)}</span>
+                  </div>
+                  <Bar val={r.price} max={rawUsage[0]?.price||1} color={DARK.accent}/>
+                </div>
+              ))}
+            </div>
+            <div>
+              <div style={{fontSize:11,color:DARK.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{t.rawMostUsed}</div>
+              {[...rawUsage].sort((a,b)=>(b.inPrep+b.inProd)-(a.inPrep+a.inProd)).slice(0,topN).map((r,i)=>(
+                <div key={r.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:DARK.surface,borderRadius:8,marginBottom:6,border:"1px solid "+DARK.border}}>
+                  <span style={{fontSize:12,fontWeight:600,color:DARK.text}}>{i+1}. {r.name}</span>
+                  <div style={{display:"flex",gap:6}}>
+                    <span style={{background:"#1e3a5f",color:"#60a5fa",padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700}}>P:{r.inPrep}</span>
+                    <span style={{background:"#0a3326",color:"#4ade80",padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700}}>M:{r.inProd}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -865,7 +883,7 @@ function IngRowProd({ing, rawList, prepList, lang, t, onUpdate, onRemove}) {
 // ═══════════════════════════════════════════════════════════════
 // RAW MATERIALS
 // ═══════════════════════════════════════════════════════════════
-function RawTab({t,lang,rawList,setRawList,classes,showToast,hasPerm,mod}) {
+function RawTab({t,lang,rawList,setRawList,classes,prepList=[],prodList=[],showToast,hasPerm,mod}) {
   const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:"",unit:"kg",price:"",class:""}); const [errs,setErrs]=useState({});
@@ -906,12 +924,44 @@ function RawTab({t,lang,rawList,setRawList,classes,showToast,hasPerm,mod}) {
                 <td><span className="badge badge-cls">{m.class||"—"}</span></td>
                 <td><span className={`badge badge-${m.unit}`}>{unitLbl(m.unit,t)}</span></td>
                 <td style={{color:C.accent,fontWeight:700}}>{m.price.toFixed(2)}</td>
+                <td>{(()=>{const n=prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id))).length;return n>0?<button onClick={()=>setUsageModal({item:m,type:"prep",list:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id)))})} style={{background:"#0f2a4a",color:"#60a5fa",border:"1px solid #1e3a6033",borderRadius:6,padding:"3px 10px",cursor:"pointer",fontWeight:700,fontSize:13}}>{n}</button>:<span style={{color:DARK.muted}}>0</span>;})()}</td>
+                <td>{(()=>{const n=prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id))).length;return n>0?<button onClick={()=>setUsageModal({item:m,type:"product",list:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id)))})} style={{background:"#0a2a1a",color:"#4ade80",border:"1px solid #16a34a33",borderRadius:6,padding:"3px 10px",cursor:"pointer",fontWeight:700,fontSize:13}}>{n}</button>:<span style={{color:DARK.muted}}>0</span>;})()}</td>
                 {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<td><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}</div></td>}
               </tr>
             ))}
           </tbody>
         </table>
       </div></div>
+
+      {/* USAGE MODAL */}
+      {usageModal&&(
+        <div className="overlay" onClick={e=>e.target===e.currentTarget&&setUsageModal(null)}>
+          <div className="modal" style={{maxWidth:500}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <div>
+                <div style={{fontWeight:800,fontSize:15,color:DARK.accent}}>{usageModal.item.name}</div>
+                <div style={{fontSize:12,color:DARK.muted,marginTop:2}}>{usageModal.type==="prep"?t.relatedPreps:t.relatedProducts} ({usageModal.list.length})</div>
+              </div>
+              <button onClick={()=>setUsageModal(null)} style={{background:"transparent",border:"none",color:DARK.muted,fontSize:20,cursor:"pointer"}}>✕</button>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {usageModal.list.map((item,i)=>(
+                <div key={item.id} style={{background:DARK.surface,borderRadius:9,padding:"10px 14px",border:"1px solid "+DARK.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div>
+                    <code style={{background:DARK.bg,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8",marginLeft:8}}>{item.code}</code>
+                    <span style={{fontWeight:600,fontSize:13}}>{item.name}</span>
+                  </div>
+                  <span className="badge badge-cls">{item.class||"—"}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}>
+              <button className="btn btn-secondary" onClick={()=>setUsageModal(null)}>{t.cancel}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.rawMat}</h2>
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
@@ -932,13 +982,14 @@ function RawTab({t,lang,rawList,setRawList,classes,showToast,hasPerm,mod}) {
 // ═══════════════════════════════════════════════════════════════
 // PREP ITEMS
 // ═══════════════════════════════════════════════════════════════
-function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showToast,hasPerm,mod}) {
+function PrepTab({t,lang,prepList,setPrepList,rawList,prodList=[],classes,calcPrepCost,showToast,hasPerm,mod}) {
   const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); const [errs,setErrs]=useState({});
   const [delId,setDelId]=useState(null); const fileRef=useRef();
   const [ingSearch,setIngSearch]=useState("");
   const [viewItem,setViewItem]=useState(null);
+  const [usageModal,setUsageModal]=useState(null);
   const cls=classes.prep||[];
   const blank=()=>({id:Date.now()+Math.random(),source:"raw",rawId:"",qty:"",waste:"0"});
   const reset=()=>{ setForm({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
@@ -1202,6 +1253,33 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
         );
       })()}
 
+      {usageModal&&(
+        <div className="overlay" onClick={e=>e.target===e.currentTarget&&setUsageModal(null)}>
+          <div className="modal" style={{maxWidth:500}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <div>
+                <div style={{fontWeight:800,fontSize:15,color:DARK.accent}}>{usageModal.item.name}</div>
+                <div style={{fontSize:12,color:DARK.muted,marginTop:2}}>{t.relatedProducts} ({usageModal.list.length})</div>
+              </div>
+              <button onClick={()=>setUsageModal(null)} style={{background:"transparent",border:"none",color:DARK.muted,fontSize:20,cursor:"pointer"}}>✕</button>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {usageModal.list.map((item,i)=>(
+                <div key={item.id} style={{background:DARK.surface,borderRadius:9,padding:"10px 14px",border:"1px solid "+DARK.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div>
+                    <code style={{background:DARK.bg,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8",marginLeft:8}}>{item.code}</code>
+                    <span style={{fontWeight:600,fontSize:13}}>{item.name}</span>
+                  </div>
+                  <span className="badge badge-cls">{item.class||"—"}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}>
+              <button className="btn btn-secondary" onClick={()=>setUsageModal(null)}>{t.cancel}</button>
+            </div>
+          </div>
+        </div>
+      )}
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.prepItem}</h2>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:12}}>
@@ -1238,15 +1316,15 @@ function PrepTab({t,lang,prepList,setPrepList,rawList,classes,calcPrepCost,showT
 function ProductsTab({t,lang,prodList,setProdList,rawList,prepList,classes,calcPrepCost,calcProductCost,showToast,hasPerm,mod}) {
   const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
-  const [form,setForm]=useState({name:"",class:"",sellingPrice:"",ingredients:[]}); const [errs,setErrs]=useState({});
+  const [form,setForm]=useState({name:"",class:"",sellingPrice:"",stdCost:"",ingredients:[]}); const [errs,setErrs]=useState({});
   const [delId,setDelId]=useState(null); const fileRef=useRef();
   const [ingSearch,setIngSearch]=useState("");
   const cls=[...(classes.raw||[]),...(classes.prep||[])];
   const blank=()=>({id:Date.now()+Math.random(),source:"raw",srcId:"",qty:"",waste:"0"});
-  const reset=()=>{ setForm({name:"",class:"",sellingPrice:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
+  const reset=()=>{ setForm({name:"",class:"",sellingPrice:"",stdCost:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
   const ok=()=>{ const e={}; if(!form.name.trim())e.name=t.required; setErrs(e); return !Object.keys(e).length; };
   const save=()=>{ if(!ok()) return; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); const ings=form.ingredients.filter(i=>i.srcId&&parseFloat(i.qty)>0); if(editId!==null) setProdList(p=>p.map(m=>m.id===editId?{...m,name:form.name.trim(),class:form.class,sellingPrice:parseFloat(form.sellingPrice)||0,ingredients:ings,lastUpdated:now}:m)); else { const code=genCode("Prod",prodList); setProdList(p=>[...p,{id:Date.now(),code,name:form.name.trim(),class:form.class,sellingPrice:parseFloat(form.sellingPrice)||0,ingredients:ings,lastUpdated:now}]); } reset(); showToast(t.savedOk); };
-  const doEdit=m=>{ setForm({name:m.name,class:m.class||"",sellingPrice:String(m.sellingPrice||""),ingredients:m.ingredients||[]}); setEditId(m.id); setShowForm(true); };
+  const doEdit=m=>{ setForm({name:m.name,class:m.class||"",sellingPrice:String(m.sellingPrice||""),stdCost:String(m.stdCost||""),ingredients:m.ingredients||[]}); setEditId(m.id); setShowForm(true); };
   const doDelete=id=>{ setProdList(p=>p.filter(m=>m.id!==id)); setDelId(null); showToast(t.deletedOk,"error"); };
   const addI=()=>setForm(f=>({...f,ingredients:[...f.ingredients,blank()]}));
   const remI=id=>setForm(f=>({...f,ingredients:f.ingredients.filter(i=>i.id!==id)}));
@@ -1341,7 +1419,7 @@ function ClassesTab({t,lang,classes,setClasses,showToast,hasPerm,mod}) {
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:7}}>
             {(classes[sec.key]||[]).map((cls,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,padding:"9px 12px",borderRadius:8,border:`1px solid ${DARK.border}`}}>
+              <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:C.surface,padding:"9px 12px",borderRadius:8,border:`1px solid ${darkMode?DARK.border:LIGHT.border}`}}>
                 {et===sec.key&&ei===i
                   ?<div style={{display:"flex",gap:7,flex:1}}><input value={val} onChange={e=>setVal(e.target.value)} style={{flex:1}}/><button className="btn btn-primary" style={{padding:"4px 11px",fontSize:12}} onClick={save}>{t.save}</button><button className="btn btn-secondary" style={{padding:"4px 9px",fontSize:12}} onClick={cancel}>x</button></div>
                   :<><span className="badge badge-cls" style={{fontSize:12}}>{cls}</span><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>startEdit(sec.key,i)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>del(sec.key,i)}>{t.delete}</button>}</div></>
