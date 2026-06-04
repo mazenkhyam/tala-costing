@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, createContext, useContext } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import * as XLSX from "xlsx";
 
 // ═══════════════════════════════════════════════════════════════
@@ -150,7 +150,6 @@ const LIGHT = {
   green:"#16a34a", red:"#dc2626", yellow:"#d97706", blue:"#2563eb",
 };
 const C = DARK;
-const getC = (dm) => DARK;
 
 // ═══════════════════════════════════════════════════════════════
 // APP ROOT
@@ -879,7 +878,7 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
   const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:"",unit:"kg",price:"",class:""}); const [errs,setErrs]=useState({});
-  const [delId,setDelId]=useState(null); const fileRef=useRef();
+  const [delId,setDelId]=useState(null); const [usageModal,setUsageModal]=useState(null); const fileRef=useRef();
   const cls=classes.raw||[];
   const ok=()=>{ const e={}; if(!form.name.trim())e.name=t.required; if(!form.price)e.price=t.required; else if(parseFloat(form.price)<=0)e.price=t.positiveNum; setErrs(e); return !Object.keys(e).length; };
   const reset=()=>{ setForm({name:"",unit:"kg",price:"",class:""}); setErrs({}); setShowForm(false); setEditId(null); };
