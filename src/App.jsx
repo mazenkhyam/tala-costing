@@ -164,6 +164,7 @@ export default function App() {
   const [tab,setTab]         = useState("dashboard");
   const [toast,setToast]     = useState(null);
   const [sideOpen,setSideOpen]= useState(true);
+  
 
   useEffect(()=>persist(SK.users,users),[users]);
   useEffect(()=>persist(SK.raw,rawList),[rawList]);
@@ -171,6 +172,7 @@ export default function App() {
   useEffect(()=>persist(SK.products,prodList),[prodList]);
   useEffect(()=>persist(SK.classes,classes),[classes]);
   useEffect(()=>persist(SK.session,session),[session]);
+  
 
   const showToast = useCallback((msg,type="success")=>{ setToast({msg,type}); setTimeout(()=>setToast(null),3000); },[]);
 
@@ -234,7 +236,6 @@ export default function App() {
     return currentUser.perms?.[mod]?.[action]===true;
   };
 
-  
   if(!currentUser) return <LoginScreen users={users} onLogin={u=>setSession({id:u.id})} lang={lang} />;
 
   const navItems = [
@@ -589,284 +590,238 @@ function NoPerm({t,C=DARK}) {
 // ═══════════════════════════════════════════════════════════════
 // DASHBOARD / ANALYTICS
 // ═══════════════════════════════════════════════════════════════
-function DashboardTab({t,lang,C,rawList,prepList,prodList,calcPrepCost,calcProductCost}) {
-  const [topN,setTopN] = useState(10);
+function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calcProductCost}) {
+  const [topN,setTopN]=useState(10);
+  const [section,setSection]=useState("all");
+  const [relModal,setRelModal]=useState(null);
 
-  const prodCalc = prodList.map(p=>({...p,...calcProductCost(p)}));
-  const prepCalc = prepList.map(p=>({...p,...calcPrepCost(p)}));
+  const prodCalc=prodList.map(p=>({...p,...calcProductCost(p)}));
+  const prepCalc=prepList.map(p=>({...p,...calcPrepCost(p)}));
 
-  // KPIs
-  const totalProds = prodList.length;
-  const totalPreps = prepList.length;
-  const totalRaws  = rawList.length;
-  const avgMargin  = prodCalc.filter(p=>p.sellingPrice>0).length
-    ? prodCalc.filter(p=>p.sellingPrice>0).reduce((a,p)=>a+p.margin,0)/prodCalc.filter(p=>p.sellingPrice>0).length : 0;
-  const avgCost    = prodCalc.length ? prodCalc.reduce((a,p)=>a+p.totalCost,0)/prodCalc.length : 0;
+  const withSP=prodCalc.filter(p=>parseFloat(p.sellingPrice)>0);
+  const avgMargin=withSP.length?withSP.reduce((a,p)=>a+p.margin,0)/withSP.length:0;
+  const avgCost=prodCalc.length?prodCalc.reduce((a,p)=>a+p.totalCost,0)/prodCalc.length:0;
+  const maxCost=prodCalc.length?Math.max(...prodCalc.map(p=>p.totalCost)):0;
+  const minCost=prodCalc.filter(p=>p.totalCost>0).length?Math.min(...prodCalc.filter(p=>p.totalCost>0).map(p=>p.totalCost)):0;
+  const withStd=prodCalc.filter(p=>parseFloat(p.stdCost)>0);
+  const overBudget=withStd.filter(p=>p.totalCost>parseFloat(p.stdCost));
+  const highM=prodCalc.filter(p=>p.margin>30&&parseFloat(p.sellingPrice)>0).length;
+  const midM=prodCalc.filter(p=>p.margin>=15&&p.margin<=30&&parseFloat(p.sellingPrice)>0).length;
+  const lowM=prodCalc.filter(p=>p.margin<15&&parseFloat(p.sellingPrice)>0&&p.margin>0).length;
+  const noPrice=prodCalc.filter(p=>!parseFloat(p.sellingPrice)).length;
 
-  // Variance analysis
-  const withStd    = prodCalc.filter(p=>p.stdCost>0);
-  const overBudget = withStd.filter(p=>p.totalCost>p.stdCost);
-  const underBudget= withStd.filter(p=>p.totalCost<=p.stdCost);
+  const driverMap={};
+  prodList.forEach(prod=>{prod.ingredients?.forEach(ing=>{
+    if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(!r)return;driverMap[r.name]=(driverMap[r.name]||0)+(parseFloat(ing.qty)||0)/1000*r.price;}
+    else{const p=prepList.find(p=>String(p.id)===String(ing.srcId));if(!p)return;const {costPerUnit}=calcPrepCost(p);driverMap[p.name]=(driverMap[p.name]||0)+(parseFloat(ing.qty)||0)/1000*costPerUnit;}
+  });});
+  const drivers=Object.entries(driverMap).sort((a,b)=>b[1]-a[1]).slice(0,topN);
+  const maxDrv=drivers[0]?.[1]||1;
 
-  // Margin distribution
-  const highMargin = prodCalc.filter(p=>p.margin>30&&p.sellingPrice>0).length;
-  const midMargin  = prodCalc.filter(p=>p.margin>=15&&p.margin<=30&&p.sellingPrice>0).length;
-  const lowMargin  = prodCalc.filter(p=>p.margin<15&&p.sellingPrice>0&&p.margin>0).length;
-  const noPrice    = prodCalc.filter(p=>!p.sellingPrice||p.sellingPrice===0).length;
-
-  // Top cost drivers across all products
-  const driverMap = {};
-  prodList.forEach(prod=>{
-    prod.ingredients?.forEach(ing=>{
-      if(ing.source==="raw"){
-        const raw=rawList.find(r=>String(r.id)===String(ing.srcId));
-        if(!raw) return;
-        const qty=parseFloat(ing.qty)||0;
-        const cost=(qty/1000)*raw.price;
-        driverMap[raw.name]=(driverMap[raw.name]||0)+cost;
-      } else {
-        const prep=prepList.find(p=>String(p.id)===String(ing.srcId));
-        if(!prep) return;
-        const {costPerUnit}=calcPrepCost(prep);
-        const qty=parseFloat(ing.qty)||0;
-        const cost=(qty/1000)*costPerUnit;
-        driverMap[prep.name]=(driverMap[prep.name]||0)+cost;
-      }
-    });
-  });
-  const drivers = Object.entries(driverMap).sort((a,b)=>b[1]-a[1]).slice(0,topN);
-  const maxDriver = drivers[0]?.[1]||1;
-
-  // Prep usage
-  const prepUsage = prepCalc.map(p=>({
-    ...p, usedIn:prodList.filter(pr=>pr.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(p.id))).length
+  const prepUsage=prepCalc.map(p=>({...p,
+    usedIn:prodList.filter(pr=>pr.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(p.id))).length,
+    relatedProds:prodList.filter(pr=>pr.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(p.id)))
   }));
-
-  // Raw usage
-  const rawUsage = rawList.map(r=>({
-    ...r,
+  const rawUsage=rawList.map(r=>({...r,
     inPrep:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(r.id))).length,
     inProd:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(r.id))).length,
+    relatedPreps:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(r.id))),
+    relatedProds:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(r.id))),
   }));
+  const atRisk=prodCalc.filter(p=>p.totalCost>0&&p.margin<20&&parseFloat(p.sellingPrice)>0).sort((a,b)=>a.margin-b.margin);
 
-  const Card = ({label,value,sub,color})=>(
-    <div className="card" style={{padding:"14px 18px"}}>
-      <div style={{fontSize:24,fontWeight:800,color:color||DARK.accent}}>{value}</div>
-      <div style={{fontSize:12,color:DARK.muted,marginTop:3}}>{label}</div>
-      {sub&&<div style={{fontSize:11,color:DARK.muted,marginTop:2}}>{sub}</div>}
-    </div>
-  );
-
-  const SectionTitle = ({children})=>(
-    <div style={{fontWeight:700,fontSize:14,color:DARK.text,marginBottom:12,paddingBottom:8,borderBottom:"1px solid "+DARK.border}}>{children}</div>
-  );
-
-  const Bar = ({val,max,color})=>(
-    <div style={{background:DARK.surface,borderRadius:3,height:6,flex:1}}>
-      <div style={{width:(val/max*100)+"%",height:6,borderRadius:3,background:color,transition:"width .4s ease"}}/>
-    </div>
-  );
-
-  const noDataMsg = <div style={{color:DARK.muted,fontSize:13,textAlign:"center",padding:"24px 0"}}>{t.noData}</div>;
+  const Bar=({val,max,color})=>(<div style={{background:C.surface,borderRadius:3,height:6,flex:1}}><div style={{width:Math.min((val/(max||1))*100,100)+"%",height:6,borderRadius:3,background:color,transition:"width .4s"}}/></div>);
+  const SecHd=({c,sub})=>(<div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{c}</div>{sub&&<div style={{fontSize:11,color:C.muted,marginTop:2}}>{sub}</div>}<div style={{height:2,background:C.border,marginTop:8}}/></div>);
+  const KCard=({label,value,color,sub})=>(<div className="card" style={{padding:"16px 18px"}}><div style={{fontSize:26,fontWeight:800,color:color||C.accent,lineHeight:1}}>{value}</div><div style={{fontSize:12,color:C.muted,marginTop:4}}>{label}</div>{sub&&<div style={{fontSize:10,color:C.muted,marginTop:2}}>{sub}</div>}</div>);
+  const noMsg=<div style={{color:C.muted,fontSize:13,textAlign:"center",padding:"24px 0"}}>{t.noData}</div>;
+  const secs=[{id:"all",label:lang==="ar"?"الكل":"All"},{id:"products",label:t.secProducts},{id:"prep",label:t.secPrep},{id:"raw",label:t.secRaw},{id:"variance",label:t.varianceReport}];
+  const show=s=>section==="all"||section===s;
 
   return (
     <div style={{maxWidth:1100,margin:"0 auto"}}>
-      {/* Top N selector */}
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:18,justifyContent:"flex-end"}}>
-        <span style={{fontSize:12,color:DARK.muted}}>{t.show}</span>
-        {[5,10,20].map(n=>(
-          <button key={n} className={`top-n-btn${topN===n?" active":""}`} onClick={()=>setTopN(n)}>{n}</button>
-        ))}
-      </div>
-
-      {/* KPI CARDS */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:20}}>
-        <Card label={t.totalProducts}  value={totalProds}               color={DARK.accent}/>
-        <Card label={t.totalPrep}      value={totalPreps}               color={DARK.blue}/>
-        <Card label={t.totalRaw}       value={totalRaws}                color="#a78bfa"/>
-        <Card label={t.avgMarginLbl}   value={avgMargin.toFixed(1)+"%"} color={avgMargin>30?DARK.green:avgMargin>15?DARK.yellow:DARK.red}/>
-        <Card label={t.avgCostLbl}     value={avgCost.toFixed(2)}       color="#f87171"/>
-        <Card label={t.productsOverBudget} value={overBudget.length} sub={withStd.length>0?`/ ${withStd.length} ${lang==="ar"?"لهم معياري":"with target"}`:""} color={overBudget.length>0?DARK.red:DARK.green}/>
-      </div>
-
-      {/* MARGIN DISTRIBUTION */}
-      <div className="card" style={{padding:18,marginBottom:16}}>
-        <SectionTitle>{t.marginDistribution}</SectionTitle>
-        {prodCalc.length===0?noDataMsg:(
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10}}>
-            {[
-              {label:t.highMargin, count:highMargin, color:DARK.green,   pct:totalProds?((highMargin/totalProds)*100).toFixed(0):0},
-              {label:t.midMargin,  count:midMargin,  color:DARK.yellow,  pct:totalProds?((midMargin/totalProds)*100).toFixed(0):0},
-              {label:t.lowMargin,  count:lowMargin,  color:DARK.red,     pct:totalProds?((lowMargin/totalProds)*100).toFixed(0):0},
-              {label:t.noSelling,  count:noPrice,    color:DARK.muted,   pct:totalProds?((noPrice/totalProds)*100).toFixed(0):0},
-            ].map((s,i)=>(
-              <div key={i} style={{background:DARK.surface,borderRadius:10,padding:"12px 14px",border:"1px solid "+DARK.border}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-                  <span style={{fontSize:11,color:DARK.muted,fontWeight:600}}>{s.label}</span>
-                  <span style={{fontSize:11,color:s.color,fontWeight:700}}>{s.pct}%</span>
-                </div>
-                <div style={{fontSize:22,fontWeight:800,color:s.color}}>{s.count}</div>
-                <div style={{background:DARK.border,borderRadius:3,height:4,marginTop:8}}>
-                  <div style={{width:s.pct+"%",height:4,borderRadius:3,background:s.color}}/>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* VARIANCE REPORT */}
-      {withStd.length>0&&(
-        <div className="card" style={{padding:18,marginBottom:16}}>
-          <SectionTitle>{t.varianceReport}</SectionTitle>
-          <div style={{overflowX:"auto"}}>
-            <table style={{width:"100%",borderCollapse:"collapse"}}>
-              <thead><tr>
-                {[t.productName,t.totalCost,t.stdCost,t.variance,t.variancePct,t.topCostDriver].map((h,i)=>(
-                  <th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:DARK.muted,textTransform:"uppercase",letterSpacing:".06em",background:DARK.surface,whiteSpace:"nowrap"}}>{h}</th>
-                ))}
-              </tr></thead>
-              <tbody>
-                {[...withStd].sort((a,b)=>(b.totalCost-b.stdCost)-(a.totalCost-a.stdCost)).slice(0,topN).map((p,i)=>{
-                  const v=p.totalCost-p.stdCost;
-                  const vp=((p.totalCost-p.stdCost)/p.stdCost)*100;
-                  // find top cost driver
-                  let topDriver="—"; let topCost=0;
-                  p.ingredients?.forEach(ing=>{
-                    let cost=0,name="";
-                    if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}
-                    else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}
-                    if(cost>topCost){topCost=cost;topDriver=name;}
-                  });
-                  return(
-                    <tr key={p.id} style={{borderBottom:"1px solid "+DARK.border+"22",background:v>0?DARK.red+"08":"transparent"}}>
-                      <td style={{padding:"10px 12px",fontWeight:600}}>{p.name}</td>
-                      <td style={{padding:"10px 12px",color:"#f87171",fontWeight:600}}>{p.totalCost.toFixed(2)}</td>
-                      <td style={{padding:"10px 12px",color:DARK.muted}}>{p.stdCost.toFixed(2)}</td>
-                      <td style={{padding:"10px 12px"}}><span style={{color:v>0?"#f87171":"#4ade80",fontWeight:700}}>{v>0?"+":""}{v.toFixed(2)}</span></td>
-                      <td style={{padding:"10px 12px"}}><span style={{background:v>0?"#f8717122":"#4ade8022",color:v>0?"#f87171":"#4ade80",padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700}}>{vp>0?"+":""}{vp.toFixed(1)}%</span></td>
-                      <td style={{padding:"10px 12px",color:DARK.yellow,fontSize:12,fontWeight:600}}>{topDriver}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:10}}>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {secs.map(s=><button key={s.id} className={`fbtn${section===s.id?" active":""}`} onClick={()=>setSection(s.id)}>{s.label}</button>)}
         </div>
-      )}
-
-      {/* PRODUCTS ANALYSIS */}
-      <div className="card" style={{padding:18,marginBottom:16}}>
-        <SectionTitle>{t.secProducts}</SectionTitle>
-        {prodCalc.length===0?noDataMsg:(
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:16}}>
-            {[
-              {title:lang==="ar"?"أعلى هامش ربح":"Highest Margin", data:[...prodCalc].filter(p=>p.sellingPrice>0).sort((a,b)=>b.margin-a.margin), valFn:p=>p.margin, fmt:v=>v.toFixed(1)+"%", color:p=>p.margin>30?DARK.green:p.margin>15?DARK.yellow:DARK.red},
-              {title:lang==="ar"?"أعلى تكلفة":"Highest Cost",    data:[...prodCalc].sort((a,b)=>b.totalCost-a.totalCost),           valFn:p=>p.totalCost, fmt:v=>v.toFixed(2), color:()=>"#f87171"},
-              {title:lang==="ar"?"أقل تكلفة":"Lowest Cost",      data:[...prodCalc].filter(p=>p.totalCost>0).sort((a,b)=>a.totalCost-b.totalCost), valFn:p=>p.totalCost, fmt:v=>v.toFixed(2), color:()=>DARK.green},
-            ].map((sec,si)=>(
-              <div key={si}>
-                <div style={{fontSize:11,color:DARK.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{sec.title}</div>
-                {sec.data.slice(0,topN).map((p,i)=>{
-                  const val=sec.valFn(p);
-                  const max=sec.valFn(sec.data[0])||1;
-                  const col=sec.color(p);
-                  return(
-                    <div key={p.id} style={{marginBottom:8}}>
-                      <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                        <span style={{fontSize:12,color:DARK.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
-                        <span style={{fontSize:12,color:col,fontWeight:700,marginRight:6,minWidth:60,textAlign:"left"}}>{sec.fmt(val)}</span>
-                      </div>
-                      <Bar val={val} max={max} color={col}/>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        )}
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:12,color:C.muted}}>{t.show}</span>
+          {[5,10,20].map(n=><button key={n} className={`topn${topN===n?" active":""}`} onClick={()=>setTopN(n)}>{n}</button>)}
+        </div>
       </div>
 
-      {/* TOP COST DRIVERS */}
-      <div className="card" style={{padding:18,marginBottom:16}}>
-        <SectionTitle>{t.topCostDriversReport}</SectionTitle>
-        {drivers.length===0?noDataMsg:(
-          <div>
-            {drivers.map(([name,cost],i)=>(
-              <div key={i} style={{marginBottom:9}}>
+      {show("products")&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12,marginBottom:20}}>
+        <KCard label={lang==="ar"?"إجمالي المنتجات":"Total Products"} value={prodList.length} color={C.accent}/>
+        <KCard label={lang==="ar"?"إجمالي Prep":"Total Prep"} value={prepList.length} color={C.blue}/>
+        <KCard label={lang==="ar"?"إجمالي الخام":"Total Raw"} value={rawList.length} color="#a78bfa"/>
+        <KCard label={t.avgMarginLbl} value={avgMargin.toFixed(1)+"%"} color={avgMargin>30?C.green:avgMargin>15?C.yellow:C.red} sub={lang==="ar"?`أعلى تكلفة: ${maxCost.toFixed(2)} | أقل: ${minCost.toFixed(2)}`:`Max: ${maxCost.toFixed(2)} | Min: ${minCost.toFixed(2)}`}/>
+        <KCard label={t.avgCostLbl} value={avgCost.toFixed(2)} color="#f87171"/>
+        <KCard label={t.productsOverBudget} value={overBudget.length} sub={withStd.length>0?`/ ${withStd.length} ${lang==="ar"?"لهم معياري":"with target"}`:""} color={overBudget.length>0?C.red:C.green}/>
+      </div>}
+
+      {show("products")&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <SecHd c={t.marginDistribution} sub={lang==="ar"?"توزيع المنتجات حسب هامش الربح":"Products distributed by profit margin"}/>
+        {prodCalc.length===0?noMsg:<>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,marginBottom:14}}>
+            {[{l:t.highMargin,n:highM,col:C.green},{l:t.midMargin,n:midM,col:C.yellow},{l:t.lowMargin,n:lowM,col:C.red},{l:t.noSelling,n:noPrice,col:C.muted}].map((s,i)=>{
+              const pct=prodList.length?((s.n/prodList.length)*100).toFixed(0):0;
+              return <div key={i} style={{background:C.surface,borderRadius:10,padding:"12px 14px",border:`1px solid ${C.border}`}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span style={{fontSize:11,color:C.muted,fontWeight:600}}>{s.l}</span><span style={{fontSize:11,color:s.col,fontWeight:700}}>{pct}%</span></div>
+                <div style={{fontSize:22,fontWeight:800,color:s.col}}>{s.n}</div>
+                <div style={{background:C.border,borderRadius:3,height:4,marginTop:8}}><div style={{width:pct+"%",height:4,borderRadius:3,background:s.col}}/></div>
+              </div>;
+            })}
+          </div>
+          <div style={{display:"flex",height:8,borderRadius:4,overflow:"hidden",gap:1}}>
+            {[[highM,C.green],[midM,C.yellow],[lowM,C.red],[noPrice,C.muted]].map(([n,col],i)=><div key={i} style={{flex:n||0,background:col,minWidth:n>0?2:0}}/>)}
+          </div>
+        </>}
+      </div>}
+
+      {show("products")&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <SecHd c={t.secProducts}/>
+        {prodCalc.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16}}>
+          {[
+            {title:lang==="ar"?"أعلى هامش ربح":"Highest Margin",data:[...prodCalc].filter(p=>parseFloat(p.sellingPrice)>0).sort((a,b)=>b.margin-a.margin),fn:p=>p.margin,fmt:v=>v.toFixed(1)+"%",col:p=>p.margin>30?C.green:p.margin>15?C.yellow:C.red},
+            {title:lang==="ar"?"أعلى تكلفة":"Highest Cost",data:[...prodCalc].sort((a,b)=>b.totalCost-a.totalCost),fn:p=>p.totalCost,fmt:v=>v.toFixed(2),col:()=>"#f87171"},
+            {title:lang==="ar"?"أقل تكلفة":"Lowest Cost",data:[...prodCalc].filter(p=>p.totalCost>0).sort((a,b)=>a.totalCost-b.totalCost),fn:p=>p.totalCost,fmt:v=>v.toFixed(2),col:()=>C.green},
+          ].map((sec,si)=><div key={si}>
+            <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{sec.title}</div>
+            {sec.data.slice(0,topN).map((p,i)=>{const val=sec.fn(p),max=sec.fn(sec.data[0])||1,col=sec.col(p);return(
+              <div key={p.id} style={{marginBottom:8}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                  <span style={{fontSize:12,fontWeight:600,color:DARK.text}}>{i+1}. {name}</span>
-                  <span style={{fontSize:12,color:DARK.yellow,fontWeight:700}}>{cost.toFixed(2)}</span>
+                  <span style={{fontSize:12,color:C.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
+                  <span style={{fontSize:12,color:col,fontWeight:700,marginRight:6}}>{sec.fmt(val)}</span>
                 </div>
-                <Bar val={cost} max={maxDriver} color={DARK.yellow}/>
+                <Bar val={val} max={max} color={col}/>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            );})}
+          </div>)}
+        </div>}
+      </div>}
 
-      {/* PREP ANALYSIS */}
-      <div className="card" style={{padding:18,marginBottom:16}}>
-        <SectionTitle>{t.secPrep}</SectionTitle>
-        {prepCalc.length===0?noDataMsg:(
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-            <div>
-              <div style={{fontSize:11,color:DARK.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{t.prepHighCost}</div>
-              {[...prepCalc].sort((a,b)=>b.costPerUnit-a.costPerUnit).slice(0,topN).map((p,i)=>(
-                <div key={p.id} style={{marginBottom:8}}>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                    <span style={{fontSize:12,color:DARK.text,fontWeight:600}}>{i+1}. {p.name}</span>
-                    <span style={{fontSize:12,color:DARK.accent,fontWeight:700}}>{p.costPerUnit.toFixed(3)}</span>
-                  </div>
-                  <Bar val={p.costPerUnit} max={prepCalc[0]?.costPerUnit||1} color={DARK.accent}/>
-                </div>
-              ))}
-            </div>
-            <div>
-              <div style={{fontSize:11,color:DARK.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{t.prepMostUsed}</div>
-              {[...prepUsage].sort((a,b)=>b.usedIn-a.usedIn).slice(0,topN).map((p,i)=>(
-                <div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:DARK.surface,borderRadius:8,marginBottom:6,border:"1px solid "+DARK.border}}>
-                  <span style={{fontSize:12,fontWeight:600,color:DARK.text}}>{i+1}. {p.name}</span>
-                  <span style={{background:DARK.blue+"22",color:DARK.blue,padding:"2px 10px",borderRadius:20,fontSize:12,fontWeight:700}}>{p.usedIn} {t.productsCount}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      {show("products")&&atRisk.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <SecHd c={lang==="ar"?"منتجات تحتاج مراجعة (هامش أقل من 20%)":"Products Needing Review (Margin < 20%)"} sub={lang==="ar"?"تحقق من التسعير أو خفض التكلفة":"Check pricing or reduce costs"}/>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse"}}>
+            <thead><tr>{[t.productName,t.totalCost,t.sellingPrice,t.margin,t.topCostDriver].map((h,i)=><th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+            <tbody>{atRisk.slice(0,topN).map((p,i)=>{
+              let topDrv="—",topC=0;
+              p.ingredients?.forEach(ing=>{let cost=0,name="";if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}if(cost>topC){topC=cost;topDrv=name;}});
+              return <tr key={p.id} style={{borderBottom:`1px solid ${C.border}22`}}>
+                <td style={{padding:"10px 12px",fontWeight:600}}>{p.name}</td>
+                <td style={{padding:"10px 12px",color:"#f87171",fontWeight:600}}>{p.totalCost.toFixed(2)}</td>
+                <td style={{padding:"10px 12px",color:C.green,fontWeight:600}}>{parseFloat(p.sellingPrice||0).toFixed(2)}</td>
+                <td style={{padding:"10px 12px"}}><span style={{background:p.margin<0?"#f8717122":"#f59e0b22",color:p.margin<0?"#f87171":"#f59e0b",padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700}}>{p.margin.toFixed(1)}%</span></td>
+                <td style={{padding:"10px 12px",color:C.yellow,fontSize:12,fontWeight:600}}>{topDrv} <span style={{color:C.muted,fontSize:11}}>({topC.toFixed(2)})</span></td>
+              </tr>;
+            })}</tbody>
+          </table>
+        </div>
+      </div>}
 
-      {/* RAW MATERIALS ANALYSIS */}
-      <div className="card" style={{padding:18,marginBottom:16}}>
-        <SectionTitle>{t.secRaw}</SectionTitle>
-        {rawList.length===0?noDataMsg:(
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-            <div>
-              <div style={{fontSize:11,color:DARK.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{t.rawHighPrice}</div>
-              {[...rawUsage].sort((a,b)=>b.price-a.price).slice(0,topN).map((r,i)=>(
-                <div key={r.id} style={{marginBottom:8}}>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                    <span style={{fontSize:12,color:DARK.text,fontWeight:600}}>{i+1}. {r.name}</span>
-                    <span style={{fontSize:12,color:DARK.accent,fontWeight:700}}>{r.price.toFixed(2)}</span>
-                  </div>
-                  <Bar val={r.price} max={rawUsage[0]?.price||1} color={DARK.accent}/>
-                </div>
-              ))}
-            </div>
-            <div>
-              <div style={{fontSize:11,color:DARK.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{t.rawMostUsed}</div>
-              {[...rawUsage].sort((a,b)=>(b.inPrep+b.inProd)-(a.inPrep+a.inProd)).slice(0,topN).map((r,i)=>(
-                <div key={r.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:DARK.surface,borderRadius:8,marginBottom:6,border:"1px solid "+DARK.border}}>
-                  <span style={{fontSize:12,fontWeight:600,color:DARK.text}}>{i+1}. {r.name}</span>
-                  <div style={{display:"flex",gap:6}}>
-                    <span style={{background:"#1e3a5f",color:"#60a5fa",padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700}}>P:{r.inPrep}</span>
-                    <span style={{background:"#0a3326",color:"#4ade80",padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700}}>M:{r.inProd}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+      {show("variance")&&withStd.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <SecHd c={t.varianceReport} sub={lang==="ar"?"مقارنة التكلفة الفعلية بالمعيارية":"Actual vs Standard Cost"}/>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse"}}>
+            <thead><tr>{[t.productName,t.totalCost,t.stdCost,t.variance,t.variancePct,t.topCostDriver].map((h,i)=><th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+            <tbody>{[...withStd].sort((a,b)=>(b.totalCost-parseFloat(b.stdCost))-(a.totalCost-parseFloat(a.stdCost))).slice(0,topN).map((p,i)=>{
+              const v=p.totalCost-parseFloat(p.stdCost); const vp=(v/parseFloat(p.stdCost))*100;
+              let topDrv="—",topC=0;
+              p.ingredients?.forEach(ing=>{let cost=0,name="";if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}if(cost>topC){topC=cost;topDrv=name;}});
+              return <tr key={p.id} style={{borderBottom:`1px solid ${C.border}22`,background:v>0?C.red+"08":"transparent"}}>
+                <td style={{padding:"10px 12px",fontWeight:600}}>{p.name}</td>
+                <td style={{padding:"10px 12px",color:"#f87171",fontWeight:600}}>{p.totalCost.toFixed(2)}</td>
+                <td style={{padding:"10px 12px",color:C.muted}}>{parseFloat(p.stdCost).toFixed(2)}</td>
+                <td style={{padding:"10px 12px"}}><span style={{color:v>0?"#f87171":"#4ade80",fontWeight:700}}>{v>0?"+":""}{v.toFixed(2)}</span></td>
+                <td style={{padding:"10px 12px"}}><span style={{background:v>0?"#f8717122":"#4ade8022",color:v>0?"#f87171":"#4ade80",padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700}}>{vp>0?"+":""}{vp.toFixed(1)}%</span></td>
+                <td style={{padding:"10px 12px",color:C.yellow,fontSize:12,fontWeight:600}}>{topDrv}</td>
+              </tr>;
+            })}</tbody>
+          </table>
+        </div>
+      </div>}
+
+      {show("products")&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <SecHd c={t.topCostDriversReport} sub={lang==="ar"?"أعلى المكونات تكلفة عبر جميع المنتجات":"Top cost ingredients across all products"}/>
+        {drivers.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+          <div>{drivers.slice(0,Math.ceil(topN/2)).map(([name,cost],i)=><div key={i} style={{marginBottom:9}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:600,color:C.text}}>{i+1}. {name}</span><span style={{fontSize:12,color:C.yellow,fontWeight:700}}>{cost.toFixed(2)}</span></div>
+            <Bar val={cost} max={maxDrv} color={C.yellow}/>
+          </div>)}</div>
+          <div>{drivers.slice(Math.ceil(topN/2)).map(([name,cost],i)=><div key={i} style={{marginBottom:9}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:600,color:C.text}}>{Math.ceil(topN/2)+i+1}. {name}</span><span style={{fontSize:12,color:C.yellow,fontWeight:700}}>{cost.toFixed(2)}</span></div>
+            <Bar val={cost} max={maxDrv} color={C.yellow}/>
+          </div>)}</div>
+        </div>}
+      </div>}
+
+      {show("prep")&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <SecHd c={t.secPrep}/>
+        {prepCalc.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+          <div>
+            <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.prepHighCost}</div>
+            {[...prepCalc].sort((a,b)=>b.costPerUnit-a.costPerUnit).slice(0,topN).map((p,i)=><div key={p.id} style={{marginBottom:8}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,color:C.text,fontWeight:600}}>{i+1}. {p.name}</span><span style={{fontSize:12,color:C.accent,fontWeight:700}}>{p.costPerUnit.toFixed(3)}</span></div>
+              <Bar val={p.costPerUnit} max={prepCalc.reduce((a,x)=>Math.max(a,x.costPerUnit),0.001)} color={C.accent}/>
+            </div>)}
           </div>
-        )}
-      </div>
+          <div>
+            <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.prepMostUsed}</div>
+            {[...prepUsage].sort((a,b)=>b.usedIn-a.usedIn).slice(0,topN).map((p,i)=><div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:C.surface,borderRadius:8,marginBottom:6,border:`1px solid ${C.border}`}}>
+              <span style={{fontSize:12,fontWeight:600,color:C.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
+              <button onClick={()=>p.usedIn>0&&setRelModal({title:p.name,list:p.relatedProds,type:"products"})}
+                style={{background:p.usedIn>0?C.blue+"22":"transparent",color:p.usedIn>0?C.blue:C.muted,padding:"2px 10px",borderRadius:20,fontSize:12,fontWeight:700,border:"none",cursor:p.usedIn>0?"pointer":"default",fontFamily:"inherit"}}>
+                {p.usedIn} {t.productsCount}
+              </button>
+            </div>)}
+          </div>
+        </div>}
+      </div>}
+
+      {show("raw")&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <SecHd c={t.secRaw}/>
+        {rawList.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+          <div>
+            <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.rawHighPrice}</div>
+            {[...rawUsage].sort((a,b)=>b.price-a.price).slice(0,topN).map((r,i)=><div key={r.id} style={{marginBottom:8}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,color:C.text,fontWeight:600}}>{i+1}. {r.name}</span><span style={{fontSize:12,color:C.accent,fontWeight:700}}>{r.price.toFixed(2)}</span></div>
+              <Bar val={r.price} max={rawUsage.reduce((a,x)=>Math.max(a,x.price),0.001)} color={C.accent}/>
+            </div>)}
+          </div>
+          <div>
+            <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.rawMostUsed}</div>
+            {[...rawUsage].sort((a,b)=>(b.inPrep+b.inProd)-(a.inPrep+a.inProd)).slice(0,topN).map((r,i)=><div key={r.id} style={{padding:"8px 12px",background:C.surface,borderRadius:8,marginBottom:6,border:`1px solid ${C.border}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:12,fontWeight:600,color:C.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {r.name}</span>
+                <div style={{display:"flex",gap:6}}>
+                  <button onClick={()=>r.inPrep>0&&setRelModal({title:r.name,list:r.relatedPreps,type:"prep"})}
+                    style={{background:r.inPrep>0?"#1e3a5f":"transparent",color:r.inPrep>0?"#60a5fa":C.muted,padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700,border:"none",cursor:r.inPrep>0?"pointer":"default",fontFamily:"inherit"}}>P:{r.inPrep}</button>
+                  <button onClick={()=>r.inProd>0&&setRelModal({title:r.name,list:r.relatedProds,type:"products"})}
+                    style={{background:r.inProd>0?"#0a3326":"transparent",color:r.inProd>0?"#4ade80":C.muted,padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700,border:"none",cursor:r.inProd>0?"pointer":"default",fontFamily:"inherit"}}>M:{r.inProd}</button>
+                </div>
+              </div>
+            </div>)}
+          </div>
+        </div>}
+      </div>}
+
+      {relModal&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&setRelModal(null)}>
+        <div className="modal" style={{maxWidth:500}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+            <div><div style={{fontWeight:800,fontSize:15,color:C.accent}}>{relModal.title}</div>
+              <div style={{fontSize:12,color:C.muted,marginTop:2}}>{relModal.type==="prep"?t.relatedPreps:t.relatedProducts} ({relModal.list.length})</div>
+            </div>
+            <button onClick={()=>setRelModal(null)} style={{background:"transparent",border:"none",color:C.muted,fontSize:20,cursor:"pointer"}}>✕</button>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {relModal.list.map((item,i)=><div key={item.id||i} style={{background:C.surface,borderRadius:9,padding:"10px 14px",border:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div><code style={{background:C.bg||C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8",marginLeft:8}}>{item.code}</code><span style={{fontWeight:600,fontSize:13}}>{item.name}</span></div>
+              <span className="badge badge-cls">{item.class||"—"}</span>
+            </div>)}
+          </div>
+          <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}><button className="btn btn-secondary" onClick={()=>setRelModal(null)}>{t.cancel}</button></div>
+        </div>
+      </div>}
     </div>
   );
 }
