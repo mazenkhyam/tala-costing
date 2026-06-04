@@ -60,6 +60,16 @@ const T = {
     noSelling:"بدون سعر بيع",
     productsOverBudget:"منتجات تجاوزت المعياري",
     view:"عرض",
+    usedInPrepLbl:"مستخدم في Prep", usedInProdsLbl:"مستخدم في منتجات",
+    rawMaterialsUsed:"المواد الخام المستخدمة", prepItemsUsed:"Prep المستخدمة",
+    noIngredients:"لا توجد مكونات",
+    profitabilityMatrix:"مصفوفة الربحية", atRiskProducts:"منتجات تحتاج مراجعة",
+    statusExcellent:"ممتاز", statusGood:"جيد", statusLow:"منخفض", statusLoss:"خسارة",
+    marginPct:"هامش %", costPct:"تكلفة %",
+    prepContribution:"نسبة مساهمة Prep في التكلفة",
+    rawPriceImpact:"تأثير سعر المواد الخام",
+    topDriversTitle:"أعلى مكونات التكلفة",
+    rawCountLbl:"خام", prepCountLbl:"Prep",
   },
   en: {
     dir:"ltr", font:"'DM Sans',sans-serif",
@@ -111,6 +121,16 @@ const T = {
     noSelling:"No Selling Price",
     productsOverBudget:"Products Over Budget",
     view:"View",
+    usedInPrepLbl:"Used in Prep", usedInProdsLbl:"Used in Products",
+    rawMaterialsUsed:"Raw Materials Used", prepItemsUsed:"Prep Items Used",
+    noIngredients:"No ingredients",
+    profitabilityMatrix:"Profitability Matrix", atRiskProducts:"At-Risk Products",
+    statusExcellent:"Excellent", statusGood:"Good", statusLow:"Low", statusLoss:"Loss",
+    marginPct:"Margin %", costPct:"Cost %",
+    prepContribution:"Prep Cost Contribution",
+    rawPriceImpact:"Raw Price Impact",
+    topDriversTitle:"Top Cost Drivers",
+    rawCountLbl:"Raw", prepCountLbl:"Prep",
   }
 };
 
@@ -291,6 +311,7 @@ export default function App() {
         .badge-piece{background:#1a0f33;color:#a78bfa}
         .badge-cls{background:#1a1a33;color:#94a3b8;border:1px solid #2a2a4a}
         .filter-btn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
+        .filter-btn:hover{color:${DARK.text};border-color:#3a4060}
         .filter-btn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
         .divider{height:1px;background:${DARK.border};margin:14px 0}
         .nav-item{display:flex;align-items:center;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:${DARK.muted};transition:all .14s;border:none;background:transparent;font-family:inherit;width:100%;text-align:${lang==="ar"?"right":"left"}}
@@ -302,6 +323,25 @@ export default function App() {
         .section-hd{font-size:14px;font-weight:700;color:${DARK.text};margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid ${DARK.border}}
         .top-n-btn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .14s}
         .top-n-btn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
+        .btn-sm-v{background:#0a2a3a;color:#38bdf8;padding:4px 11px;font-size:12px;border:1px solid #0ea5e933;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
+        .btn-sm-v:hover{background:#0d3a50;border-color:#0ea5e966}
+        .chip-prep{display:inline-flex;align-items:center;background:#0f2040;color:#60a5fa;border:1px solid #1e3a6044;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .14s;gap:4px}
+        .chip-prep:hover{background:#1e3060;border-color:#3b82f666}
+        .chip-prod{display:inline-flex;align-items:center;background:#062018;color:#4ade80;border:1px solid #16a34a33;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .14s;gap:4px}
+        .chip-prod:hover{background:#0a3328;border-color:#16a34a66}
+        .chip-raw{display:inline-flex;align-items:center;background:#1a0f33;color:#a78bfa;border:1px solid #7c3aed33;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .14s;gap:4px}
+        .chip-raw:hover{background:#2a1850}
+        .chip-zero{display:inline-flex;align-items:center;background:${DARK.surface};color:${DARK.muted};border:1px solid ${DARK.border};border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600;font-family:inherit}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .animate-in{animation:fadeIn .2s ease}
+        .fbtn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:6px 14px;font-size:12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
+        .fbtn:hover{color:${DARK.text};border-color:#3a4060}
+        .fbtn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
+        .topn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .14s}
+        .topn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
+        .kpi-card{background:${DARK.card};border:1px solid ${DARK.border};border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;transition:transform .14s}
+        .kpi-card:hover{transform:translateY(-2px)}
+        .status-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700}
       `}</style>
 
       {/* SIDEBAR */}
@@ -590,14 +630,49 @@ function NoPerm({t,C=DARK}) {
 // ═══════════════════════════════════════════════════════════════
 // DASHBOARD / ANALYTICS
 // ═══════════════════════════════════════════════════════════════
+function RelModal({title,subtitle,list,onClose,lang,C=DARK,t}) {
+  return (
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal animate-in" style={{maxWidth:520}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <div>
+            <div style={{fontWeight:800,fontSize:15,color:C.accent}}>{title}</div>
+            <div style={{fontSize:12,color:C.muted,marginTop:2}}>{subtitle} ({list.length})</div>
+          </div>
+          <button onClick={onClose} style={{background:"transparent",border:"none",color:C.muted,fontSize:20,cursor:"pointer"}}>✕</button>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:8,maxHeight:400,overflowY:"auto"}}>
+          {list.length===0
+            ? <div style={{color:C.muted,textAlign:"center",padding:24}}>{t.noData}</div>
+            : list.map((item,i)=>(
+              <div key={item.id||i} style={{background:C.surface,borderRadius:9,padding:"10px 14px",border:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <code style={{background:C.bg,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{item.code}</code>
+                  <span style={{fontWeight:600,fontSize:13}}>{item.name}</span>
+                </div>
+                <span className="badge badge-cls">{item.class||"—"}</span>
+              </div>
+            ))
+          }
+        </div>
+        <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}>
+          <button className="btn btn-secondary" onClick={onClose}>{t.cancel}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calcProductCost}) {
   const [topN,setTopN]=useState(10);
   const [section,setSection]=useState("all");
   const [relModal,setRelModal]=useState(null);
 
+  const isAr=lang==="ar";
   const prodCalc=prodList.map(p=>({...p,...calcProductCost(p)}));
   const prepCalc=prepList.map(p=>({...p,...calcPrepCost(p)}));
 
+  // KPI data
   const withSP=prodCalc.filter(p=>parseFloat(p.sellingPrice)>0);
   const avgMargin=withSP.length?withSP.reduce((a,p)=>a+p.margin,0)/withSP.length:0;
   const avgCost=prodCalc.length?prodCalc.reduce((a,p)=>a+p.totalCost,0)/prodCalc.length:0;
@@ -610,6 +685,7 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
   const lowM=prodCalc.filter(p=>p.margin<15&&parseFloat(p.sellingPrice)>0&&p.margin>0).length;
   const noPrice=prodCalc.filter(p=>!parseFloat(p.sellingPrice)).length;
 
+  // Cost drivers
   const driverMap={};
   prodList.forEach(prod=>{prod.ingredients?.forEach(ing=>{
     if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(!r)return;driverMap[r.name]=(driverMap[r.name]||0)+(parseFloat(ing.qty)||0)/1000*r.price;}
@@ -618,27 +694,47 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
   const drivers=Object.entries(driverMap).sort((a,b)=>b[1]-a[1]).slice(0,topN);
   const maxDrv=drivers[0]?.[1]||1;
 
+  // Prep usage
   const prepUsage=prepCalc.map(p=>({...p,
     usedIn:prodList.filter(pr=>pr.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(p.id))).length,
     relatedProds:prodList.filter(pr=>pr.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(p.id)))
   }));
+
+  // Raw usage
   const rawUsage=rawList.map(r=>({...r,
     inPrep:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(r.id))).length,
     inProd:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(r.id))).length,
     relatedPreps:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(r.id))),
     relatedProds:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(r.id))),
   }));
+
   const atRisk=prodCalc.filter(p=>p.totalCost>0&&p.margin<20&&parseFloat(p.sellingPrice)>0).sort((a,b)=>a.margin-b.margin);
 
-  const Bar=({val,max,color})=>(<div style={{background:C.surface,borderRadius:3,height:6,flex:1}}><div style={{width:Math.min((val/(max||1))*100,100)+"%",height:6,borderRadius:3,background:color,transition:"width .4s"}}/></div>);
-  const SecHd=({c,sub})=>(<div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{c}</div>{sub&&<div style={{fontSize:11,color:C.muted,marginTop:2}}>{sub}</div>}<div style={{height:2,background:C.border,marginTop:8}}/></div>);
-  const KCard=({label,value,color,sub})=>(<div className="card" style={{padding:"16px 18px"}}><div style={{fontSize:26,fontWeight:800,color:color||C.accent,lineHeight:1}}>{value}</div><div style={{fontSize:12,color:C.muted,marginTop:4}}>{label}</div>{sub&&<div style={{fontSize:10,color:C.muted,marginTop:2}}>{sub}</div>}</div>);
+  // Helpers
+  const Bar=({val,max,color,height=6})=>(<div style={{background:C.surface,borderRadius:3,height,flex:1}}><div style={{width:Math.min((val/(max||1))*100,100)+"%",height,borderRadius:3,background:color,transition:"width .5s ease"}}/></div>);
+
   const noMsg=<div style={{color:C.muted,fontSize:13,textAlign:"center",padding:"24px 0"}}>{t.noData}</div>;
-  const secs=[{id:"all",label:lang==="ar"?"الكل":"All"},{id:"products",label:t.secProducts},{id:"prep",label:t.secPrep},{id:"raw",label:t.secRaw},{id:"variance",label:t.varianceReport}];
+
+  const secs=[
+    {id:"all",     label:isAr?"الكل":"All"},
+    {id:"products",label:isAr?"تحليل المنتجات":"Products"},
+    {id:"prep",    label:isAr?"تحليل Prep":"Prep"},
+    {id:"raw",     label:isAr?"تحليل الخام":"Raw"},
+    {id:"variance",label:isAr?"الانحراف":"Variance"},
+  ];
   const show=s=>section==="all"||section===s;
 
+  const getStatus=(m,hasSP)=>{
+    if(!hasSP) return {label:isAr?"بدون سعر":"No Price",bg:"#1a1a33",color:"#94a3b8"};
+    if(m>30)   return {label:t.statusExcellent,bg:"#053d2a",color:"#4ade80"};
+    if(m>15)   return {label:t.statusGood,bg:"#3d2900",color:"#fbbf24"};
+    if(m>0)    return {label:t.statusLow,bg:"#3d1a0a",color:"#f97316"};
+    return {label:t.statusLoss,bg:"#3d0505",color:"#f87171"};
+  };
+
   return (
-    <div style={{maxWidth:1100,margin:"0 auto"}}>
+    <div style={{maxWidth:1200,margin:"0 auto"}}>
+      {/* ── HEADER BAR ── */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:10}}>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {secs.map(s=><button key={s.id} className={`fbtn${section===s.id?" active":""}`} onClick={()=>setSection(s.id)}>{s.label}</button>)}
@@ -649,64 +745,131 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
         </div>
       </div>
 
-      {show("products")&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12,marginBottom:20}}>
-        <KCard label={lang==="ar"?"إجمالي المنتجات":"Total Products"} value={prodList.length} color={C.accent}/>
-        <KCard label={lang==="ar"?"إجمالي Prep":"Total Prep"} value={prepList.length} color={C.blue}/>
-        <KCard label={lang==="ar"?"إجمالي الخام":"Total Raw"} value={rawList.length} color="#a78bfa"/>
-        <KCard label={t.avgMarginLbl} value={avgMargin.toFixed(1)+"%"} color={avgMargin>30?C.green:avgMargin>15?C.yellow:C.red} sub={lang==="ar"?`أعلى تكلفة: ${maxCost.toFixed(2)} | أقل: ${minCost.toFixed(2)}`:`Max: ${maxCost.toFixed(2)} | Min: ${minCost.toFixed(2)}`}/>
-        <KCard label={t.avgCostLbl} value={avgCost.toFixed(2)} color="#f87171"/>
-        <KCard label={t.productsOverBudget} value={overBudget.length} sub={withStd.length>0?`/ ${withStd.length} ${lang==="ar"?"لهم معياري":"with target"}`:""} color={overBudget.length>0?C.red:C.green}/>
+      {/* ── KPI CARDS ── */}
+      {show("products")&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:20}}>
+        {[
+          {label:isAr?"إجمالي المنتجات":"Total Products", value:prodList.length, color:C.accent, icon:"🛍"},
+          {label:isAr?"إجمالي Prep":"Total Prep",         value:prepList.length, color:C.blue,   icon:"⚗️"},
+          {label:isAr?"إجمالي الخام":"Total Raw",          value:rawList.length,  color:"#a78bfa", icon:"📦"},
+          {label:t.avgMarginLbl, value:avgMargin.toFixed(1)+"%", color:avgMargin>30?C.green:avgMargin>15?C.yellow:C.red, icon:"📊",
+            sub:isAr?`أعلى: ${maxCost.toFixed(2)} | أقل: ${minCost.toFixed(2)}`:`High: ${maxCost.toFixed(2)} | Low: ${minCost.toFixed(2)}`},
+          {label:t.avgCostLbl,   value:avgCost.toFixed(2), color:"#f87171", icon:"💰"},
+          {label:t.productsOverBudget, value:overBudget.length, icon:"⚠️",
+            sub:withStd.length>0?`/ ${withStd.length} ${isAr?"لهم معياري":"with target"}`:isAr?"لا يوجد معياري":"No target set",
+            color:overBudget.length>0?C.red:C.green},
+        ].map((k,i)=>(
+          <div key={i} className="kpi-card">
+            <div style={{position:"absolute",top:10,left:isAr?10:undefined,right:isAr?undefined:10,fontSize:28,opacity:.12}}>{k.icon}</div>
+            <div style={{fontSize:26,fontWeight:800,color:k.color,lineHeight:1}}>{k.value}</div>
+            <div style={{fontSize:12,color:C.muted,marginTop:5,fontWeight:600}}>{k.label}</div>
+            {k.sub&&<div style={{fontSize:10,color:C.muted,marginTop:3}}>{k.sub}</div>}
+          </div>
+        ))}
       </div>}
 
+      {/* ── MARGIN DISTRIBUTION ── */}
       {show("products")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <SecHd c={t.marginDistribution} sub={lang==="ar"?"توزيع المنتجات حسب هامش الربح":"Products distributed by profit margin"}/>
+        <div style={{marginBottom:14}}>
+          <div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.marginDistribution}</div>
+          <div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"توزيع المنتجات حسب هامش الربح":"Products distributed by profit margin"}</div>
+          <div style={{height:2,background:C.border,marginTop:8}}/>
+        </div>
         {prodCalc.length===0?noMsg:<>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,marginBottom:14}}>
-            {[{l:t.highMargin,n:highM,col:C.green},{l:t.midMargin,n:midM,col:C.yellow},{l:t.lowMargin,n:lowM,col:C.red},{l:t.noSelling,n:noPrice,col:C.muted}].map((s,i)=>{
+            {[
+              {l:t.highMargin,n:highM,col:C.green},
+              {l:t.midMargin,n:midM,col:C.yellow},
+              {l:t.lowMargin,n:lowM,col:C.red},
+              {l:t.noSelling,n:noPrice,col:C.muted},
+            ].map((s,i)=>{
               const pct=prodList.length?((s.n/prodList.length)*100).toFixed(0):0;
               return <div key={i} style={{background:C.surface,borderRadius:10,padding:"12px 14px",border:`1px solid ${C.border}`}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span style={{fontSize:11,color:C.muted,fontWeight:600}}>{s.l}</span><span style={{fontSize:11,color:s.col,fontWeight:700}}>{pct}%</span></div>
-                <div style={{fontSize:22,fontWeight:800,color:s.col}}>{s.n}</div>
-                <div style={{background:C.border,borderRadius:3,height:4,marginTop:8}}><div style={{width:pct+"%",height:4,borderRadius:3,background:s.col}}/></div>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                  <span style={{fontSize:10,color:C.muted,fontWeight:600}}>{s.l}</span>
+                  <span style={{fontSize:11,color:s.col,fontWeight:700}}>{pct}%</span>
+                </div>
+                <div style={{fontSize:24,fontWeight:800,color:s.col}}>{s.n}</div>
+                <div style={{background:C.border,borderRadius:3,height:4,marginTop:8}}>
+                  <div style={{width:pct+"%",height:4,borderRadius:3,background:s.col,transition:"width .5s"}}/>
+                </div>
               </div>;
             })}
           </div>
           <div style={{display:"flex",height:8,borderRadius:4,overflow:"hidden",gap:1}}>
-            {[[highM,C.green],[midM,C.yellow],[lowM,C.red],[noPrice,C.muted]].map(([n,col],i)=><div key={i} style={{flex:n||0,background:col,minWidth:n>0?2:0}}/>)}
+            {[[highM,C.green],[midM,C.yellow],[lowM,C.red],[noPrice,C.muted]].map(([n,col],i)=>(
+              <div key={i} style={{flex:n||0,background:col,minWidth:n>0?2:0}}/>
+            ))}
           </div>
         </>}
       </div>}
 
+      {/* ── PRODUCTS ANALYSIS ── */}
       {show("products")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <SecHd c={t.secProducts}/>
+        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{isAr?"تحليل المنتجات":"Products Analysis"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
         {prodCalc.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16}}>
           {[
-            {title:lang==="ar"?"أعلى هامش ربح":"Highest Margin",data:[...prodCalc].filter(p=>parseFloat(p.sellingPrice)>0).sort((a,b)=>b.margin-a.margin),fn:p=>p.margin,fmt:v=>v.toFixed(1)+"%",col:p=>p.margin>30?C.green:p.margin>15?C.yellow:C.red},
-            {title:lang==="ar"?"أعلى تكلفة":"Highest Cost",data:[...prodCalc].sort((a,b)=>b.totalCost-a.totalCost),fn:p=>p.totalCost,fmt:v=>v.toFixed(2),col:()=>"#f87171"},
-            {title:lang==="ar"?"أقل تكلفة":"Lowest Cost",data:[...prodCalc].filter(p=>p.totalCost>0).sort((a,b)=>a.totalCost-b.totalCost),fn:p=>p.totalCost,fmt:v=>v.toFixed(2),col:()=>C.green},
-          ].map((sec,si)=><div key={si}>
-            <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{sec.title}</div>
-            {sec.data.slice(0,topN).map((p,i)=>{const val=sec.fn(p),max=sec.fn(sec.data[0])||1,col=sec.col(p);return(
-              <div key={p.id} style={{marginBottom:8}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                  <span style={{fontSize:12,color:C.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
-                  <span style={{fontSize:12,color:col,fontWeight:700,marginRight:6}}>{sec.fmt(val)}</span>
+            {title:isAr?"أعلى هامش ربح":"Highest Margin",  data:[...prodCalc].filter(p=>parseFloat(p.sellingPrice)>0).sort((a,b)=>b.margin-a.margin),  fn:p=>p.margin,     fmt:v=>v.toFixed(1)+"%", col:p=>p.margin>30?C.green:p.margin>15?C.yellow:C.red},
+            {title:isAr?"أعلى تكلفة":"Highest Cost",        data:[...prodCalc].sort((a,b)=>b.totalCost-a.totalCost),                                      fn:p=>p.totalCost,  fmt:v=>v.toFixed(2),     col:()=>"#f87171"},
+            {title:isAr?"أقل تكلفة":"Lowest Cost",          data:[...prodCalc].filter(p=>p.totalCost>0).sort((a,b)=>a.totalCost-b.totalCost),             fn:p=>p.totalCost,  fmt:v=>v.toFixed(2),     col:()=>C.green},
+          ].map((sec,si)=>(
+            <div key={si}>
+              <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10,letterSpacing:".05em"}}>{sec.title}</div>
+              {sec.data.slice(0,topN).map((p,i)=>{const val=sec.fn(p),max=sec.fn(sec.data[0])||1,col=sec.col(p);return(
+                <div key={p.id} style={{marginBottom:8}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                    <span style={{fontSize:12,color:C.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
+                    <span style={{fontSize:12,color:col,fontWeight:700,marginRight:6}}>{sec.fmt(val)}</span>
+                  </div>
+                  <Bar val={val} max={max} color={col}/>
                 </div>
-                <Bar val={val} max={max} color={col}/>
-              </div>
-            );})}
-          </div>)}
+              );})}
+            </div>
+          ))}
         </div>}
       </div>}
 
-      {show("products")&&atRisk.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <SecHd c={lang==="ar"?"منتجات تحتاج مراجعة (هامش أقل من 20%)":"Products Needing Review (Margin < 20%)"} sub={lang==="ar"?"تحقق من التسعير أو خفض التكلفة":"Check pricing or reduce costs"}/>
+      {/* ── PROFITABILITY MATRIX ── */}
+      {show("products")&&prodCalc.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.profitabilityMatrix}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"جميع المنتجات مع تقييم الربحية":"All products with profitability rating"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
         <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse"}}>
-            <thead><tr>{[t.productName,t.totalCost,t.sellingPrice,t.margin,t.topCostDriver].map((h,i)=><th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
-            <tbody>{atRisk.slice(0,topN).map((p,i)=>{
+            <thead><tr>{[isAr?"#":"#",t.productName,t.class,t.totalCost,t.sellingPrice,t.marginPct,isAr?"الحالة":"Status"].map((h,i)=>(
+              <th key={i} style={{padding:"9px 12px",textAlign:isAr?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>
+            ))}</tr></thead>
+            <tbody>{[...prodCalc].sort((a,b)=>b.margin-a.margin).slice(0,topN).map((p,i)=>{
+              const hasSP=parseFloat(p.sellingPrice)>0;
+              const st=getStatus(p.margin,hasSP);
+              return (
+                <tr key={p.id} style={{borderBottom:`1px solid ${C.border}22`}}>
+                  <td style={{padding:"9px 12px",color:C.muted,fontSize:11}}>{i+1}</td>
+                  <td style={{padding:"9px 12px",fontWeight:600}}>{p.name}</td>
+                  <td style={{padding:"9px 12px"}}><span className="badge badge-cls">{p.class||"—"}</span></td>
+                  <td style={{padding:"9px 12px",color:"#f87171",fontWeight:600}}>{p.totalCost.toFixed(2)}</td>
+                  <td style={{padding:"9px 12px",color:C.green,fontWeight:600}}>{hasSP?parseFloat(p.sellingPrice).toFixed(2):"—"}</td>
+                  <td style={{padding:"9px 12px",fontWeight:700,color:hasSP?(p.margin>30?C.green:p.margin>15?C.yellow:C.red):C.muted}}>{hasSP?p.margin.toFixed(1)+"%":"—"}</td>
+                  <td style={{padding:"9px 12px"}}><span className="status-badge" style={{background:st.bg,color:st.color}}>{st.label}</span></td>
+                </tr>
+              );
+            })}</tbody>
+          </table>
+        </div>
+      </div>}
+
+      {/* ── AT-RISK PRODUCTS ── */}
+      {show("products")&&atRisk.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.atRiskProducts} <span style={{background:"#f8717122",color:"#f87171",padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700,marginRight:8}}>{atRisk.length}</span></div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"منتجات هامشها أقل من 20%":"Products with margin below 20%"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse"}}>
+            <thead><tr>{[t.productName,t.totalCost,t.sellingPrice,t.margin,t.topCostDriver].map((h,i)=>(
+              <th key={i} style={{padding:"9px 12px",textAlign:isAr?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface}}>{h}</th>
+            ))}</tr></thead>
+            <tbody>{atRisk.slice(0,topN).map(p=>{
               let topDrv="—",topC=0;
-              p.ingredients?.forEach(ing=>{let cost=0,name="";if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}if(cost>topC){topC=cost;topDrv=name;}});
+              p.ingredients?.forEach(ing=>{let cost=0,name="";
+                if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}
+                else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}
+                if(cost>topC){topC=cost;topDrv=name;}
+              });
               return <tr key={p.id} style={{borderBottom:`1px solid ${C.border}22`}}>
                 <td style={{padding:"10px 12px",fontWeight:600}}>{p.name}</td>
                 <td style={{padding:"10px 12px",color:"#f87171",fontWeight:600}}>{p.totalCost.toFixed(2)}</td>
@@ -719,15 +882,22 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
         </div>
       </div>}
 
+      {/* ── VARIANCE REPORT ── */}
       {show("variance")&&withStd.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <SecHd c={t.varianceReport} sub={lang==="ar"?"مقارنة التكلفة الفعلية بالمعيارية":"Actual vs Standard Cost"}/>
+        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.varianceReport}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"مقارنة التكلفة الفعلية بالمعيارية":"Actual vs Standard Cost"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
         <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse"}}>
-            <thead><tr>{[t.productName,t.totalCost,t.stdCost,t.variance,t.variancePct,t.topCostDriver].map((h,i)=><th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
-            <tbody>{[...withStd].sort((a,b)=>(b.totalCost-parseFloat(b.stdCost))-(a.totalCost-parseFloat(a.stdCost))).slice(0,topN).map((p,i)=>{
+            <thead><tr>{[t.productName,t.totalCost,t.stdCost,t.variance,t.variancePct,t.topCostDriver].map((h,i)=>(
+              <th key={i} style={{padding:"9px 12px",textAlign:isAr?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>
+            ))}</tr></thead>
+            <tbody>{[...withStd].sort((a,b)=>(b.totalCost-parseFloat(b.stdCost))-(a.totalCost-parseFloat(a.stdCost))).slice(0,topN).map(p=>{
               const v=p.totalCost-parseFloat(p.stdCost); const vp=(v/parseFloat(p.stdCost))*100;
               let topDrv="—",topC=0;
-              p.ingredients?.forEach(ing=>{let cost=0,name="";if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}if(cost>topC){topC=cost;topDrv=name;}});
+              p.ingredients?.forEach(ing=>{let cost=0,name="";
+                if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}
+                else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}
+                if(cost>topC){topC=cost;topDrv=name;}
+              });
               return <tr key={p.id} style={{borderBottom:`1px solid ${C.border}22`,background:v>0?C.red+"08":"transparent"}}>
                 <td style={{padding:"10px 12px",fontWeight:600}}>{p.name}</td>
                 <td style={{padding:"10px 12px",color:"#f87171",fontWeight:600}}>{p.totalCost.toFixed(2)}</td>
@@ -741,87 +911,172 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
         </div>
       </div>}
 
+      {/* ── TOP COST DRIVERS ── */}
       {show("products")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <SecHd c={t.topCostDriversReport} sub={lang==="ar"?"أعلى المكونات تكلفة عبر جميع المنتجات":"Top cost ingredients across all products"}/>
+        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.topDriversTitle}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"أعلى المكونات تكلفة عبر جميع المنتجات":"Top cost ingredients across all products"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
         {drivers.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-          <div>{drivers.slice(0,Math.ceil(topN/2)).map(([name,cost],i)=><div key={i} style={{marginBottom:9}}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:600,color:C.text}}>{i+1}. {name}</span><span style={{fontSize:12,color:C.yellow,fontWeight:700}}>{cost.toFixed(2)}</span></div>
-            <Bar val={cost} max={maxDrv} color={C.yellow}/>
-          </div>)}</div>
-          <div>{drivers.slice(Math.ceil(topN/2)).map(([name,cost],i)=><div key={i} style={{marginBottom:9}}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:600,color:C.text}}>{Math.ceil(topN/2)+i+1}. {name}</span><span style={{fontSize:12,color:C.yellow,fontWeight:700}}>{cost.toFixed(2)}</span></div>
-            <Bar val={cost} max={maxDrv} color={C.yellow}/>
-          </div>)}</div>
+          <div>{drivers.slice(0,Math.ceil(drivers.length/2)).map(([name,cost],i)=>(
+            <div key={i} style={{marginBottom:9}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                <span style={{fontSize:12,fontWeight:600,color:C.text}}>{i+1}. {name}</span>
+                <span style={{fontSize:12,color:C.yellow,fontWeight:700}}>{cost.toFixed(2)}</span>
+              </div>
+              <Bar val={cost} max={maxDrv} color={C.yellow}/>
+            </div>
+          ))}</div>
+          <div>{drivers.slice(Math.ceil(drivers.length/2)).map(([name,cost],i)=>(
+            <div key={i} style={{marginBottom:9}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                <span style={{fontSize:12,fontWeight:600,color:C.text}}>{Math.ceil(drivers.length/2)+i+1}. {name}</span>
+                <span style={{fontSize:12,color:C.yellow,fontWeight:700}}>{cost.toFixed(2)}</span>
+              </div>
+              <Bar val={cost} max={maxDrv} color={C.yellow}/>
+            </div>
+          ))}</div>
         </div>}
       </div>}
 
+      {/* ── PREP ANALYSIS ── */}
       {show("prep")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <SecHd c={t.secPrep}/>
+        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{isAr?"تحليل Prep":"Prep Analysis"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
         {prepCalc.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
           <div>
             <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.prepHighCost}</div>
-            {[...prepCalc].sort((a,b)=>b.costPerUnit-a.costPerUnit).slice(0,topN).map((p,i)=><div key={p.id} style={{marginBottom:8}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,color:C.text,fontWeight:600}}>{i+1}. {p.name}</span><span style={{fontSize:12,color:C.accent,fontWeight:700}}>{p.costPerUnit.toFixed(3)}</span></div>
-              <Bar val={p.costPerUnit} max={prepCalc.reduce((a,x)=>Math.max(a,x.costPerUnit),0.001)} color={C.accent}/>
-            </div>)}
+            {[...prepCalc].sort((a,b)=>b.costPerUnit-a.costPerUnit).slice(0,topN).map((p,i)=>(
+              <div key={p.id} style={{marginBottom:8}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                  <span style={{fontSize:12,color:C.text,fontWeight:600}}>{i+1}. {p.name}</span>
+                  <span style={{fontSize:12,color:C.accent,fontWeight:700}}>{p.costPerUnit.toFixed(3)}</span>
+                </div>
+                <Bar val={p.costPerUnit} max={prepCalc.reduce((a,x)=>Math.max(a,x.costPerUnit),0.001)} color={C.accent}/>
+              </div>
+            ))}
           </div>
           <div>
             <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.prepMostUsed}</div>
-            {[...prepUsage].sort((a,b)=>b.usedIn-a.usedIn).slice(0,topN).map((p,i)=><div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:C.surface,borderRadius:8,marginBottom:6,border:`1px solid ${C.border}`}}>
-              <span style={{fontSize:12,fontWeight:600,color:C.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
-              <button onClick={()=>p.usedIn>0&&setRelModal({title:p.name,list:p.relatedProds,type:"products"})}
-                style={{background:p.usedIn>0?C.blue+"22":"transparent",color:p.usedIn>0?C.blue:C.muted,padding:"2px 10px",borderRadius:20,fontSize:12,fontWeight:700,border:"none",cursor:p.usedIn>0?"pointer":"default",fontFamily:"inherit"}}>
-                {p.usedIn} {t.productsCount}
-              </button>
-            </div>)}
+            {[...prepUsage].sort((a,b)=>b.usedIn-a.usedIn).slice(0,topN).map((p,i)=>(
+              <div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:C.surface,borderRadius:8,marginBottom:6,border:`1px solid ${C.border}`}}>
+                <span style={{fontSize:12,fontWeight:600,color:C.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
+                <button onClick={()=>p.usedIn>0&&setRelModal({title:p.name,subtitle:t.relatedProducts,list:p.relatedProds})}
+                  className={p.usedIn>0?"chip-prod":"chip-zero"}>
+                  {p.usedIn} {isAr?"منتج":"products"}
+                </button>
+              </div>
+            ))}
           </div>
         </div>}
       </div>}
 
+      {/* ── PREP CONTRIBUTION TABLE ── */}
+      {show("prep")&&prepCalc.length>0&&prodCalc.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.prepContribution}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"مساهمة Prep مقابل المواد الخام في تكلفة كل منتج":"Prep vs Raw contribution per product"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse"}}>
+            <thead><tr>{[t.productName,isAr?"تكلفة Prep":"Prep Cost",isAr?"تكلفة الخام":"Raw Cost",t.totalCost,isAr?"% Prep":"Prep %",isAr?"% خام":"Raw %"].map((h,i)=>(
+              <th key={i} style={{padding:"9px 12px",textAlign:isAr?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>
+            ))}</tr></thead>
+            <tbody>{prodCalc.slice(0,topN).map(prod=>{
+              let prepCost=0, rawCost=0;
+              prod.ingredients?.forEach(ing=>{
+                if(ing.source==="prep"){const p=prepList.find(p=>String(p.id)===String(ing.srcId));if(p){const {costPerUnit}=calcPrepCost(p);prepCost+=(parseFloat(ing.qty)||0)/1000*costPerUnit;}}
+                else{const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){rawCost+=(parseFloat(ing.qty)||0)/1000*r.price;}}
+              });
+              const total=prepCost+rawCost||1;
+              const prepPct=(prepCost/total*100).toFixed(0);
+              const rawPct=(rawCost/total*100).toFixed(0);
+              return (
+                <tr key={prod.id} style={{borderBottom:`1px solid ${C.border}22`}}>
+                  <td style={{padding:"10px 12px",fontWeight:600}}>{prod.name}</td>
+                  <td style={{padding:"10px 12px",color:"#a78bfa",fontWeight:600}}>{prepCost.toFixed(2)}</td>
+                  <td style={{padding:"10px 12px",color:C.accent,fontWeight:600}}>{rawCost.toFixed(2)}</td>
+                  <td style={{padding:"10px 12px",color:"#f87171",fontWeight:700}}>{prod.totalCost.toFixed(2)}</td>
+                  <td style={{padding:"10px 12px"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <span style={{color:"#a78bfa",fontWeight:700,minWidth:36}}>{prepPct}%</span>
+                      <div style={{flex:1,height:6,background:C.surface,borderRadius:3}}>
+                        <div style={{width:prepPct+"%",height:6,borderRadius:3,background:"#a78bfa",transition:"width .5s"}}/>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{padding:"10px 12px"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:8}}>
+                      <span style={{color:C.accent,fontWeight:700,minWidth:36}}>{rawPct}%</span>
+                      <div style={{flex:1,height:6,background:C.surface,borderRadius:3}}>
+                        <div style={{width:rawPct+"%",height:6,borderRadius:3,background:C.accent,transition:"width .5s"}}/>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}</tbody>
+          </table>
+        </div>
+      </div>}
+
+      {/* ── RAW ANALYSIS ── */}
       {show("raw")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <SecHd c={t.secRaw}/>
+        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{isAr?"تحليل المواد الخام":"Raw Materials Analysis"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
         {rawList.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
           <div>
             <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.rawHighPrice}</div>
-            {[...rawUsage].sort((a,b)=>b.price-a.price).slice(0,topN).map((r,i)=><div key={r.id} style={{marginBottom:8}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,color:C.text,fontWeight:600}}>{i+1}. {r.name}</span><span style={{fontSize:12,color:C.accent,fontWeight:700}}>{r.price.toFixed(2)}</span></div>
-              <Bar val={r.price} max={rawUsage.reduce((a,x)=>Math.max(a,x.price),0.001)} color={C.accent}/>
-            </div>)}
+            {[...rawUsage].sort((a,b)=>b.price-a.price).slice(0,topN).map((r,i)=>(
+              <div key={r.id} style={{marginBottom:8}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                  <span style={{fontSize:12,color:C.text,fontWeight:600}}>{i+1}. {r.name}</span>
+                  <span style={{fontSize:12,color:C.accent,fontWeight:700}}>{r.price.toFixed(2)}</span>
+                </div>
+                <Bar val={r.price} max={rawUsage.reduce((a,x)=>Math.max(a,x.price),0.001)} color={C.accent}/>
+              </div>
+            ))}
           </div>
           <div>
             <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.rawMostUsed}</div>
-            {[...rawUsage].sort((a,b)=>(b.inPrep+b.inProd)-(a.inPrep+a.inProd)).slice(0,topN).map((r,i)=><div key={r.id} style={{padding:"8px 12px",background:C.surface,borderRadius:8,marginBottom:6,border:`1px solid ${C.border}`}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <span style={{fontSize:12,fontWeight:600,color:C.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {r.name}</span>
-                <div style={{display:"flex",gap:6}}>
-                  <button onClick={()=>r.inPrep>0&&setRelModal({title:r.name,list:r.relatedPreps,type:"prep"})}
-                    style={{background:r.inPrep>0?"#1e3a5f":"transparent",color:r.inPrep>0?"#60a5fa":C.muted,padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700,border:"none",cursor:r.inPrep>0?"pointer":"default",fontFamily:"inherit"}}>P:{r.inPrep}</button>
-                  <button onClick={()=>r.inProd>0&&setRelModal({title:r.name,list:r.relatedProds,type:"products"})}
-                    style={{background:r.inProd>0?"#0a3326":"transparent",color:r.inProd>0?"#4ade80":C.muted,padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700,border:"none",cursor:r.inProd>0?"pointer":"default",fontFamily:"inherit"}}>M:{r.inProd}</button>
+            {[...rawUsage].sort((a,b)=>(b.inPrep+b.inProd)-(a.inPrep+a.inProd)).slice(0,topN).map((r,i)=>(
+              <div key={r.id} style={{padding:"8px 12px",background:C.surface,borderRadius:8,marginBottom:6,border:`1px solid ${C.border}`}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontSize:12,fontWeight:600,color:C.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {r.name}</span>
+                  <div style={{display:"flex",gap:6}}>
+                    <button onClick={()=>r.inPrep>0&&setRelModal({title:r.name,subtitle:t.relatedPreps,list:r.relatedPreps})}
+                      className={r.inPrep>0?"chip-prep":"chip-zero"}>
+                      P: {r.inPrep}
+                    </button>
+                    <button onClick={()=>r.inProd>0&&setRelModal({title:r.name,subtitle:t.relatedProducts,list:r.relatedProds})}
+                      className={r.inProd>0?"chip-prod":"chip-zero"}>
+                      M: {r.inProd}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>)}
+            ))}
           </div>
         </div>}
       </div>}
 
-      {relModal&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&setRelModal(null)}>
-        <div className="modal" style={{maxWidth:500}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-            <div><div style={{fontWeight:800,fontSize:15,color:C.accent}}>{relModal.title}</div>
-              <div style={{fontSize:12,color:C.muted,marginTop:2}}>{relModal.type==="prep"?t.relatedPreps:t.relatedProducts} ({relModal.list.length})</div>
+      {/* ── RAW PRICE IMPACT ── */}
+      {show("raw")&&rawUsage.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.rawPriceImpact}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"تأثير كل مادة خام على التكلفة الإجمالية":"Impact of each raw material on total cost"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10}}>
+          {[...rawUsage].sort((a,b)=>((b.inPrep+b.inProd)-(a.inPrep+a.inProd))).slice(0,topN).map(r=>(
+            <div key={r.id} style={{background:C.surface,borderRadius:10,padding:"12px 14px",border:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{fontWeight:700,fontSize:13,color:C.text}}>{r.name}</div>
+                <div style={{fontSize:11,color:C.muted,marginTop:3}}>{isAr?"سعر:":"Price:"} <span style={{color:C.accent,fontWeight:700}}>{r.price.toFixed(2)}</span> / {r.unit}</div>
+              </div>
+              <div style={{display:"flex",gap:6}}>
+                <button onClick={()=>r.inPrep>0&&setRelModal({title:r.name,subtitle:t.relatedPreps,list:r.relatedPreps})} className={r.inPrep>0?"chip-prep":"chip-zero"}>
+                  {r.inPrep} {isAr?"Prep":"Prep"}
+                </button>
+                <button onClick={()=>r.inProd>0&&setRelModal({title:r.name,subtitle:t.relatedProducts,list:r.relatedProds})} className={r.inProd>0?"chip-prod":"chip-zero"}>
+                  {r.inProd} {isAr?"منتج":"Prod"}
+                </button>
+              </div>
             </div>
-            <button onClick={()=>setRelModal(null)} style={{background:"transparent",border:"none",color:C.muted,fontSize:20,cursor:"pointer"}}>✕</button>
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            {relModal.list.map((item,i)=><div key={item.id||i} style={{background:C.surface,borderRadius:9,padding:"10px 14px",border:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div><code style={{background:C.bg||C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8",marginLeft:8}}>{item.code}</code><span style={{fontWeight:600,fontSize:13}}>{item.name}</span></div>
-              <span className="badge badge-cls">{item.class||"—"}</span>
-            </div>)}
-          </div>
-          <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}><button className="btn btn-secondary" onClick={()=>setRelModal(null)}>{t.cancel}</button></div>
+          ))}
         </div>
       </div>}
+
+      {/* ── REL MODAL ── */}
+      {relModal&&<RelModal title={relModal.title} subtitle={relModal.subtitle} list={relModal.list} onClose={()=>setRelModal(null)} lang={lang} C={C} t={t}/>}
     </div>
   );
 }
@@ -859,10 +1114,18 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
       <div style={{fontSize:11,color:"#2e3a55",marginBottom:10}}>* {t.importNote}</div>
       <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr>{["#",t.code,t.name,t.class,t.unit,t.price,hasPerm(mod,"edit")||hasPerm(mod,"delete")?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
+          <thead><tr>
+            <th>#</th><th>{t.code}</th><th>{t.name}</th><th>{t.class}</th><th>{t.unit}</th><th>{t.price}</th>
+            <th style={{color:"#60a5fa"}}>{t.usedInPrepLbl}</th>
+            <th style={{color:"#4ade80"}}>{t.usedInProdsLbl}</th>
+            {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<th>{t.actions}</th>}
+          </tr></thead>
           <tbody>
-            {filtered.length===0?<tr><td colSpan={7} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
-            :filtered.map((m,i)=>(
+            {filtered.length===0?<tr><td colSpan={9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            :filtered.map((m,i)=>{
+              const nPrep=prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id))).length;
+              const nProd=prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id))).length;
+              return (
               <tr key={m.id}>
                 <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
                 <td><code style={{background:C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.code}</code></td>
@@ -870,11 +1133,28 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
                 <td><span className="badge badge-cls">{m.class||"—"}</span></td>
                 <td><span className={`badge badge-${m.unit}`}>{unitLbl(m.unit,t)}</span></td>
                 <td style={{color:C.accent,fontWeight:700}}>{m.price.toFixed(2)}</td>
-                <td>{(()=>{const n=prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id))).length;return n>0?<button onClick={()=>setUsageModal({item:m,type:"prep",list:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id)))})} style={{background:"#0f2a4a",color:"#60a5fa",border:"1px solid #1e3a6033",borderRadius:6,padding:"3px 10px",cursor:"pointer",fontWeight:700,fontSize:13}}>{n}</button>:<span style={{color:DARK.muted}}>0</span>;})()}</td>
-                <td>{(()=>{const n=prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id))).length;return n>0?<button onClick={()=>setUsageModal({item:m,type:"product",list:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id)))})} style={{background:"#0a2a1a",color:"#4ade80",border:"1px solid #16a34a33",borderRadius:6,padding:"3px 10px",cursor:"pointer",fontWeight:700,fontSize:13}}>{n}</button>:<span style={{color:DARK.muted}}>0</span>;})()}</td>
-                {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<td><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}</div></td>}
+                <td>
+                  <button
+                    className={nPrep>0?"chip-prep":"chip-zero"}
+                    onClick={()=>nPrep>0&&setUsageModal({item:m,type:"prep",list:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id)))})}
+                    disabled={nPrep===0}
+                    title={nPrep>0?t.clickToView:""}
+                  >{nPrep}</button>
+                </td>
+                <td>
+                  <button
+                    className={nProd>0?"chip-prod":"chip-zero"}
+                    onClick={()=>nProd>0&&setUsageModal({item:m,type:"product",list:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id)))})}
+                    disabled={nProd===0}
+                    title={nProd>0?t.clickToView:""}
+                  >{nProd}</button>
+                </td>
+                {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<td><div style={{display:"flex",gap:5}}>
+                  {hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}
+                  {hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}
+                </div></td>}
               </tr>
-            ))}
+            );})}
           </tbody>
         </table>
       </div></div>
@@ -1063,10 +1343,22 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
       </div>
       <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr>{["#",t.code,t.name,t.class,t.unit,lang==="ar"?"مكونات":"Ing.",t.yieldWeight,t.costPerUnit,(hasPerm(mod,"edit")||hasPerm(mod,"delete"))?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
+          <thead><tr>
+            <th>#</th><th>{t.code}</th><th>{t.name}</th><th>{t.class}</th><th>{t.unit}</th>
+            <th>{lang==="ar"?"مكونات":"Ing."}</th><th>{t.yieldWeight}</th><th>{t.costPerUnit}</th>
+            <th style={{color:"#4ade80"}}>{t.usedInProdsLbl}</th>
+            <th style={{color:"#60a5fa"}}>{t.rawMaterialsUsed}</th>
+            <th>{t.actions}</th>
+          </tr></thead>
           <tbody>
-            {filtered.length===0?<tr><td colSpan={9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
-            :filtered.map((m,i)=>{ const {costPerUnit,yieldKg}=calcPrepCost(m); return(
+            {filtered.length===0?<tr><td colSpan={11} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            :filtered.map((m,i)=>{
+              const {costPerUnit,yieldKg}=calcPrepCost(m);
+              const nProd=prodList.filter(p=>p.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(m.id))).length;
+              const nRaw=m.ingredients?.filter(i=>i.source==="raw"||!i.source).length||0;
+              const relatedProds=prodList.filter(p=>p.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(m.id)));
+              const relatedRaws=m.ingredients?.map(i=>{const r=rawList.find(r=>String(r.id)===String(i.rawId));return r||null;}).filter(Boolean)||[];
+              return (
               <tr key={m.id}>
                 <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
                 <td><code style={{background:C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.code}</code></td>
@@ -1076,11 +1368,25 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
                 <td style={{color:C.muted}}>{m.ingredients?.length||0}</td>
                 <td style={{color:C.muted}}>{yieldKg.toFixed(3)}</td>
                 <td style={{color:C.accent,fontWeight:700}}>{costPerUnit.toFixed(4)}</td>
-                {<td><div style={{display:"flex",gap:5}}>
-                <button style={{background:"#0a2a3a",color:"#38bdf8",padding:"4px 11px",fontSize:12,border:"1px solid #0ea5e933",borderRadius:6,cursor:"pointer",fontFamily:"inherit",fontWeight:600}} onClick={()=>setViewItem(m)}>{lang==="ar"?"عرض":"View"}</button>
-                {hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}
-                {hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}
-              </div></td>}
+                <td>
+                  <button
+                    className={nProd>0?"chip-prod":"chip-zero"}
+                    onClick={()=>nProd>0&&setUsageModal({item:m,type:"product",list:relatedProds})}
+                    disabled={nProd===0}
+                  >{nProd}</button>
+                </td>
+                <td>
+                  <button
+                    className={nRaw>0?"chip-prep":"chip-zero"}
+                    onClick={()=>nRaw>0&&setUsageModal({item:m,type:"raw",list:relatedRaws})}
+                    disabled={nRaw===0}
+                  >{nRaw}</button>
+                </td>
+                <td><div style={{display:"flex",gap:5}}>
+                  <button className="btn-sm-v" onClick={()=>setViewItem(m)}>{t.view}</button>
+                  {hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}
+                  {hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}
+                </div></td>
               </tr>
             );})}
           </tbody>
@@ -1103,18 +1409,22 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
               </div>
 
               {/* summary cards */}
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:18}}>
-                {[
-                  {l:lang==="ar"?"عدد المكونات":"Ingredients", v:viewItem.ingredients?.length||0, c:DARK.blue},
-                  {l:lang==="ar"?"وزن الناتج":"Yield Weight",  v:yieldKg.toFixed(3)+" "+unitLbl(viewItem.unit,t), c:DARK.green},
-                  {l:lang==="ar"?"تكلفة/وحدة":"Cost/Unit",    v:costPerUnit.toFixed(4), c:DARK.accent},
-                ].map((s,i)=>(
-                  <div key={i} style={{background:DARK.surface,borderRadius:10,padding:"12px 16px",border:"1px solid "+DARK.border}}>
-                    <div style={{fontSize:11,color:DARK.muted,marginBottom:4,textTransform:"uppercase",letterSpacing:".05em"}}>{s.l}</div>
-                    <div style={{fontSize:18,fontWeight:800,color:s.c}}>{s.v}</div>
-                  </div>
-                ))}
-              </div>
+              {(()=>{
+                const nProdView=prodList.filter(p=>p.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(viewItem.id))).length;
+                return <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:18}}>
+                  {[
+                    {l:lang==="ar"?"عدد المكونات":"Ingredients", v:viewItem.ingredients?.length||0, c:DARK.blue},
+                    {l:lang==="ar"?"وزن الناتج":"Yield Weight",  v:yieldKg.toFixed(3)+" "+unitLbl(viewItem.unit,t), c:DARK.green},
+                    {l:lang==="ar"?"تكلفة/وحدة":"Cost/Unit",    v:costPerUnit.toFixed(4), c:DARK.accent},
+                    {l:lang==="ar"?"مستخدم في منتجات":"Used in Products", v:nProdView, c:nProdView>0?"#4ade80":DARK.muted},
+                  ].map((s,i)=>(
+                    <div key={i} style={{background:DARK.surface,borderRadius:10,padding:"12px 16px",border:"1px solid "+DARK.border}}>
+                      <div style={{fontSize:11,color:DARK.muted,marginBottom:4,textTransform:"uppercase",letterSpacing:".05em"}}>{s.l}</div>
+                      <div style={{fontSize:18,fontWeight:800,color:s.c}}>{s.v}</div>
+                    </div>
+                  ))}
+                </div>;
+              })()}
 
               {/* ingredients table */}
               <div style={{overflowX:"auto"}}>
@@ -1205,7 +1515,7 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
               <div>
                 <div style={{fontWeight:800,fontSize:15,color:DARK.accent}}>{usageModal.item.name}</div>
-                <div style={{fontSize:12,color:DARK.muted,marginTop:2}}>{t.relatedProducts} ({usageModal.list.length})</div>
+                <div style={{fontSize:12,color:DARK.muted,marginTop:2}}>{usageModal.type==="raw"?(lang==="ar"?"المواد الخام المستخدمة":"Raw Materials Used"):t.relatedProducts} ({usageModal.list.length})</div>
               </div>
               <button onClick={()=>setUsageModal(null)} style={{background:"transparent",border:"none",color:DARK.muted,fontSize:20,cursor:"pointer"}}>✕</button>
             </div>
@@ -1265,6 +1575,7 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
   const [form,setForm]=useState({name:"",class:"",sellingPrice:"",stdCost:"",ingredients:[]}); const [errs,setErrs]=useState({});
   const [delId,setDelId]=useState(null); const fileRef=useRef();
   const [ingSearch,setIngSearch]=useState("");
+  const [viewItem,setViewItem]=useState(null);
   const cls=[...(classes.raw||[]),...(classes.prep||[])];
   const blank=()=>({id:Date.now()+Math.random(),source:"raw",srcId:"",qty:"",waste:"0"});
   const reset=()=>{ setForm({name:"",class:"",sellingPrice:"",stdCost:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
@@ -1295,28 +1606,150 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
       </div>
       <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr>{["#",t.code,t.productName,t.class,lang==="ar"?"مكونات":"Ing.",t.totalCost,t.sellingPrice,t.margin,(hasPerm(mod,"edit")||hasPerm(mod,"delete"))?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
+          <thead><tr>
+            <th>#</th><th>{t.code}</th><th>{t.productName}</th><th>{t.class}</th>
+            <th style={{color:C.accent}}>{t.rawCountLbl}</th>
+            <th style={{color:"#a78bfa"}}>{t.prepCountLbl}</th>
+            <th>{t.totalCost}</th>
+            <th>{t.stdCost}</th>
+            <th>{t.variance}</th>
+            <th>{t.sellingPrice}</th>
+            <th>{t.margin}</th>
+            <th>{t.actions}</th>
+          </tr></thead>
           <tbody>
-            {filtered.length===0?<tr><td colSpan={9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
-            :filtered.map((m,i)=>{ const {totalCost,margin}=calcProductCost(m); return(
+            {filtered.length===0?<tr><td colSpan={12} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            :filtered.map((m,i)=>{
+              const {totalCost,margin}=calcProductCost(m);
+              const nRaw=m.ingredients?.filter(i=>i.source==="raw").length||0;
+              const nPrep=m.ingredients?.filter(i=>i.source==="prep").length||0;
+              const relRaws=m.ingredients?.filter(i=>i.source==="raw").map(i=>{const r=rawList.find(r=>String(r.id)===String(i.srcId));return r||null;}).filter(Boolean)||[];
+              const relPreps=m.ingredients?.filter(i=>i.source==="prep").map(i=>{const p=prepList.find(p=>String(p.id)===String(i.srcId));return p||null;}).filter(Boolean)||[];
+              return (
               <tr key={m.id}>
                 <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
                 <td><code style={{background:C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.code}</code></td>
                 <td style={{fontWeight:600}}>{m.name}</td>
                 <td><span className="badge badge-cls">{m.class||"—"}</span></td>
-                <td style={{color:C.muted}}>{m.ingredients?.length||0}</td>
+                <td>
+                  <button className={nRaw>0?"chip-raw":"chip-zero"} disabled={nRaw===0}
+                    onClick={()=>nRaw>0&&setViewItem({...m,_scrollTo:"raw"})}
+                    title={nRaw>0?t.clickToView:""}
+                  >{nRaw}</button>
+                </td>
+                <td>
+                  <button className={nPrep>0?"chip-prep":"chip-zero"} disabled={nPrep===0}
+                    onClick={()=>nPrep>0&&setViewItem({...m,_scrollTo:"prep"})}
+                    title={nPrep>0?t.clickToView:""}
+                  >{nPrep}</button>
+                </td>
                 <td style={{color:"#f87171",fontWeight:600}}>{totalCost.toFixed(2)}</td>
-                <td style={{color:DARK.muted,fontWeight:500}}>{m.stdCost>0?m.stdCost.toFixed(2):"—"}</td>
-                <td>{m.stdCost>0?(()=>{const v=totalCost-m.stdCost;return <span style={{color:v>0?"#f87171":"#4ade80",fontWeight:700}}>{v>0?"+":""}{v.toFixed(2)}</span>;})():<span style={{color:DARK.muted}}>—</span>}</td>
-                <td>{m.stdCost>0?(()=>{const vp=((totalCost-m.stdCost)/m.stdCost)*100;return <span style={{color:vp>0?"#f87171":vp<0?"#4ade80":DARK.muted,fontWeight:700,background:vp>0?"#f8717115":"#4ade8015",padding:"2px 7px",borderRadius:20}}>{vp>0?"+":""}{vp.toFixed(1)}%</span>;})():<span style={{color:DARK.muted}}>—</span>}</td>
+                <td style={{color:DARK.muted,fontWeight:500}}>{m.stdCost>0?parseFloat(m.stdCost).toFixed(2):"—"}</td>
+                <td>{m.stdCost>0?(()=>{const v=totalCost-parseFloat(m.stdCost);return <span style={{color:v>0?"#f87171":"#4ade80",fontWeight:700}}>{v>0?"+":""}{v.toFixed(2)}</span>;})():<span style={{color:DARK.muted}}>—</span>}</td>
                 <td style={{color:"#4ade80",fontWeight:600}}>{parseFloat(m.sellingPrice||0).toFixed(2)}</td>
                 <td><span style={{color:margin>30?"#4ade80":margin>15?"#fbbf24":"#f87171",fontWeight:700}}>{margin.toFixed(1)}%</span></td>
-                {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<td><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}</div></td>}
+                <td><div style={{display:"flex",gap:5}}>
+                  <button className="btn-sm-v" onClick={()=>setViewItem(m)}>{t.view}</button>
+                  {hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}
+                  {hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}
+                </div></td>
               </tr>
             );})}
           </tbody>
         </table>
       </div></div>
+      {/* ── PRODUCT VIEW MODAL ── */}
+      {viewItem&&(()=>{
+        const {totalCost,margin}=calcProductCost(viewItem);
+        const rawIngs=viewItem.ingredients?.filter(i=>i.source==="raw")||[];
+        const prepIngs=viewItem.ingredients?.filter(i=>i.source==="prep")||[];
+        const sp=parseFloat(viewItem.sellingPrice||0);
+        const IngTable=({ings,type})=>(
+          <div style={{overflowX:"auto",marginBottom:16}}>
+            <div style={{fontWeight:700,fontSize:13,color:type==="raw"?DARK.accent:"#a78bfa",marginBottom:8,display:"flex",alignItems:"center",gap:8}}>
+              {type==="raw"?(lang==="ar"?"🥩 المواد الخام":"🥩 Raw Materials"):(lang==="ar"?"⚗️ Prep Items":"⚗️ Prep Items")}
+              <span style={{background:type==="raw"?DARK.accent+"22":"#a78bfa22",color:type==="raw"?DARK.accent:"#a78bfa",padding:"1px 8px",borderRadius:20,fontSize:11}}>{ings.length}</span>
+            </div>
+            {ings.length===0?<div style={{color:DARK.muted,fontSize:12,padding:"10px 0"}}>{t.noIngredients}</div>:(
+            <table style={{width:"100%",borderCollapse:"collapse"}}>
+              <thead><tr style={{background:DARK.surface}}>
+                {["#",lang==="ar"?"المادة":"Material",lang==="ar"?"الكمية":"Qty",lang==="ar"?"الهدر":"Waste",lang==="ar"?"التكلفة":"Cost"].map((h,i)=>(
+                  <th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:DARK.muted,textTransform:"uppercase",whiteSpace:"nowrap"}}>{h}</th>
+                ))}
+              </tr></thead>
+              <tbody>{ings.map((ing,i)=>{
+                let name="",unit2="",pricePerU=0,ingCost=0;
+                if(type==="raw"){
+                  const r=rawList.find(r=>String(r.id)===String(ing.srcId));
+                  if(!r) return null;
+                  name=r.name; unit2=r.unit==="kg"?"g":r.unit==="liter"?"ml":"pcs";
+                  pricePerU=r.price;
+                  ingCost=(r.unit==="piece"?parseFloat(ing.qty)||0:(parseFloat(ing.qty)||0)/1000)*r.price;
+                } else {
+                  const p=prepList.find(p=>String(p.id)===String(ing.srcId));
+                  if(!p) return null;
+                  const {costPerUnit:cpu}=calcPrepCost(p);
+                  name=p.name; unit2=p.unit==="kg"?"g":p.unit==="liter"?"ml":"pcs";
+                  pricePerU=cpu;
+                  ingCost=(p.unit==="piece"?parseFloat(ing.qty)||0:(parseFloat(ing.qty)||0)/1000)*cpu;
+                }
+                const qty=parseFloat(ing.qty)||0;
+                return (
+                  <tr key={i} style={{borderBottom:"1px solid "+DARK.border+"22"}}>
+                    <td style={{padding:"9px 12px",color:DARK.muted,fontSize:11}}>{i+1}</td>
+                    <td style={{padding:"9px 12px",fontWeight:600}}>{name}</td>
+                    <td style={{padding:"9px 12px",color:DARK.text}}>{qty.toFixed(0)} {unit2}</td>
+                    <td style={{padding:"9px 12px"}}>{ing.waste>0?<span style={{background:DARK.yellow+"22",color:DARK.yellow,padding:"2px 7px",borderRadius:20,fontSize:11,fontWeight:700}}>{ing.waste}%</span>:<span style={{color:DARK.muted}}>0%</span>}</td>
+                    <td style={{padding:"9px 12px",color:type==="raw"?DARK.accent:"#a78bfa",fontWeight:700}}>{ingCost.toFixed(4)}</td>
+                  </tr>
+                );
+              })}</tbody>
+            </table>)}
+          </div>
+        );
+        return (
+          <div className="overlay" onClick={e=>e.target===e.currentTarget&&setViewItem(null)}>
+            <div className="modal modal-lg animate-in" style={{maxWidth:860}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:18}}>
+                <div>
+                  <div style={{fontWeight:800,fontSize:16,color:DARK.accent}}>{viewItem.name}</div>
+                  <div style={{fontSize:12,color:DARK.muted,marginTop:2}}>{viewItem.code} · {viewItem.class||"—"}</div>
+                </div>
+                <button onClick={()=>setViewItem(null)} style={{background:"transparent",border:"none",color:DARK.muted,fontSize:20,cursor:"pointer"}}>✕</button>
+              </div>
+              {/* 5 summary cards */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:18}}>
+                {[
+                  {l:lang==="ar"?"خام":"Raw",       v:rawIngs.length,          c:DARK.accent},
+                  {l:lang==="ar"?"Prep":"Prep",      v:prepIngs.length,         c:"#a78bfa"},
+                  {l:lang==="ar"?"إجمالي التكلفة":"Total Cost", v:totalCost.toFixed(2), c:"#f87171"},
+                  {l:lang==="ar"?"سعر البيع":"Selling", v:sp>0?sp.toFixed(2):"—", c:DARK.green},
+                  {l:lang==="ar"?"هامش الربح":"Margin", v:sp>0?margin.toFixed(1)+"%":"—",
+                    c:sp>0?(margin>30?DARK.green:margin>15?DARK.yellow:DARK.red):DARK.muted},
+                ].map((s,i)=>(
+                  <div key={i} style={{background:DARK.surface,borderRadius:10,padding:"12px 14px",border:"1px solid "+DARK.border}}>
+                    <div style={{fontSize:10,color:DARK.muted,textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>{s.l}</div>
+                    <div style={{fontSize:18,fontWeight:800,color:s.c}}>{s.v}</div>
+                  </div>
+                ))}
+              </div>
+              <IngTable ings={rawIngs} type="raw"/>
+              <IngTable ings={prepIngs} type="prep"/>
+              {/* cost summary */}
+              <div style={{background:DARK.surface,borderRadius:10,padding:"12px 16px",border:"1px solid "+DARK.border,display:"flex",gap:20,flexWrap:"wrap",marginTop:4}}>
+                <span style={{fontSize:12,color:DARK.muted}}>{t.totalCost}: <strong style={{color:"#f87171",fontSize:15}}>{totalCost.toFixed(4)}</strong></span>
+                {sp>0&&<span style={{fontSize:12,color:DARK.muted}}>{t.sellingPrice}: <strong style={{color:DARK.green,fontSize:15}}>{sp.toFixed(2)}</strong></span>}
+                {sp>0&&<span style={{fontSize:12,color:DARK.muted}}>{t.margin}: <strong style={{color:margin>30?DARK.green:margin>15?DARK.yellow:DARK.red,fontSize:15}}>{margin.toFixed(1)}%</strong></span>}
+                {viewItem.stdCost>0&&<span style={{fontSize:12,color:DARK.muted}}>{t.stdCost}: <strong style={{color:DARK.muted,fontSize:15}}>{parseFloat(viewItem.stdCost).toFixed(2)}</strong></span>}
+              </div>
+              <div style={{display:"flex",justifyContent:"flex-end",marginTop:16}}>
+                <button className="btn btn-secondary" onClick={()=>setViewItem(null)}>{t.cancel}</button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.products}</h2>
         <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:12}}>
