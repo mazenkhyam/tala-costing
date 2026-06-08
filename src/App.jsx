@@ -60,6 +60,19 @@ const T = {
     noSelling:"بدون سعر بيع",
     productsOverBudget:"منتجات تجاوزت المعياري",
     view:"عرض",
+    // POS / AGG pricing
+    posSellPrice:"سعر POS (المحل)", aggSellPrice:"سعر AGG (التوصيل)",
+    posMargin:"هامش POS", aggMargin:"هامش AGG",
+    posCost:"متوسط تكلفة POS", aggCost:"متوسط تكلفة AGG",
+    posAvgMargin:"متوسط هامش POS", aggAvgMargin:"متوسط هامش AGG",
+    dashPOS:"لوحة POS", dashAGG:"لوحة AGG",
+    pricingChannel:"قناة البيع",
+    showMore:"اظهر المزيد", showLess:"اظهر أقل",
+    pageSize:"عدد العناصر",
+    // main categories
+    mainCategory:"الفئة الرئيسية", addMainCategory:"إضافة فئة رئيسية",
+    mainCatRaw:"المواد الخام", mainCatPrep:"المواد شبه المصنعة", mainCatProducts:"المنتجات",
+    selectCategory:"اختر الفئة",
   },
   en: {
     dir:"ltr", font:"'DM Sans',sans-serif",
@@ -111,6 +124,18 @@ const T = {
     noSelling:"No Selling Price",
     productsOverBudget:"Products Over Budget",
     view:"View",
+    // POS / AGG pricing
+    posSellPrice:"POS Price (In-store)", aggSellPrice:"AGG Price (Delivery)",
+    posMargin:"POS Margin", aggMargin:"AGG Margin",
+    posCost:"Avg POS Cost", aggCost:"Avg AGG Cost",
+    posAvgMargin:"Avg POS Margin", aggAvgMargin:"Avg AGG Margin",
+    dashPOS:"POS Dashboard", dashAGG:"AGG Dashboard",
+    pricingChannel:"Channel",
+    showMore:"Show More", showLess:"Show Less",
+    pageSize:"Page Size",
+    mainCategory:"Main Category", addMainCategory:"Add Category",
+    mainCatRaw:"Raw Materials", mainCatPrep:"Prep Items", mainCatProducts:"Products",
+    selectCategory:"Select Category",
   }
 };
 
@@ -125,7 +150,7 @@ const defaultUsers = [
   { id:"1001", pin:"11111", name:"Admin", role:"admin", lang:"ar",
     perms:{ raw:{view:true,edit:true,delete:true}, prep:{view:true,edit:true,delete:true}, products:{view:true,edit:true,delete:true}, classes:{view:true,edit:true,delete:true} } }
 ];
-const defaultClasses = { raw:["Food Item","Package Item","Cleaning Item"], prep:["Sauce","Dough","Mix","Marinade"] };
+const defaultClasses = { raw:["Food Item","Package Item","Cleaning Item"], prep:["Sauce","Dough","Mix","Marinade"], products:["Main Dish","Beverage","Dessert","Appetizer"] };
 
 const genCode = (prefix, existing, allLists=[]) => {
   // Collect ALL codes from existing + allLists to avoid cross-module duplicates
@@ -223,14 +248,13 @@ export default function App() {
   const calcPrepCost = useCallback((prep)=>calcPrepCostFn(prep),[rawList,prepList]);
 
   const calcProductCost = useCallback((prod)=>{
-    if(!prod.ingredients?.length) return {totalCost:0,margin:0};
+    if(!prod.ingredients?.length) return {totalCost:0,margin:0,posMargin:0,aggMargin:0};
     let cost=0;
     prod.ingredients.forEach(ing=>{
       const qty2=parseFloat(ing.qty)||0;
       const waste2=(parseFloat(ing.waste)||0)/100;
       if(ing.source==="raw"){
         const raw=rawList.find(r=>String(r.id)===String(ing.srcId)); if(!raw) return;
-        // cost on raw qty (before waste)
         cost+=(raw.unit==="piece"?qty2:qty2/1000)*raw.price;
       } else {
         const prep=prepList.find(p=>String(p.id)===String(ing.srcId)); if(!prep) return;
@@ -238,8 +262,13 @@ export default function App() {
         cost+=(prep.unit==="piece"?qty2:qty2/1000)*costPerUnit;
       }
     });
-    const sp=parseFloat(prod.sellingPrice)||0;
-    return {totalCost:cost, margin:sp>0?((sp-cost)/sp)*100:0};
+    const posPrice=parseFloat(prod.posSellPrice||prod.sellingPrice)||0;
+    const aggPrice=parseFloat(prod.aggSellPrice||prod.sellingPrice)||0;
+    const sp=parseFloat(prod.sellingPrice)||posPrice||aggPrice;
+    const margin=sp>0?((sp-cost)/sp)*100:0;
+    const posMargin=posPrice>0?((posPrice-cost)/posPrice)*100:0;
+    const aggMargin=aggPrice>0?((aggPrice-cost)/aggPrice)*100:0;
+    return {totalCost:cost, margin, posMargin, aggMargin};
   },[rawList,prepList,calcPrepCost]);
 
   const hasPerm = (mod,action) => {
@@ -608,22 +637,34 @@ function NoPerm({t,C=DARK}) {
 function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calcProductCost}) {
   const [topN,setTopN]=useState(10);
   const [section,setSection]=useState("all");
+  const [channel,setChannel]=useState("pos"); // "pos" | "agg"
   const [relModal,setRelModal]=useState(null);
 
   const prodCalc=prodList.map(p=>({...p,...calcProductCost(p)}));
   const prepCalc=prepList.map(p=>({...p,...calcPrepCost(p)}));
 
-  const withSP=prodCalc.filter(p=>parseFloat(p.sellingPrice)>0);
-  const avgMargin=withSP.length?withSP.reduce((a,p)=>a+p.margin,0)/withSP.length:0;
-  const avgCost=prodCalc.length?prodCalc.reduce((a,p)=>a+p.totalCost,0)/prodCalc.length:0;
+  // POS / AGG split metrics
+  const withPOS=prodCalc.filter(p=>parseFloat(p.posSellPrice||p.sellingPrice)>0);
+  const withAGG=prodCalc.filter(p=>parseFloat(p.aggSellPrice||p.sellingPrice)>0);
+  const avgPOSMargin=withPOS.length?withPOS.reduce((a,p)=>a+p.posMargin,0)/withPOS.length:0;
+  const avgAGGMargin=withAGG.length?withAGG.reduce((a,p)=>a+p.aggMargin,0)/withAGG.length:0;
+  const avgPOSCost=withPOS.length?withPOS.reduce((a,p)=>a+p.totalCost,0)/withPOS.length:0;
+  const avgAGGCost=withAGG.length?withAGG.reduce((a,p)=>a+p.totalCost,0)/withAGG.length:0;
+
+  // Legacy combined
+  const withSP=prodCalc.filter(p=>parseFloat(p.sellingPrice||p.posSellPrice)>0);
+  const avgMargin=channel==="pos"?avgPOSMargin:avgAGGMargin;
+  const avgCost=channel==="pos"?avgPOSCost:avgAGGCost;
   const maxCost=prodCalc.length?Math.max(...prodCalc.map(p=>p.totalCost)):0;
   const minCost=prodCalc.filter(p=>p.totalCost>0).length?Math.min(...prodCalc.filter(p=>p.totalCost>0).map(p=>p.totalCost)):0;
   const withStd=prodCalc.filter(p=>parseFloat(p.stdCost)>0);
   const overBudget=withStd.filter(p=>p.totalCost>parseFloat(p.stdCost));
-  const highM=prodCalc.filter(p=>p.margin>30&&parseFloat(p.sellingPrice)>0).length;
-  const midM=prodCalc.filter(p=>p.margin>=15&&p.margin<=30&&parseFloat(p.sellingPrice)>0).length;
-  const lowM=prodCalc.filter(p=>p.margin<15&&parseFloat(p.sellingPrice)>0&&p.margin>0).length;
-  const noPrice=prodCalc.filter(p=>!parseFloat(p.sellingPrice)).length;
+
+  const getMargin=(p)=>channel==="pos"?p.posMargin:p.aggMargin;
+  const highM=prodCalc.filter(p=>getMargin(p)>30&&(parseFloat(p.posSellPrice||p.aggSellPrice||p.sellingPrice)>0)).length;
+  const midM=prodCalc.filter(p=>getMargin(p)>=15&&getMargin(p)<=30&&(parseFloat(p.posSellPrice||p.aggSellPrice||p.sellingPrice)>0)).length;
+  const lowM=prodCalc.filter(p=>getMargin(p)<15&&(parseFloat(p.posSellPrice||p.aggSellPrice||p.sellingPrice)>0)&&getMargin(p)>0).length;
+  const noPrice=prodCalc.filter(p=>!parseFloat(p.posSellPrice||p.aggSellPrice||p.sellingPrice)).length;
 
   const driverMap={};
   prodList.forEach(prod=>{prod.ingredients?.forEach(ing=>{
@@ -643,7 +684,7 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
     relatedPreps:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(r.id))),
     relatedProds:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(r.id))),
   }));
-  const atRisk=prodCalc.filter(p=>p.totalCost>0&&p.margin<20&&parseFloat(p.sellingPrice)>0).sort((a,b)=>a.margin-b.margin);
+  const atRisk=prodCalc.filter(p=>p.totalCost>0&&getMargin(p)<20&&(parseFloat(p.posSellPrice||p.aggSellPrice||p.sellingPrice)>0)).sort((a,b)=>getMargin(a)-getMargin(b));
 
   const Bar=({val,max,color})=>(<div style={{background:C.surface,borderRadius:3,height:6,flex:1}}><div style={{width:Math.min((val/(max||1))*100,100)+"%",height:6,borderRadius:3,background:color,transition:"width .4s"}}/></div>);
   const SecHd=({c,sub})=>(<div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{c}</div>{sub&&<div style={{fontSize:11,color:C.muted,marginTop:2}}>{sub}</div>}<div style={{height:2,background:C.border,marginTop:8}}/></div>);
@@ -654,7 +695,8 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
 
   return (
     <div style={{maxWidth:1100,margin:"0 auto"}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:10}}>
+      {/* Channel toggle + section filters */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:10}}>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {secs.map(s=><button key={s.id} className={`fbtn${section===s.id?" active":""}`} onClick={()=>setSection(s.id)}>{s.label}</button>)}
         </div>
@@ -664,17 +706,72 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
         </div>
       </div>
 
+      {/* POS / AGG channel tabs */}
+      <div style={{display:"flex",gap:0,marginBottom:16,background:C.surface,borderRadius:10,padding:4,width:"fit-content",border:`1px solid ${C.border}`}}>
+        {[{id:"pos",label:t.dashPOS},{id:"agg",label:t.dashAGG}].map(ch=>(
+          <button key={ch.id} onClick={()=>setChannel(ch.id)} style={{
+            background:channel===ch.id?C.accent:"transparent",
+            color:channel===ch.id?"#080b14":C.muted,
+            border:"none",borderRadius:7,padding:"7px 22px",fontFamily:"inherit",
+            fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .16s"
+          }}>{ch.label}</button>
+        ))}
+      </div>
+
+      {/* KPI dual cards: POS + AGG side by side */}
       {show("products")&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12,marginBottom:20}}>
         <KCard label={lang==="ar"?"إجمالي المنتجات":"Total Products"} value={prodList.length} color={C.accent}/>
-        <KCard label={lang==="ar"?"إجمالي Prep":"Total Prep"} value={prepList.length} color={C.blue}/>
         <KCard label={lang==="ar"?"إجمالي الخام":"Total Raw"} value={rawList.length} color="#a78bfa"/>
-        <KCard label={t.avgMarginLbl} value={avgMargin.toFixed(1)+"%"} color={avgMargin>30?C.green:avgMargin>15?C.yellow:C.red} sub={lang==="ar"?`أعلى تكلفة: ${maxCost.toFixed(2)} | أقل: ${minCost.toFixed(2)}`:`Max: ${maxCost.toFixed(2)} | Min: ${minCost.toFixed(2)}`}/>
-        <KCard label={t.avgCostLbl} value={avgCost.toFixed(2)} color="#f87171"/>
+        <KCard label={lang==="ar"?"إجمالي Prep":"Total Prep"} value={prepList.length} color={C.blue}/>
+        <KCard
+          label={channel==="pos"?t.posAvgMargin:t.aggAvgMargin}
+          value={(channel==="pos"?avgPOSMargin:avgAGGMargin).toFixed(1)+"%"}
+          color={(channel==="pos"?avgPOSMargin:avgAGGMargin)>30?C.green:(channel==="pos"?avgPOSMargin:avgAGGMargin)>15?C.yellow:C.red}
+          sub={lang==="ar"?`أعلى تكلفة: ${maxCost.toFixed(2)} | أقل: ${minCost.toFixed(2)}`:`Max: ${maxCost.toFixed(2)} | Min: ${minCost.toFixed(2)}`}
+        />
+        <KCard label={channel==="pos"?t.posCost:t.aggCost} value={(channel==="pos"?avgPOSCost:avgAGGCost).toFixed(2)} color="#f87171"/>
         <KCard label={t.productsOverBudget} value={overBudget.length} sub={withStd.length>0?`/ ${withStd.length} ${lang==="ar"?"لهم معياري":"with target"}`:""} color={overBudget.length>0?C.red:C.green}/>
       </div>}
 
+      {/* Side-by-side POS vs AGG summary */}
+      {show("products")&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+        {[{ch:"pos",label:t.dashPOS,color:"#22c55e"},{ch:"agg",label:t.dashAGG,color:"#3b82f6"}].map(({ch,label,color})=>{
+          const prods=prodCalc.filter(p=>parseFloat(ch==="pos"?(p.posSellPrice||p.sellingPrice):(p.aggSellPrice||p.sellingPrice))>0);
+          const avgM=prods.length?prods.reduce((a,p)=>a+(ch==="pos"?p.posMargin:p.aggMargin),0)/prods.length:0;
+          const avgC=prods.length?prods.reduce((a,p)=>a+p.totalCost,0)/prods.length:0;
+          const high=prods.filter(p=>(ch==="pos"?p.posMargin:p.aggMargin)>30).length;
+          const low=prods.filter(p=>(ch==="pos"?p.posMargin:p.aggMargin)<15&&(ch==="pos"?p.posMargin:p.aggMargin)>0).length;
+          return (
+            <div key={ch} className="card" style={{padding:"14px 16px",border:`2px solid ${channel===ch?color:C.border}`}}>
+              <div style={{fontWeight:700,fontSize:13,color,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
+                <span style={{width:8,height:8,borderRadius:"50%",background:color,display:"inline-block"}}/>
+                {label}
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                <div style={{background:C.surface,borderRadius:7,padding:"8px 10px"}}>
+                  <div style={{fontSize:18,fontWeight:800,color:avgM>30?C.green:avgM>15?C.yellow:C.red}}>{avgM.toFixed(1)}%</div>
+                  <div style={{fontSize:10,color:C.muted}}>{t.avgMarginLbl}</div>
+                </div>
+                <div style={{background:C.surface,borderRadius:7,padding:"8px 10px"}}>
+                  <div style={{fontSize:18,fontWeight:800,color:"#f87171"}}>{avgC.toFixed(2)}</div>
+                  <div style={{fontSize:10,color:C.muted}}>{t.avgCostLbl}</div>
+                </div>
+                <div style={{background:C.surface,borderRadius:7,padding:"8px 10px"}}>
+                  <div style={{fontSize:16,fontWeight:700,color:C.green}}>{high}</div>
+                  <div style={{fontSize:10,color:C.muted}}>{lang==="ar"?"هامش >30%":"Margin >30%"}</div>
+                </div>
+                <div style={{background:C.surface,borderRadius:7,padding:"8px 10px"}}>
+                  <div style={{fontSize:16,fontWeight:700,color:C.red}}>{low}</div>
+                  <div style={{fontSize:10,color:C.muted}}>{lang==="ar"?"هامش <15%":"Margin <15%"}</div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>}
+
       {show("products")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <SecHd c={t.marginDistribution} sub={lang==="ar"?"توزيع المنتجات حسب هامش الربح":"Products distributed by profit margin"}/>
+        <SecHd c={t.marginDistribution} sub={lang==="ar"?`توزيع المنتجات حسب هامش الربح — ${channel==="pos"?"POS":"AGG"}`:`Products by margin — ${channel==="pos"?"POS":"AGG"}`}/>
         {prodCalc.length===0?noMsg:<>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,marginBottom:14}}>
             {[{l:t.highMargin,n:highM,col:C.green},{l:t.midMargin,n:midM,col:C.yellow},{l:t.lowMargin,n:lowM,col:C.red},{l:t.noSelling,n:noPrice,col:C.muted}].map((s,i)=>{
@@ -696,7 +793,7 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
         <SecHd c={t.secProducts}/>
         {prodCalc.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16}}>
           {[
-            {title:lang==="ar"?"أعلى هامش ربح":"Highest Margin",data:[...prodCalc].filter(p=>parseFloat(p.sellingPrice)>0).sort((a,b)=>b.margin-a.margin),fn:p=>p.margin,fmt:v=>v.toFixed(1)+"%",col:p=>p.margin>30?C.green:p.margin>15?C.yellow:C.red},
+            {title:lang==="ar"?"أعلى هامش ربح":"Highest Margin",data:[...prodCalc].filter(p=>parseFloat(p.posSellPrice||p.aggSellPrice||p.sellingPrice)>0).sort((a,b)=>getMargin(b)-getMargin(a)),fn:p=>getMargin(p),fmt:v=>v.toFixed(1)+"%",col:p=>getMargin(p)>30?C.green:getMargin(p)>15?C.yellow:C.red},
             {title:lang==="ar"?"أعلى تكلفة":"Highest Cost",data:[...prodCalc].sort((a,b)=>b.totalCost-a.totalCost),fn:p=>p.totalCost,fmt:v=>v.toFixed(2),col:()=>"#f87171"},
             {title:lang==="ar"?"أقل تكلفة":"Lowest Cost",data:[...prodCalc].filter(p=>p.totalCost>0).sort((a,b)=>a.totalCost-b.totalCost),fn:p=>p.totalCost,fmt:v=>v.toFixed(2),col:()=>C.green},
           ].map((sec,si)=><div key={si}>
@@ -1127,6 +1224,7 @@ function IngRowProd({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
 
 
 function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[],showToast,hasPerm,mod}) {
+  const [searchRaw,setSearchRaw]=useState("");
   const [search,setSearch]=useState("");
   const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false);
@@ -1136,10 +1234,17 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
   const [delId,setDelId]=useState(null);
   const [usageModal,setUsageModal]=useState(null);
   const [showImport,setShowImport]=useState(false);
-  const [previewData,setPreviewData]=useState(null); // Preview before import
-  const [bulkDelModal,setBulkDelModal]=useState(null); // Bulk delete duplicates
+  const [previewData,setPreviewData]=useState(null);
+  const [bulkDelModal,setBulkDelModal]=useState(null);
+  const [pageSize,setPageSize]=useState(20);
+  const [showCount,setShowCount]=useState(20);
   const fileRef=useRef();
   const cls=classes.raw||[];
+
+  // Debounce search for speed
+  useEffect(()=>{const timer=setTimeout(()=>setSearch(searchRaw),200);return()=>clearTimeout(timer);},[searchRaw]);
+  // Reset showCount when filter/search changes
+  useEffect(()=>setShowCount(pageSize),[search,fcls,pageSize]);
 
   const ok=()=>{ const e={}; if(!form.name.trim())e.name=t.required; if(!form.price||parseFloat(form.price)<=0)e.price=t.positiveNum; setErrs(e); return !Object.keys(e).length; };
   const reset=()=>{ setForm({name:"",unit:"kg",price:"",class:""}); setErrs({}); setShowForm(false); setEditId(null); };
@@ -1153,7 +1258,6 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
   const doEdit=m=>{ setForm({name:m.name,unit:m.unit,price:String(m.price),class:m.class||""}); setEditId(m.id); setShowForm(true); };
   const doDelete=id=>{ setRawList(p=>p.filter(m=>m.id!==id)); setDelId(null); showToast(t.deletedOk,"error"); };
 
-  // Find duplicates (same name, different id)
   const findDuplicates=()=>{
     const nameMap={};
     rawList.forEach(m=>{
@@ -1165,7 +1269,6 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
   };
   const dups=findDuplicates();
 
-  // Download template
   const doDownloadTemplate=()=>{
     const sample=[
       {Code:"Raw-00001",Name:lang==="ar"?"دجاج خام":"Chicken Raw",Class:"Food Item",Unit:"kg",Price:20},
@@ -1180,7 +1283,6 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
     XLSX.writeFile(wb,"TALA_Raw_Materials_Template.xlsx");
   };
 
-  // Export current data
   const doExport=()=>{
     const data=rawList.map(m=>({Code:m.code,Name:m.name,Class:m.class||"",Unit:m.unit,Price:m.price}));
     if(!data.length){doDownloadTemplate();return;}
@@ -1191,7 +1293,6 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
     XLSX.writeFile(wb,"TALA_Raw_Materials_Export.xlsx");
   };
 
-  // Parse import file → show preview
   const doImport=e=>{
     const file=e.target.files[0]; if(!file) return;
     const r=new FileReader();
@@ -1212,7 +1313,6 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
           const rcls=fv(row,["Class","الكلاس","class","كلاس","Category","فئة","Type","النوع"])||"Food Item";
           if(!rn) return;
           const unit=["liter","litre","l","لتر"].includes(ru)?"liter":["piece","pieces","pcs","حبة","قطعة"].includes(ru)?"piece":"kg";
-          // Detect if existing
           const existing=rawList.find(m=>m.name.toLowerCase()===rn.toLowerCase()) ||
                          (rc?rawList.find(m=>m.code===rc):null);
           items.push({name:rn,code:rc||"",unit,price:rp,class:rcls,_existing:existing,_action:existing?"update":"add"});
@@ -1224,7 +1324,6 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
     r.readAsBinaryString(file); e.target.value="";
   };
 
-  // Confirm import after preview (editable)
   const confirmImport=(editedItems)=>{
     const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
     let updated=0,added=0;
@@ -1250,10 +1349,15 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
 
   const [selected,setSelected]=useState(new Set());
   const toggleSel=(id)=>setSelected(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
-  const toggleAll=()=>setSelected(p=>p.size===filtered.length?new Set():new Set(filtered.map(m=>m.id)));
+  const toggleAll=()=>setSelected(p=>p.size===displayed.length?new Set():new Set(displayed.map(m=>m.id)));
   const bulkDelete=()=>{setRawList(p=>p.filter(m=>!selected.has(m.id)));setSelected(new Set());showToast(lang==="ar"?`تم حذف ${selected.size} صنف`:`Deleted ${selected.size} items`,"error");};
 
-  const filtered=rawList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
+  const filtered=rawList.filter(m=>
+    (m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))
+    &&(fcls==="all"||m.class===fcls)
+  );
+  const displayed=filtered.slice(0,showCount);
+  const hasMore=filtered.length>showCount;
 
   return (
     <div>
@@ -1272,8 +1376,13 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
       </div>}
 
       <div className="card" style={{padding:"12px 14px",marginBottom:12,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",justifyContent:"space-between"}}>
-        <input style={{maxWidth:240}} placeholder={t.search} value={search} onChange={e=>{setSearch(e.target.value);setSelected(new Set());}}/>
+        <input style={{maxWidth:240}} placeholder={t.search} value={searchRaw} onChange={e=>{setSearchRaw(e.target.value);setSelected(new Set());}}/>
         <div style={{display:"flex",gap:7,flexWrap:"wrap",alignItems:"center"}}>
+          {/* Page size selector */}
+          <div style={{display:"flex",alignItems:"center",gap:5,background:C.surface,borderRadius:7,padding:"4px 8px",border:`1px solid ${C.border}`}}>
+            <span style={{fontSize:11,color:C.muted}}>{t.pageSize}:</span>
+            {[5,10,20].map(n=><button key={n} onClick={()=>{setPageSize(n);setShowCount(n);}} style={{background:pageSize===n?C.accent:"transparent",color:pageSize===n?"#080b14":C.muted,border:"none",borderRadius:5,padding:"3px 8px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{n}</button>)}
+          </div>
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
@@ -1303,13 +1412,13 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
         <table style={{width:"100%",borderCollapse:"collapse"}}>
           <thead><tr>
             {hasPerm(mod,"delete")&&<th style={{width:36,padding:"10px 8px"}}>
-              <input type="checkbox" checked={filtered.length>0&&selected.size===filtered.length} onChange={toggleAll} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/>
+              <input type="checkbox" checked={displayed.length>0&&selected.size===displayed.length} onChange={toggleAll} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/>
             </th>}
             {["#",t.code,t.name,t.class,t.unit,t.price,t.usedInPrep,t.usedInProducts,hasPerm(mod,"edit")||hasPerm(mod,"delete")?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}
           </tr></thead>
           <tbody>
-            {filtered.length===0?<tr><td colSpan={hasPerm(mod,"delete")?10:9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
-            :filtered.map((m,i)=>{
+            {displayed.length===0?<tr><td colSpan={hasPerm(mod,"delete")?10:9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            :displayed.map((m,i)=>{
               const nPrep=prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id))).length;
               const nProd=prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id))).length;
               const isDup=dups.some(d=>d.id===m.id);
@@ -1335,6 +1444,12 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
           </tbody>
         </table>
       </div></div>
+      {/* Show more / pagination */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginTop:10}}>
+        <span style={{fontSize:12,color:C.muted}}>{lang==="ar"?`عرض ${displayed.length} من ${filtered.length}`:`Showing ${displayed.length} of ${filtered.length}`}</span>
+        {hasMore&&<button onClick={()=>setShowCount(c=>c+pageSize)} style={{background:C.surface,color:C.accent,border:`1px solid ${C.border}`,borderRadius:7,padding:"6px 16px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t.showMore} (+{Math.min(pageSize,filtered.length-showCount)})</button>}
+        {showCount>pageSize&&!hasMore&&<button onClick={()=>setShowCount(pageSize)} style={{background:"transparent",color:C.muted,border:`1px solid ${C.border}`,borderRadius:7,padding:"6px 16px",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>{t.showLess}</button>}
+      </div>
 
       {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.rawMat} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={doImport}/>}
       {usageModal&&<UsageModal t={t} C={C} usageModal={usageModal} onClose={()=>setUsageModal(null)}/>}
@@ -1683,45 +1798,70 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
 
 
 function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classes,calcPrepCost,calcProductCost,showToast,hasPerm,mod}) {
-  const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
+  const [searchRaw,setSearchRaw]=useState(""); const [search,setSearch]=useState("");
+  const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
-  const [form,setForm]=useState({name:"",class:"",sellingPrice:"",stdCost:"",ingredients:[]}); const [errs,setErrs]=useState({});
+  const [form,setForm]=useState({name:"",class:"",sellingPrice:"",posSellPrice:"",aggSellPrice:"",stdCost:"",ingredients:[]}); const [errs,setErrs]=useState({});
   const [delId,setDelId]=useState(null); const [showImport,setShowImport]=useState(false); const fileRef=useRef();
   const [ingSearch,setIngSearch]=useState("");
-  const cls=[...(classes.raw||[]),...(classes.prep||[])];
+  const [pageSize,setPageSize]=useState(20); const [showCount,setShowCount]=useState(20);
+  // Use products classes if available, fallback to raw+prep
+  const cls=[...(classes.products||[]),...(classes.raw||[]),...(classes.prep||[])].filter((v,i,a)=>a.indexOf(v)===i);
   const blank=()=>({id:Date.now()+Math.random(),source:"raw",srcId:"",qty:"",waste:"0"});
-  const reset=()=>{ setForm({name:"",class:"",sellingPrice:"",stdCost:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
+  const reset=()=>{ setForm({name:"",class:"",sellingPrice:"",posSellPrice:"",aggSellPrice:"",stdCost:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
   const ok=()=>{ const e={}; if(!form.name.trim())e.name=t.required; setErrs(e); return !Object.keys(e).length; };
-  const save=()=>{ if(!ok()) return; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); const ings=form.ingredients.filter(i=>i.srcId&&parseFloat(i.qty)>0); if(editId!==null) setProdList(p=>p.map(m=>m.id===editId?{...m,name:form.name.trim(),class:form.class,sellingPrice:parseFloat(form.sellingPrice)||0,ingredients:ings,lastUpdated:now}:m)); else { const code=genCode("Prod",prodList); setProdList(p=>[...p,{id:Date.now(),code,name:form.name.trim(),class:form.class,sellingPrice:parseFloat(form.sellingPrice)||0,ingredients:ings,lastUpdated:now}]); } reset(); showToast(t.savedOk); };
-  const doEdit=m=>{ setForm({name:m.name,class:m.class||"",sellingPrice:String(m.sellingPrice||""),stdCost:String(m.stdCost||""),ingredients:m.ingredients||[]}); setEditId(m.id); setShowForm(true); };
+  const save=()=>{
+    if(!ok()) return;
+    const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
+    const ings=form.ingredients.filter(i=>i.srcId&&parseFloat(i.qty)>0);
+    const posP=parseFloat(form.posSellPrice)||0;
+    const aggP=parseFloat(form.aggSellPrice)||0;
+    const sp=parseFloat(form.sellingPrice)||posP||aggP;
+    const prod={name:form.name.trim(),class:form.class,sellingPrice:sp,posSellPrice:posP,aggSellPrice:aggP,stdCost:parseFloat(form.stdCost)||0,ingredients:ings,lastUpdated:now};
+    if(editId!==null) setProdList(p=>p.map(m=>m.id===editId?{...m,...prod}:m));
+    else { const code=genCode("Prod",prodList); setProdList(p=>[...p,{id:Date.now(),code,...prod}]); }
+    reset(); showToast(t.savedOk);
+  };
+  const doEdit=m=>{ setForm({name:m.name,class:m.class||"",sellingPrice:String(m.sellingPrice||""),posSellPrice:String(m.posSellPrice||""),aggSellPrice:String(m.aggSellPrice||""),stdCost:String(m.stdCost||""),ingredients:m.ingredients||[]}); setEditId(m.id); setShowForm(true); };
   const doDelete=id=>{ setProdList(p=>p.filter(m=>m.id!==id)); setDelId(null); showToast(t.deletedOk,"error"); };
   const addI=()=>setForm(f=>({...f,ingredients:[...f.ingredients,blank()]}));
   const remI=id=>setForm(f=>({...f,ingredients:f.ingredients.filter(i=>i.id!==id)}));
   const updI=(id,k,v)=>setForm(f=>({...f,ingredients:f.ingredients.map(i=>i.id===id?{...i,[k]:v}:i)}));
-  const live=calcProductCost({ingredients:form.ingredients,sellingPrice:form.sellingPrice});
+  const live=calcProductCost({ingredients:form.ingredients,sellingPrice:form.sellingPrice,posSellPrice:form.posSellPrice,aggSellPrice:form.aggSellPrice});
   const srcOpts=s=>s==="raw"?rawList:prepList;
+
+  // Debounce
+  useEffect(()=>{const timer=setTimeout(()=>setSearch(searchRaw),200);return()=>clearTimeout(timer);},[searchRaw]);
+  useEffect(()=>setShowCount(pageSize),[search,fcls,pageSize]);
+
   const doDownloadTemplate=()=>{
-    const rows=[{Code:"Prod-00001",Name:lang==="ar"?"بيتزا مرغريتا":"Margherita Pizza",Class:"Food Item","Selling Price":25,"Std Cost":10},{Code:"",Name:"",Class:"","Selling Price":"","Std Cost":""}];
-    const ws=XLSX.utils.json_to_sheet(rows);ws["!cols"]=[{wch:14},{wch:25},{wch:14},{wch:14},{wch:12}];
+    const rows=[{Code:"Prod-00001",Name:lang==="ar"?"بيتزا مرغريتا":"Margherita Pizza",Class:"Food Item","POS Price":25,"AGG Price":28,"Std Cost":10},{Code:"",Name:"",Class:"","POS Price":"","AGG Price":"","Std Cost":""}];
+    const ws=XLSX.utils.json_to_sheet(rows);ws["!cols"]=[{wch:14},{wch:25},{wch:14},{wch:12},{wch:12},{wch:12}];
     const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Products");XLSX.writeFile(wb,"TALA_Products_Template.xlsx");
   };
   const doExport=()=>{
     if(!prodList.length){doDownloadTemplate();return;}
-    const rows=prodList.map(p=>{const {totalCost,margin}=calcProductCost(p);return {Code:p.code,Name:p.name,Class:p.class||"","Selling Price":p.sellingPrice||0,"Std Cost":p.stdCost||0,"Total Cost":totalCost.toFixed(4),"Margin %":margin.toFixed(2)+"%"};});
+    const rows=prodList.map(p=>{const {totalCost,posMargin,aggMargin}=calcProductCost(p);return {Code:p.code,Name:p.name,Class:p.class||"","POS Price":p.posSellPrice||p.sellingPrice||0,"AGG Price":p.aggSellPrice||p.sellingPrice||0,"Std Cost":p.stdCost||0,"Total Cost":totalCost.toFixed(4),"POS Margin %":posMargin.toFixed(2)+"%","AGG Margin %":aggMargin.toFixed(2)+"%"};});
     const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Products");XLSX.writeFile(wb,"TALA_Products_Export.xlsx");
   };
-  const doImport=e=>{ const file=e.target.files[0]; if(!file) return; const r=new FileReader(); r.onload=ev=>{ try{ const wb=XLSX.read(ev.target.result,{type:"binary"}); const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]); let n=0; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); setProdList(prev=>{ const u=[...prev]; rows.forEach(row=>{ const rn=String(row[t.name]||row.Name||row["الاسم"]||"").trim(); const rc=String(row[t.code]||row.Code||row["الكود"]||"").trim(); const rsp=parseFloat(row[t.sellingPrice]||row["Selling Price"]||0); let i=u.findIndex(m=>m.name.toLowerCase()===rn.toLowerCase()); if(i===-1) i=u.findIndex(m=>m.code===rc); if(i!==-1){u[i]={...u[i],lastUpdated:now}; if(rsp>0)u[i].sellingPrice=rsp; n++;} }); return u; }); showToast(n>0?`${t.importedOk} ${n} ${t.importedItems}`:t.noMatch,n>0?"success":"warning"); }catch{ showToast("error","error"); } }; r.readAsBinaryString(file); e.target.value=""; };
+  const doImport=e=>{ const file=e.target.files[0]; if(!file) return; const r=new FileReader(); r.onload=ev=>{ try{ const wb=XLSX.read(ev.target.result,{type:"binary"}); const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]); let n=0; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); setProdList(prev=>{ const u=[...prev]; rows.forEach(row=>{ const rn=String(row[t.name]||row.Name||row["الاسم"]||"").trim(); const rc=String(row[t.code]||row.Code||row["الكود"]||"").trim(); const rsp=parseFloat(row["Selling Price"]||row["POS Price"]||0); const ragg=parseFloat(row["AGG Price"]||0); let i=u.findIndex(m=>m.name.toLowerCase()===rn.toLowerCase()); if(i===-1) i=u.findIndex(m=>m.code===rc); if(i!==-1){u[i]={...u[i],lastUpdated:now}; if(rsp>0)u[i].posSellPrice=rsp; if(ragg>0)u[i].aggSellPrice=ragg; n++;} }); return u; }); showToast(n>0?`${t.importedOk} ${n} ${t.importedItems}`:t.noMatch,n>0?"success":"warning"); }catch{ showToast("error","error"); } }; r.readAsBinaryString(file); e.target.value=""; };
   const [selected,setSelected]=useState(new Set());
   const toggleSel=(id)=>setSelected(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
-  const toggleAll=()=>setSelected(p=>p.size===filtered.length?new Set():new Set(filtered.map(m=>m.id)));
+  const toggleAll=()=>setSelected(p=>p.size===displayed.length?new Set():new Set(displayed.map(m=>m.id)));
   const bulkDelete=()=>{setProdList(p=>p.filter(m=>!selected.has(m.id)));setSelected(new Set());showToast(lang==="ar"?`تم حذف ${selected.size} منتج`:`Deleted ${selected.size} items`,"error");};
 
   const filtered=prodList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
+  const displayed=filtered.slice(0,showCount);
+  const hasMore=filtered.length>showCount;
   return (
     <div>
       <div className="card" style={{padding:"12px 14px",marginBottom:12,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",justifyContent:"space-between"}}>
-        <input style={{maxWidth:220}} placeholder={t.search} value={search} onChange={e=>{setSearch(e.target.value);setSelected(new Set());}}/>
-        <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+        <input style={{maxWidth:220}} placeholder={t.search} value={searchRaw} onChange={e=>{setSearchRaw(e.target.value);setSelected(new Set());}}/>
+        <div style={{display:"flex",gap:7,flexWrap:"wrap",alignItems:"center"}}>
+          <div style={{display:"flex",alignItems:"center",gap:5,background:C.surface,borderRadius:7,padding:"4px 8px",border:`1px solid ${C.border}`}}>
+            <span style={{fontSize:11,color:C.muted}}>{t.pageSize}:</span>
+            {[5,10,20].map(n=><button key={n} onClick={()=>{setPageSize(n);setShowCount(n);}} style={{background:pageSize===n?C.accent:"transparent",color:pageSize===n?"#080b14":C.muted,border:"none",borderRadius:5,padding:"3px 8px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{n}</button>)}
+          </div>
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
@@ -1738,18 +1878,20 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
       </div>}
 
       <div style={{display:"flex",gap:7,marginBottom:10,flexWrap:"wrap"}}>
-        <button className={`filter-btn${fcls==="all"?" active":""}`} onClick={()=>setFcls("all")}>{t.all}</button>
-        {cls.map(c=><button key={c} className={`filter-btn${fcls===c?" active":""}`} onClick={()=>setFcls(c)}>{c}</button>)}
+        <button className={`filter-btn${fcls==="all"?" active":""}`} onClick={()=>setFcls("all")}>{t.all} ({prodList.length})</button>
+        {cls.map(c=><button key={c} className={`filter-btn${fcls===c?" active":""}`} onClick={()=>setFcls(c)}>{c} ({prodList.filter(m=>m.class===c).length})</button>)}
       </div>
       <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
           <thead><tr>
-            {hasPerm(mod,"delete")&&<th style={{width:36,padding:"10px 8px"}}><input type="checkbox" checked={filtered.length>0&&selected.size===filtered.length} onChange={toggleAll} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/></th>}
-            {["#",t.code,t.productName,t.class,lang==="ar"?"مكونات":"Ing.",t.totalCost,t.sellingPrice,t.margin,(hasPerm(mod,"edit")||hasPerm(mod,"delete"))?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}
+            {hasPerm(mod,"delete")&&<th style={{width:36,padding:"10px 8px"}}><input type="checkbox" checked={displayed.length>0&&selected.size===displayed.length} onChange={toggleAll} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/></th>}
+            {["#",t.code,t.productName,t.class,lang==="ar"?"مكونات":"Ing.",t.totalCost,t.stdCost,lang==="ar"?"POS":"POS",lang==="ar"?"هامش POS":"POS%",lang==="ar"?"AGG":"AGG",lang==="ar"?"هامش AGG":"AGG%",(hasPerm(mod,"edit")||hasPerm(mod,"delete"))?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}
           </tr></thead>
           <tbody>
-            {filtered.length===0?<tr><td colSpan={hasPerm(mod,"delete")?10:9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
-            :filtered.map((m,i)=>{ const {totalCost,margin}=calcProductCost(m); const isSel=selected.has(m.id); return(
+            {displayed.length===0?<tr><td colSpan={12} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            :displayed.map((m,i)=>{ const {totalCost,posMargin,aggMargin}=calcProductCost(m); const isSel=selected.has(m.id);
+              const posP=parseFloat(m.posSellPrice||m.sellingPrice||0); const aggP=parseFloat(m.aggSellPrice||m.sellingPrice||0);
+              return(
               <tr key={m.id} style={{background:isSel?C.accent+"12":""}}>
                 {hasPerm(mod,"delete")&&<td style={{padding:"10px 8px",textAlign:"center"}}><input type="checkbox" checked={isSel} onChange={()=>toggleSel(m.id)} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/></td>}
                 <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
@@ -1759,23 +1901,44 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
                 <td style={{color:C.muted}}>{m.ingredients?.length||0}</td>
                 <td style={{color:"#f87171",fontWeight:600}}>{totalCost.toFixed(2)}</td>
                 <td style={{color:DARK.muted,fontWeight:500}}>{m.stdCost>0?m.stdCost.toFixed(2):"—"}</td>
-                <td>{m.stdCost>0?(()=>{const v=totalCost-m.stdCost;return <span style={{color:v>0?"#f87171":"#4ade80",fontWeight:700}}>{v>0?"+":""}{v.toFixed(2)}</span>;})():<span style={{color:DARK.muted}}>—</span>}</td>
-                <td>{m.stdCost>0?(()=>{const vp=((totalCost-m.stdCost)/m.stdCost)*100;return <span style={{color:vp>0?"#f87171":vp<0?"#4ade80":DARK.muted,fontWeight:700,background:vp>0?"#f8717115":"#4ade8015",padding:"2px 7px",borderRadius:20}}>{vp>0?"+":""}{vp.toFixed(1)}%</span>;})():<span style={{color:DARK.muted}}>—</span>}</td>
-                <td style={{color:"#4ade80",fontWeight:600}}>{parseFloat(m.sellingPrice||0).toFixed(2)}</td>
-                <td><span style={{color:margin>30?"#4ade80":margin>15?"#fbbf24":"#f87171",fontWeight:700}}>{margin.toFixed(1)}%</span></td>
+                <td style={{color:"#4ade80",fontWeight:600}}>{posP>0?posP.toFixed(2):"—"}</td>
+                <td><span style={{color:posMargin>30?"#4ade80":posMargin>15?"#fbbf24":"#f87171",fontWeight:700}}>{posP>0?posMargin.toFixed(1)+"%":"—"}</span></td>
+                <td style={{color:"#60a5fa",fontWeight:600}}>{aggP>0?aggP.toFixed(2):"—"}</td>
+                <td><span style={{color:aggMargin>30?"#4ade80":aggMargin>15?"#fbbf24":"#f87171",fontWeight:700}}>{aggP>0?aggMargin.toFixed(1)+"%":"—"}</span></td>
                 {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<td><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}</div></td>}
               </tr>
             );})}
           </tbody>
         </table>
       </div></div>
+      {/* Pagination */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginTop:10}}>
+        <span style={{fontSize:12,color:C.muted}}>{lang==="ar"?`عرض ${displayed.length} من ${filtered.length}`:`Showing ${displayed.length} of ${filtered.length}`}</span>
+        {hasMore&&<button onClick={()=>setShowCount(c=>c+pageSize)} style={{background:C.surface,color:C.accent,border:`1px solid ${C.border}`,borderRadius:7,padding:"6px 16px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{t.showMore} (+{Math.min(pageSize,filtered.length-showCount)})</button>}
+        {showCount>pageSize&&!hasMore&&<button onClick={()=>setShowCount(pageSize)} style={{background:"transparent",color:C.muted,border:`1px solid ${C.border}`,borderRadius:7,padding:"6px 16px",fontSize:12,cursor:"pointer",fontFamily:"inherit"}}>{t.showLess}</button>}
+      </div>
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.products}</h2>
-        <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:12}}>
+        <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:10,marginBottom:10}}>
           <div><label className="lbl">{t.productName}</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>{errs.name&&<div className="err">{errs.name}</div>}</div>
           <div><label className="lbl">{t.class}</label><select value={form.class} onChange={e=>setForm({...form,class:e.target.value})}><option value="">—</option>{cls.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
-          <div><label className="lbl">{t.sellingPrice}</label><input type="number" min="0" step="0.01" value={form.sellingPrice} onChange={e=>setForm({...form,sellingPrice:e.target.value})} placeholder="0.00"/></div>
-          <div><label className="lbl">{t.stdCost}</label><input type="number" min="0" step="0.01" value={form.stdCost||""} onChange={e=>setForm({...form,stdCost:e.target.value})} placeholder="0.00"/></div>
+        </div>
+        {/* POS / AGG pricing grid */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:10,background:C.surface,borderRadius:9,padding:"12px 14px",border:`1px solid ${C.border}`}}>
+          <div>
+            <label className="lbl" style={{color:"#22c55e"}}>🏪 {t.posSellPrice}</label>
+            <input type="number" min="0" step="0.01" value={form.posSellPrice} onChange={e=>setForm({...form,posSellPrice:e.target.value})} placeholder="0.00" style={{borderColor:form.posSellPrice?"#22c55e44":undefined}}/>
+            {parseFloat(form.posSellPrice)>0&&<div style={{fontSize:11,color:"#22c55e",marginTop:3}}>هامش: {live.posMargin.toFixed(1)}%</div>}
+          </div>
+          <div>
+            <label className="lbl" style={{color:"#3b82f6"}}>🛵 {t.aggSellPrice}</label>
+            <input type="number" min="0" step="0.01" value={form.aggSellPrice} onChange={e=>setForm({...form,aggSellPrice:e.target.value})} placeholder="0.00" style={{borderColor:form.aggSellPrice?"#3b82f644":undefined}}/>
+            {parseFloat(form.aggSellPrice)>0&&<div style={{fontSize:11,color:"#3b82f6",marginTop:3}}>هامش: {live.aggMargin.toFixed(1)}%</div>}
+          </div>
+          <div>
+            <label className="lbl">{t.stdCost}</label>
+            <input type="number" min="0" step="0.01" value={form.stdCost||""} onChange={e=>setForm({...form,stdCost:e.target.value})} placeholder="0.00"/>
+          </div>
         </div>
         <div className="divider"/>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
@@ -1790,8 +1953,8 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
         ))}
         <div style={{background:C.bg,borderRadius:8,padding:"10px 13px",marginTop:8,display:"flex",gap:16,flexWrap:"wrap"}}>
           <span style={{fontSize:12,color:C.muted}}>{t.totalCost}: <strong style={{color:C.red}}>{live.totalCost.toFixed(4)}</strong></span>
-          <span style={{fontSize:12,color:C.muted}}>{t.sellingPrice}: <strong style={{color:C.green}}>{parseFloat(form.sellingPrice||0).toFixed(2)}</strong></span>
-          <span style={{fontSize:12,color:C.muted}}>{t.margin}: <strong style={{color:live.margin>30?C.green:live.margin>15?C.yellow:C.red}}>{live.margin.toFixed(1)}%</strong></span>
+          <span style={{fontSize:12,color:C.muted}}>POS: <strong style={{color:"#22c55e"}}>{parseFloat(form.posSellPrice||0).toFixed(2)}</strong> → <strong style={{color:live.posMargin>30?"#22c55e":live.posMargin>15?"#fbbf24":"#f87171"}}>{live.posMargin.toFixed(1)}%</strong></span>
+          <span style={{fontSize:12,color:C.muted}}>AGG: <strong style={{color:"#60a5fa"}}>{parseFloat(form.aggSellPrice||0).toFixed(2)}</strong> → <strong style={{color:live.aggMargin>30?"#22c55e":live.aggMargin>15?"#fbbf24":"#f87171"}}>{live.aggMargin.toFixed(1)}%</strong></span>
         </div>
         <div style={{display:"flex",gap:8,marginTop:16}}><button className="btn btn-primary" style={{flex:1}} onClick={save}>{t.save}</button><button className="btn btn-secondary" style={{flex:1}} onClick={reset}>{t.cancel}</button></div>
       </div></div>}
@@ -1805,7 +1968,11 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
 // ═══════════════════════════════════════════════════════════════
 function ClassesTab({t,lang,C=DARK,classes,setClasses,showToast,hasPerm,mod}) {
   const [et,setEt]=useState(null); const [ei,setEi]=useState(null); const [val,setVal]=useState(""); const [err,setErr]=useState("");
-  const secs=[{key:"raw",label:t.rawMat,cat:t.rawMatCategory},{key:"prep",label:t.prepItem,cat:t.prepCategory}];
+  const secs=[
+    {key:"raw",label:t.rawMat,cat:t.rawMatCategory},
+    {key:"prep",label:t.prepItem,cat:t.prepCategory},
+    {key:"products",label:t.products,cat:lang==="ar"?"كلاسات المنتجات":"Product Classes"},
+  ];
   const startAdd=k=>{ setEt(k); setEi(null); setVal(""); setErr(""); };
   const startEdit=(k,i)=>{ setEt(k); setEi(i); setVal(classes[k][i]); setErr(""); };
   const cancel=()=>{ setEt(null); setEi(null); setVal(""); setErr(""); };
