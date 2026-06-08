@@ -127,8 +127,15 @@ const defaultUsers = [
 ];
 const defaultClasses = { raw:["Food Item","Package Item","Cleaning Item"], prep:["Sauce","Dough","Mix","Marinade"] };
 
-const genCode = (prefix,existing) => {
-  const nums = existing.map(i=>parseInt(i.code?.replace(prefix+"-",""))||0);
+const genCode = (prefix, existing, allLists=[]) => {
+  // Collect ALL codes from existing + allLists to avoid cross-module duplicates
+  const allCodes = [
+    ...existing.map(i=>i.code),
+    ...allLists.flatMap(l=>l.map(i=>i.code))
+  ].filter(Boolean);
+  const nums = allCodes
+    .filter(c=>c && c.startsWith(prefix+"-"))
+    .map(c=>parseInt(c.replace(prefix+"-",""))||0);
   const next = nums.length ? Math.max(...nums)+1 : 1;
   return `${prefix}-${String(next).padStart(5,"0")}`;
 };
@@ -183,6 +190,7 @@ export default function App() {
   const calcPrepCostFn = (prep, depth=0)=>{
     if(!prep.ingredients?.length||depth>5) return {totalCost:0,yieldKg:0,costPerUnit:0};
     let totalCost=0, yieldG=0;
+    const isPiece=prep.unit==="piece";
     prep.ingredients.forEach(ing=>{
       const qty=parseFloat(ing.qty)||0;
       const waste=(parseFloat(ing.waste)||0)/100;
@@ -192,20 +200,24 @@ export default function App() {
         const subPrep=prepList.find(p=>String(p.id)===String(ing.rawId||ing.srcId||ing.prepId));
         if(!subPrep) return;
         const sub=calcPrepCostFn(subPrep,depth+1);
-        // cost = qty × costPerUnit (buy raw qty, pay for it)
+        // cost: if sub is piece → qty pieces × cost/piece; else qty g ÷ 1000 × cost/kg
         totalCost+=(subPrep.unit==="piece"?qty:qty/1000)*sub.costPerUnit;
       } else {
         const raw=rawList.find(r=>String(r.id)===String(ing.rawId));
         if(!raw) return;
-        // cost = raw qty × price (no waste adjustment on cost)
+        // cost: if raw is piece → qty pieces × price/piece; else qty g ÷ 1000 × price/kg (or liter)
         totalCost+=(raw.unit==="piece"?qty:qty/1000)*raw.price;
       }
-      // yield = net qty after waste
-      yieldG+=netQty;
+      // yield: if prep is by piece, qty = pcs (no g conversion); else qty is in grams
+      yieldG+=isPiece?netQty:netQty;
     });
+    // For piece preps: yield is in pcs (1 pcs = 1 unit); divide by 1 not 1000
+    // For kg/liter preps: yield is in grams; divide by 1000 to get kg/liter
     const yieldKg=prep.yieldOverride&&parseFloat(prep.yieldOverride)>0
       ?parseFloat(prep.yieldOverride)
-      :(yieldG/1000);
+      :isPiece
+        ?yieldG          // piece: yieldG is already piece count
+        :(yieldG/1000);  // kg/liter: convert from grams
     return {totalCost, yieldKg, costPerUnit:yieldKg>0?totalCost/yieldKg:0};
   };
   const calcPrepCost = useCallback((prep)=>calcPrepCostFn(prep),[rawList,prepList]);
@@ -292,6 +304,9 @@ export default function App() {
         .badge-cls{background:#1a1a33;color:#94a3b8;border:1px solid #2a2a4a}
         .filter-btn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
         .filter-btn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
+        .fbtn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
+        .fbtn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
+        .fbtn:hover{border-color:#3a4060;color:${DARK.text}}
         .divider{height:1px;background:${DARK.border};margin:14px 0}
         .nav-item{display:flex;align-items:center;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:${DARK.muted};transition:all .14s;border:none;background:transparent;font-family:inherit;width:100%;text-align:${lang==="ar"?"right":"left"}}
         .nav-item:hover{background:${DARK.surface};color:${DARK.text}}
@@ -827,6 +842,153 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
 }
 
 // ═══════════════════════════════════════════════════════════════
+// PREVIEW MODAL — shown after file parse, before commit
+// ═══════════════════════════════════════════════════════════════
+function PreviewModal({t,lang,C=DARK,data,onConfirm,onCancel,classes,moduleType}) {
+  const [items,setItems]=useState(()=>data.items.map((it,i)=>({...it,_idx:i,_skip:false})));
+  const ar=lang==="ar";
+  const unitOpts=["kg","liter","piece"];
+  const clsOpts=moduleType==="raw"?(classes||[]):moduleType==="prep"?(classes||[]):[];
+  const addCount=items.filter(it=>!it._skip&&!it._existing).length;
+  const updCount=items.filter(it=>!it._skip&&it._existing).length;
+  const skipCount=items.filter(it=>it._skip).length;
+  const update=(idx,field,val)=>setItems(prev=>prev.map(it=>it._idx===idx?{...it,[field]:val}:it));
+  return (
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onCancel()}>
+      <div className="modal" style={{maxWidth:900,width:"100%",maxHeight:"90vh",display:"flex",flexDirection:"column"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexShrink:0}}>
+          <div>
+            <div style={{fontWeight:800,fontSize:15,color:C.accent}}>{ar?"مراجعة البيانات قبل الاستيراد":"Review Before Import"}</div>
+            <div style={{fontSize:12,color:C.muted,marginTop:3,display:"flex",gap:12}}>
+              <span style={{color:C.green}}>✓ {ar?"يضاف":"Add"}: {addCount}</span>
+              <span style={{color:C.yellow}}>↻ {ar?"يحدَّث":"Update"}: {updCount}</span>
+              <span style={{color:C.muted}}>⊘ {ar?"يتجاهل":"Skip"}: {skipCount}</span>
+            </div>
+          </div>
+          <button onClick={onCancel} style={{background:"transparent",border:"none",color:C.muted,fontSize:22,cursor:"pointer"}}>✕</button>
+        </div>
+        <div style={{overflowY:"auto",flex:1,marginBottom:14}}>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}>
+            <thead style={{position:"sticky",top:0,zIndex:10}}>
+              <tr>
+                {[ar?"#":"#",ar?"الاسم":"Name",ar?"الكلاس":"Class",ar?"الوحدة":"Unit",ar?"السعر":"Price",ar?"الإجراء":"Action",ar?"تجاهل":"Skip"].map((h,i)=>(
+                  <th key={i} style={{padding:"8px 10px",textAlign:ar?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,borderBottom:`1px solid ${C.border}`}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((it)=>(
+                <tr key={it._idx} style={{opacity:it._skip?0.4:1,background:it._skip?"transparent":it._existing?C.accent+"08":C.green+"08"}}>
+                  <td style={{padding:"7px 10px",color:C.muted,fontSize:11}}>{it._idx+1}</td>
+                  <td style={{padding:"7px 10px"}}>
+                    <input value={it.name} onChange={e=>update(it._idx,"name",e.target.value)}
+                      style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:5,padding:"4px 8px",fontSize:12,width:"100%",outline:"none",minWidth:120}}/>
+                  </td>
+                  <td style={{padding:"7px 10px"}}>
+                    {clsOpts.length>0
+                      ?<select value={it.class||""} onChange={e=>update(it._idx,"class",e.target.value)} style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:5,padding:"4px 8px",fontSize:12,width:"100%",outline:"none"}}>
+                        <option value="">—</option>
+                        {clsOpts.map(c=><option key={c} value={c}>{c}</option>)}
+                      </select>
+                      :<span style={{color:C.muted,fontSize:11}}>—</span>}
+                  </td>
+                  <td style={{padding:"7px 10px"}}>
+                    <select value={it.unit||"kg"} onChange={e=>update(it._idx,"unit",e.target.value)} style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:5,padding:"4px 8px",fontSize:12,width:"100%",outline:"none"}}>
+                      {unitOpts.map(u=><option key={u} value={u}>{u==="kg"?t.kg:u==="liter"?t.liter:t.piece}</option>)}
+                    </select>
+                  </td>
+                  <td style={{padding:"7px 10px"}}>
+                    {it.price!==undefined
+                      ?<input type="number" value={it.price||0} onChange={e=>update(it._idx,"price",e.target.value)}
+                          style={{background:C.surface,border:`1px solid ${C.border}`,color:C.accent,borderRadius:5,padding:"4px 8px",fontSize:12,width:80,outline:"none",fontWeight:700}}/>
+                      :<span style={{color:C.muted}}>—</span>}
+                  </td>
+                  <td style={{padding:"7px 10px"}}>
+                    <span style={{padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700,
+                      background:it._existing?C.yellow+"22":C.green+"22",
+                      color:it._existing?C.yellow:C.green}}>
+                      {it._existing?(ar?"تحديث":"Update"):(ar?"إضافة":"Add")}
+                    </span>
+                  </td>
+                  <td style={{padding:"7px 10px",textAlign:"center"}}>
+                    <input type="checkbox" checked={!!it._skip} onChange={e=>update(it._idx,"_skip",e.target.checked)}
+                      style={{width:15,height:15,accentColor:C.danger,cursor:"pointer"}}/>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div style={{display:"flex",gap:8,flexShrink:0,borderTop:`1px solid ${C.border}`,paddingTop:12}}>
+          <button className="btn btn-primary" style={{flex:2}} onClick={()=>onConfirm(items)}>
+            {ar?`✅ تأكيد الاستيراد (${addCount+updCount} صنف)`:`✅ Confirm Import (${addCount+updCount} items)`}
+          </button>
+          <button className="btn btn-secondary" style={{flex:1}} onClick={onCancel}>{t.cancel}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DUPLICATE DELETE MODAL — manage duplicate names
+// ═══════════════════════════════════════════════════════════════
+function DupDeleteModal({t,lang,C=DARK,items,onDelete,onClose}) {
+  const ar=lang==="ar";
+  // Group by name
+  const groups={};
+  items.forEach(it=>{
+    const k=it.name.trim().toLowerCase();
+    if(!groups[k]) groups[k]=[];
+    groups[k].push(it);
+  });
+  const [toDelete,setToDelete]=useState({});
+  const toggleDel=(id)=>setToDelete(p=>({...p,[id]:!p[id]}));
+  const selectedCount=Object.values(toDelete).filter(Boolean).length;
+  return (
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal" style={{maxWidth:680,width:"100%",maxHeight:"85vh",display:"flex",flexDirection:"column"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexShrink:0}}>
+          <div>
+            <div style={{fontWeight:800,fontSize:15,color:C.yellow}}>{ar?"إدارة الأسماء المكررة":"Manage Duplicate Names"}</div>
+            <div style={{fontSize:12,color:C.muted,marginTop:3}}>{ar?"حدد السجلات التي تريد حذفها":"Select the records to delete"}</div>
+          </div>
+          <button onClick={onClose} style={{background:"transparent",border:"none",color:C.muted,fontSize:22,cursor:"pointer"}}>✕</button>
+        </div>
+        <div style={{overflowY:"auto",flex:1,marginBottom:14}}>
+          {Object.entries(groups).map(([key,grp])=>(
+            <div key={key} style={{marginBottom:14,background:C.surface,borderRadius:10,padding:12,border:`1px solid ${C.yellow}44`}}>
+              <div style={{fontSize:12,fontWeight:700,color:C.yellow,marginBottom:8}}>
+                ⚠ {ar?"اسم مكرر":"Duplicate"}: <span style={{color:C.text}}>{grp[0].name}</span>
+                <span style={{color:C.muted,fontWeight:400,marginRight:6,marginLeft:6}}>({grp.length} {ar?"نسخ":"copies"})</span>
+              </div>
+              {grp.map((it,i)=>(
+                <div key={it.id} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 10px",borderRadius:7,background:toDelete[it.id]?C.danger+"18":C.card,border:`1px solid ${toDelete[it.id]?C.danger+"66":C.border}`,marginBottom:5}}>
+                  <input type="checkbox" checked={!!toDelete[it.id]} onChange={()=>toggleDel(it.id)} style={{width:14,height:14,accentColor:C.danger,cursor:"pointer"}}/>
+                  <code style={{background:C.bg||C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{it.code}</code>
+                  <span style={{fontWeight:600,fontSize:12,flex:1}}>{it.name}</span>
+                  <span className="badge badge-cls">{it.class||"—"}</span>
+                  <span style={{fontSize:11,color:C.muted}}>{it.unit}</span>
+                  <span style={{fontSize:12,color:C.accent,fontWeight:700}}>{it.price?.toFixed(2)}</span>
+                  {i===0&&<span style={{fontSize:10,color:C.green,fontWeight:700,padding:"1px 7px",borderRadius:20,background:C.green+"22"}}>{ar?"الأحدث":"Newest"}</span>}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div style={{display:"flex",gap:8,flexShrink:0,borderTop:`1px solid ${C.border}`,paddingTop:12}}>
+          <button className="btn-sm-d" style={{flex:2,padding:"9px",fontSize:13,borderRadius:7,opacity:selectedCount===0?0.5:1,cursor:selectedCount===0?"not-allowed":"pointer"}}
+            onClick={()=>{if(selectedCount>0)onDelete(Object.keys(toDelete).filter(id=>toDelete[id]));}}>
+            🗑 {ar?`حذف ${selectedCount} سجل محدد`:`Delete ${selectedCount} selected`}
+          </button>
+          <button className="btn btn-secondary" style={{flex:1}} onClick={onClose}>{t.cancel}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 // RAW MATERIALS
 // ═══════════════════════════════════════════════════════════════
 // ─── USAGE MODAL ─────────────────────────────────────────────
@@ -974,6 +1136,8 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
   const [delId,setDelId]=useState(null);
   const [usageModal,setUsageModal]=useState(null);
   const [showImport,setShowImport]=useState(false);
+  const [previewData,setPreviewData]=useState(null); // Preview before import
+  const [bulkDelModal,setBulkDelModal]=useState(null); // Bulk delete duplicates
   const fileRef=useRef();
   const cls=classes.raw||[];
 
@@ -988,6 +1152,18 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
   };
   const doEdit=m=>{ setForm({name:m.name,unit:m.unit,price:String(m.price),class:m.class||""}); setEditId(m.id); setShowForm(true); };
   const doDelete=id=>{ setRawList(p=>p.filter(m=>m.id!==id)); setDelId(null); showToast(t.deletedOk,"error"); };
+
+  // Find duplicates (same name, different id)
+  const findDuplicates=()=>{
+    const nameMap={};
+    rawList.forEach(m=>{
+      const k=m.name.trim().toLowerCase();
+      if(!nameMap[k]) nameMap[k]=[];
+      nameMap[k].push(m);
+    });
+    return Object.values(nameMap).filter(g=>g.length>1).flat();
+  };
+  const dups=findDuplicates();
 
   // Download template
   const doDownloadTemplate=()=>{
@@ -1015,7 +1191,7 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
     XLSX.writeFile(wb,"TALA_Raw_Materials_Export.xlsx");
   };
 
-  // Smart import — reads any column format
+  // Parse import file → show preview
   const doImport=e=>{
     const file=e.target.files[0]; if(!file) return;
     const r=new FileReader();
@@ -1025,61 +1201,129 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
         const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
         if(!rows.length){showToast(t.noMatch,"warning");return;}
         const fv=(row,keys)=>{ for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v).trim();}return ""; };
-        const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
-        let updated=0,added=0;
-        setRawList(prev=>{
-          const u=[...prev];
-          rows.forEach(row=>{
-            const rn=fv(row,["Name","الاسم","name","اسم الصنف","Item Name","المادة","المادة الخام","Raw Material"]);
-            const rc=fv(row,["Code","الكود","code","كود الصنف","Item Code","الرمز"]);
-            const rpRaw=fv(row,["Price","السعر","price","Cost","التكلفة","تكلفة","سعر","Cost Per KG","التكلفة بالكيلو","New Cost"]);
-            const rp=parseFloat(rpRaw)||0;
-            const ruRaw=fv(row,["Unit","الوحدة","unit","وحدة","UOM"]);
-            const ru=ruRaw.toLowerCase();
-            const rcls=fv(row,["Class","الكلاس","class","كلاس","Category","فئة","Type","النوع"])||"Food Item";
-            if(!rn) return;
-            const unit=["liter","litre","l","لتر"].includes(ru)?"liter":["piece","pieces","pcs","حبة","قطعة"].includes(ru)?"piece":"kg";
-            let i=u.findIndex(m=>m.name.toLowerCase()===rn.toLowerCase());
-            if(i===-1&&rc) i=u.findIndex(m=>m.code===rc);
-            if(i!==-1){u[i]={...u[i],price:rp,unit,class:rcls||u[i].class,lastUpdated:now};updated++;}
-            else{const newCode=rc&&!["undefined","nan",""].includes(rc)?rc:genCode("Raw",u);u.push({id:Date.now()+Math.random(),code:newCode,name:rn,unit,price:rp,class:rcls,lastUpdated:now});added++;}
-          });
-          return u;
+        const items=[];
+        rows.forEach(row=>{
+          const rn=fv(row,["Name","الاسم","name","اسم الصنف","Item Name","المادة","المادة الخام","Raw Material"]);
+          const rc=fv(row,["Code","الكود","code","كود الصنف","Item Code","الرمز"]);
+          const rpRaw=fv(row,["Price","السعر","price","Cost","التكلفة","تكلفة","سعر","Cost Per KG","التكلفة بالكيلو","New Cost"]);
+          const rp=parseFloat(rpRaw)||0;
+          const ruRaw=fv(row,["Unit","الوحدة","unit","وحدة","UOM"]);
+          const ru=ruRaw.toLowerCase();
+          const rcls=fv(row,["Class","الكلاس","class","كلاس","Category","فئة","Type","النوع"])||"Food Item";
+          if(!rn) return;
+          const unit=["liter","litre","l","لتر"].includes(ru)?"liter":["piece","pieces","pcs","حبة","قطعة"].includes(ru)?"piece":"kg";
+          // Detect if existing
+          const existing=rawList.find(m=>m.name.toLowerCase()===rn.toLowerCase()) ||
+                         (rc?rawList.find(m=>m.code===rc):null);
+          items.push({name:rn,code:rc||"",unit,price:rp,class:rcls,_existing:existing,_action:existing?"update":"add"});
         });
-        showToast(lang==="ar"?`✅ أضيف ${added} | حُدِّث ${updated}`:`✅ Added ${added} | Updated ${updated}`,(added+updated)>0?"success":"warning");
+        setPreviewData({items, module:"raw"});
+        setShowImport(false);
       }catch(err){showToast(lang==="ar"?"خطأ في الملف":"File error","error");}
     };
     r.readAsBinaryString(file); e.target.value="";
   };
 
+  // Confirm import after preview (editable)
+  const confirmImport=(editedItems)=>{
+    const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
+    let updated=0,added=0;
+    setRawList(prev=>{
+      const u=[...prev];
+      editedItems.forEach(item=>{
+        if(item._skip) return;
+        const i=item._existing?u.findIndex(m=>m.id===item._existing.id):-1;
+        if(i!==-1){
+          u[i]={...u[i],name:item.name.trim(),price:parseFloat(item.price)||0,unit:item.unit,class:item.class||u[i].class,lastUpdated:now};
+          updated++;
+        } else {
+          const newCode=item.code&&!["undefined","nan",""].includes(item.code)?item.code:genCode("Raw",u);
+          u.push({id:Date.now()+Math.random(),code:newCode,name:item.name.trim(),unit:item.unit,price:parseFloat(item.price)||0,class:item.class||"Food Item",lastUpdated:now});
+          added++;
+        }
+      });
+      return u;
+    });
+    setPreviewData(null);
+    showToast(lang==="ar"?`✅ أضيف ${added} | حُدِّث ${updated}`:`✅ Added ${added} | Updated ${updated}`,(added+updated)>0?"success":"warning");
+  };
+
+  const [selected,setSelected]=useState(new Set());
+  const toggleSel=(id)=>setSelected(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
+  const toggleAll=()=>setSelected(p=>p.size===filtered.length?new Set():new Set(filtered.map(m=>m.id)));
+  const bulkDelete=()=>{setRawList(p=>p.filter(m=>!selected.has(m.id)));setSelected(new Set());showToast(lang==="ar"?`تم حذف ${selected.size} صنف`:`Deleted ${selected.size} items`,"error");};
+
   const filtered=rawList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
 
   return (
     <div>
+      {/* Duplicate warning banner */}
+      {dups.length>0&&<div style={{background:"#3d2205",border:"1px solid #ca8a04",borderRadius:10,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:16}}>⚠️</span>
+          <span style={{fontSize:12,color:"#fcd34d",fontWeight:700}}>
+            {lang==="ar"?`يوجد ${dups.length} مادة خام بأسماء مكررة`:`${dups.length} duplicate raw material names found`}
+          </span>
+        </div>
+        <button onClick={()=>setBulkDelModal({items:dups,module:"raw"})}
+          style={{background:"#ca8a04",color:"#060810",border:"none",borderRadius:6,padding:"5px 12px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+          {lang==="ar"?"عرض وإدارة التكرارات":"View & Manage Duplicates"}
+        </button>
+      </div>}
+
       <div className="card" style={{padding:"12px 14px",marginBottom:12,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",justifyContent:"space-between"}}>
-        <input style={{maxWidth:240}} placeholder={t.search} value={search} onChange={e=>setSearch(e.target.value)}/>
+        <input style={{maxWidth:240}} placeholder={t.search} value={search} onChange={e=>{setSearch(e.target.value);setSelected(new Set());}}/>
         <div style={{display:"flex",gap:7,flexWrap:"wrap",alignItems:"center"}}>
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
         </div>
       </div>
+
+      {/* Bulk action bar */}
+      {selected.size>0&&hasPerm(mod,"delete")&&<div style={{background:"#1a0f0f",border:"1px solid #dc262666",borderRadius:10,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+        <span style={{fontSize:13,color:"#fca5a5",fontWeight:700}}>
+          {lang==="ar"?`تم تحديد ${selected.size} صنف`:`${selected.size} item(s) selected`}
+        </span>
+        <div style={{display:"flex",gap:7}}>
+          <button onClick={()=>setSelected(new Set())} style={{background:"transparent",color:C.muted,border:`1px solid ${C.border}`,borderRadius:6,padding:"5px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>
+            {lang==="ar"?"إلغاء التحديد":"Deselect"}
+          </button>
+          <button onClick={bulkDelete} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"5px 14px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>
+            🗑 {lang==="ar"?`حذف ${selected.size} محدد`:`Delete ${selected.size}`}
+          </button>
+        </div>
+      </div>}
+
       <div style={{display:"flex",gap:7,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
         <button className={`fbtn${fcls==="all"?" active":""}`} onClick={()=>setFcls("all")}>{t.all} ({rawList.length})</button>
         {cls.map(c=><button key={c} className={`fbtn${fcls===c?" active":""}`} onClick={()=>setFcls(c)}>{c} ({rawList.filter(m=>m.class===c).length})</button>)}
       </div>
       <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr>{["#",t.code,t.name,t.class,t.unit,t.price,t.usedInPrep,t.usedInProducts,hasPerm(mod,"edit")||hasPerm(mod,"delete")?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
+          <thead><tr>
+            {hasPerm(mod,"delete")&&<th style={{width:36,padding:"10px 8px"}}>
+              <input type="checkbox" checked={filtered.length>0&&selected.size===filtered.length} onChange={toggleAll} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/>
+            </th>}
+            {["#",t.code,t.name,t.class,t.unit,t.price,t.usedInPrep,t.usedInProducts,hasPerm(mod,"edit")||hasPerm(mod,"delete")?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}
+          </tr></thead>
           <tbody>
-            {filtered.length===0?<tr><td colSpan={9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            {filtered.length===0?<tr><td colSpan={hasPerm(mod,"delete")?10:9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
             :filtered.map((m,i)=>{
               const nPrep=prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id))).length;
               const nProd=prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id))).length;
-              return <tr key={m.id}>
+              const isDup=dups.some(d=>d.id===m.id);
+              const isSel=selected.has(m.id);
+              return <tr key={m.id} style={{background:isSel?C.accent+"12":isDup?"#3d220511":"",cursor:"default"}}>
+                {hasPerm(mod,"delete")&&<td style={{padding:"10px 8px",textAlign:"center"}}>
+                  <input type="checkbox" checked={isSel} onChange={()=>toggleSel(m.id)} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/>
+                </td>}
                 <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
                 <td><code style={{background:C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.code}</code></td>
-                <td style={{fontWeight:600}}>{m.name}</td>
+                <td style={{fontWeight:600}}>
+                  {isDup&&<span title={lang==="ar"?"اسم مكرر":"Duplicate name"} style={{color:"#f59e0b",marginLeft:4,marginRight:4,fontSize:12}}>⚠</span>}
+                  {m.name}
+                </td>
                 <td><span className="badge badge-cls">{m.class||"—"}</span></td>
                 <td><span className={`badge badge-${m.unit}`}>{unitLbl(m.unit,t)}</span></td>
                 <td style={{color:C.accent,fontWeight:700}}>{m.price.toFixed(2)}</td>
@@ -1094,6 +1338,8 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
 
       {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.rawMat} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={doImport}/>}
       {usageModal&&<UsageModal t={t} C={C} usageModal={usageModal} onClose={()=>setUsageModal(null)}/>}
+      {previewData&&previewData.module==="raw"&&<PreviewModal t={t} lang={lang} C={C} data={previewData} onConfirm={confirmImport} onCancel={()=>setPreviewData(null)} classes={cls} moduleType="raw"/>}
+      {bulkDelModal&&bulkDelModal.module==="raw"&&<DupDeleteModal t={t} lang={lang} C={C} items={bulkDelModal.items} onDelete={ids=>{setRawList(p=>p.filter(m=>!ids.includes(m.id)));setBulkDelModal(null);showToast(lang==="ar"?`تم حذف ${ids.length} مادة مكررة`:`Deleted ${ids.length} duplicates`,"error");}} onClose={()=>setBulkDelModal(null)}/>}
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.rawMat}</h2>
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
@@ -1112,13 +1358,24 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
 }
 
 
+
 function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes,calcPrepCost,showToast,hasPerm,mod}) {
   const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); const [errs,setErrs]=useState({});
   const [delId,setDelId]=useState(null); const [viewItem,setViewItem]=useState(null);
   const [usageModal,setUsageModal]=useState(null); const [showImport,setShowImport]=useState(false);
+  const [previewData,setPreviewData]=useState(null);
+  const [bulkDelModal,setBulkDelModal]=useState(null);
   const fileRef=useRef(); const cls=classes.prep||[];
+
+  // Find duplicates
+  const findDuplicates=()=>{
+    const nameMap={};
+    prepList.forEach(m=>{const k=m.name.trim().toLowerCase();if(!nameMap[k])nameMap[k]=[];nameMap[k].push(m);});
+    return Object.values(nameMap).filter(g=>g.length>1).flat();
+  };
+  const dups=findDuplicates();
 
   const blank=()=>({id:Date.now()+Math.random(),source:"raw",rawId:"",qty:"",waste:"0"});
   const reset=()=>{ setForm({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
@@ -1138,15 +1395,17 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
   const updI=(id,k,v)=>setForm(f=>({...f,ingredients:f.ingredients.map(i=>i.id===id?{...i,[k]:v}:i)}));
   const live=calcPrepCost({ingredients:form.ingredients,unit:form.unit,yieldOverride:form.yieldOverride});
 
-  // Download template
+  // Download template — now includes Class column with valid options
   const doDownloadTemplate=()=>{
+    const validClasses=cls.join(" / ") || "Sauce / Dough / Mix / Marinade";
     const rows=[
-      {"Prep Name":lang==="ar"?"دجاج متبل":"Marinated Chicken","Prep Code":"Prep-00001","Ingredient Type":"Raw","Ingredient Code":"Raw-00001","Ingredient Name":lang==="ar"?"دجاج خام":"Raw Chicken","Qty (g/ml)":1000,"Waste %":20},
-      {"Prep Name":lang==="ar"?"دجاج متبل":"Marinated Chicken","Prep Code":"Prep-00001","Ingredient Type":"Raw","Ingredient Code":"Raw-00002","Ingredient Name":lang==="ar"?"بهارات":"Spices","Qty (g/ml)":30,"Waste %":0},
-      {"Prep Name":lang==="ar"?"صوص ثوم":"Garlic Sauce","Prep Code":"Prep-00002","Ingredient Type":"Raw","Ingredient Code":"Raw-00003","Ingredient Name":lang==="ar"?"ثوم خام":"Raw Garlic","Qty (g/ml)":500,"Waste %":30},
+      {"Prep Name":lang==="ar"?"دجاج متبل":"Marinated Chicken","Prep Code":"Prep-00001","Class":cls[0]||"Sauce","Unit":"kg","Ingredient Type":"Raw","Ingredient Code":"Raw-00001","Ingredient Name":lang==="ar"?"دجاج خام":"Raw Chicken","Qty (g/ml)":1000,"Waste %":20},
+      {"Prep Name":lang==="ar"?"دجاج متبل":"Marinated Chicken","Prep Code":"Prep-00001","Class":cls[0]||"Sauce","Unit":"kg","Ingredient Type":"Raw","Ingredient Code":"Raw-00002","Ingredient Name":lang==="ar"?"بهارات":"Spices","Qty (g/ml)":30,"Waste %":0},
+      {"Prep Name":lang==="ar"?"صوص ثوم":"Garlic Sauce","Prep Code":"Prep-00002","Class":cls[1]||"Sauce","Unit":"kg","Ingredient Type":"Raw","Ingredient Code":"Raw-00003","Ingredient Name":lang==="ar"?"ثوم خام":"Raw Garlic","Qty (g/ml)":500,"Waste %":30},
+      {"Prep Name":"","Prep Code":"","Class":`⚡ ${lang==="ar"?"الكلاسات المتاحة":"Valid classes"}: ${validClasses}`,"Unit":"","Ingredient Type":"","Ingredient Code":"","Ingredient Name":"","Qty (g/ml)":"","Waste %":""},
     ];
     const ws=XLSX.utils.json_to_sheet(rows);
-    ws["!cols"]=[{wch:22},{wch:14},{wch:16},{wch:14},{wch:25},{wch:12},{wch:10}];
+    ws["!cols"]=[{wch:22},{wch:14},{wch:16},{wch:10},{wch:16},{wch:14},{wch:25},{wch:12},{wch:10}];
     const wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,"Prep Items");
     XLSX.writeFile(wb,"TALA_Prep_Items_Template.xlsx");
@@ -1159,24 +1418,24 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
     prepList.forEach(p=>{
       const ings=p.ingredients||[];
       if(!ings.length){
-        rows.push({"Prep Name":p.name,"Prep Code":p.code,"Ingredient Type":"","Ingredient Code":"","Ingredient Name":"","Qty (g/ml)":"","Waste %":""});
+        rows.push({"Prep Name":p.name,"Prep Code":p.code,"Class":p.class||"","Unit":p.unit||"kg","Ingredient Type":"","Ingredient Code":"","Ingredient Name":"","Qty (g/ml)":"","Waste %":""});
       } else {
         ings.forEach(ing=>{
           let ingCode="",ingName="",ingType="";
           if(ing.source==="prep"){const pp=prepList.find(pp=>String(pp.id)===String(ing.rawId));if(pp){ingCode=pp.code;ingName=pp.name;ingType="Prep";}}
           else{const raw=rawList.find(r=>String(r.id)===String(ing.rawId));if(raw){ingCode=raw.code;ingName=raw.name;ingType="Raw";}}
-          rows.push({"Prep Name":p.name,"Prep Code":p.code,"Ingredient Type":ingType,"Ingredient Code":ingCode,"Ingredient Name":ingName,"Qty (g/ml)":parseFloat(ing.qty)||0,"Waste %":parseFloat(ing.waste)||0});
+          rows.push({"Prep Name":p.name,"Prep Code":p.code,"Class":p.class||"","Unit":p.unit||"kg","Ingredient Type":ingType,"Ingredient Code":ingCode,"Ingredient Name":ingName,"Qty (g/ml)":parseFloat(ing.qty)||0,"Waste %":parseFloat(ing.waste)||0});
         });
       }
     });
     const ws=XLSX.utils.json_to_sheet(rows);
-    ws["!cols"]=[{wch:22},{wch:14},{wch:16},{wch:14},{wch:25},{wch:12},{wch:10}];
+    ws["!cols"]=[{wch:22},{wch:14},{wch:16},{wch:10},{wch:16},{wch:14},{wch:25},{wch:12},{wch:10}];
     const wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,"Prep Items");
     XLSX.writeFile(wb,"TALA_Prep_Export.xlsx");
   };
 
-  // Smart import — handles repeated prep names, any column format
+  // Smart import — parse → show preview
   const doImport=e=>{
     const file=e.target.files[0]; if(!file) return;
     const r=new FileReader();
@@ -1186,39 +1445,31 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
         const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
         if(!rows.length){showToast(t.noMatch,"warning");return;}
         const fv=(row,keys)=>{ for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v).trim();}return ""; };
-        const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
 
-        // Group by prep name (first column / Prep Name column)
+        // Group by prep name
         const groups={};
         rows.forEach(row=>{
-          // Detect prep name — usually first non-empty repeating column
           const pn=fv(row,["Prep Name","اسم Prep","prep name","prep","اسم البريب","البريب","Prep","اسم"]) || fv(row,[Object.keys(row)[0]]);
           const pc=fv(row,["Prep Code","كود Prep","prep code","كود البريب"]);
-          if(!pn) return;
+          const pcls=fv(row,["Class","الكلاس","class","كلاس","Category","فئة"]);
+          const punit=fv(row,["Unit","الوحدة","unit","وحدة","UOM"]);
+          if(!pn||pn.startsWith("⚡")) return;
           const key=pn.toLowerCase();
-          if(!groups[key]) groups[key]={code:pc,name:pn,ingredients:[]};
+          if(!groups[key]) groups[key]={code:pc,name:pn,class:pcls,unit:punit,ingredients:[]};
+          else { if(pcls&&!groups[key].class)groups[key].class=pcls; }
 
-          // Ingredient info
           const ingCode=fv(row,["Ingredient Code","كود المكون","code","الكود","Raw Code","Prep Code 2"]);
           const ingName=fv(row,["Ingredient Name","اسم المكون","ingredient","المكون","Raw Name","Prep Name 2","name","الاسم"]);
           const ingTypeRaw=fv(row,["Ingredient Type","نوع المكون","type","النوع","Type"]);
           const ingType=ingTypeRaw.toLowerCase().includes("prep")||ingTypeRaw.includes("بريب")?"prep":"raw";
-          
-          // Quantity — detect column with g/ml or quantity keywords
-          const qtyRaw=fv(row,["Qty (g/ml)","الكمية (g/ml)","qty","quantity","الكمية","Qty","weight","الوزن","Amount","الكمية بالجرام","g","gram","ml"]);
+          const qtyRaw=fv(row,["Qty (g/ml)","الكمية (g/ml)","qty","quantity","الكمية","Qty","weight","الوزن","Amount","g","gram","ml"]);
           let qty=parseFloat(qtyRaw)||0;
-          // If qty seems to be in kg (small number like 0.5), convert to grams
           const uomCheck=fv(row,["UOM","وحدة","unit","الوحدة"]).toLowerCase();
           if(["kg","kilo","كيلو","l","liter","litre"].includes(uomCheck) && qty>0 && qty<100) qty*=1000;
-
           const wasteRaw=fv(row,["Waste %","الهدر %","waste","هدر","Waste","Wastage"]);
           let waste=parseFloat(wasteRaw)||0;
-          // If waste is decimal (0.2 instead of 20%), convert
           if(waste>0&&waste<1) waste=Math.round(waste*100*10)/10;
-
           if(!ingName&&!ingCode) return;
-          
-          // Find the actual ingredient
           if(ingType==="prep"){
             const p=prepList.find(p=>p.code===ingCode||p.name.toLowerCase()===ingName.toLowerCase());
             if(p) groups[key].ingredients.push({id:Date.now()+Math.random(),source:"prep",rawId:p.id,qty,waste});
@@ -1228,59 +1479,108 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
           }
         });
 
-        let updated=0,added=0;
-        setPrepList(prev=>{
-          const u=[...prev];
-          Object.values(groups).forEach(pg=>{
-            if(!pg.name) return;
-            let idx=u.findIndex(p=>p.name.toLowerCase()===pg.name.toLowerCase());
-            if(idx===-1&&pg.code) idx=u.findIndex(p=>p.code===pg.code);
-            if(idx===-1){
-              const newCode=pg.code&&!["undefined","nan",""].includes(pg.code)?pg.code:genCode("Prep",u);
-              u.push({id:Date.now()+Math.random(),code:newCode,name:pg.name,unit:"kg",class:"",yieldOverride:"",ingredients:pg.ingredients,lastUpdated:now});
-              added++;
-            } else {
-              u[idx]={...u[idx],ingredients:pg.ingredients,lastUpdated:now};
-              updated++;
-            }
-          });
-          return u;
+        // Build preview items (one per prep)
+        const items=Object.values(groups).map(pg=>{
+          const unitRaw=(pg.unit||"").toLowerCase();
+          const unit=["liter","litre","l","لتر"].includes(unitRaw)?"liter":["piece","pcs","حبة"].includes(unitRaw)?"piece":"kg";
+          const existing=prepList.find(p=>p.name.toLowerCase()===pg.name.toLowerCase()) ||
+                         (pg.code?prepList.find(p=>p.code===pg.code):null);
+          return {name:pg.name,code:pg.code,class:pg.class,unit,_ingredients:pg.ingredients,_existing:existing};
         });
-        const total=added+updated;
-        showToast(total>0?(lang==="ar"?`✅ أضيف ${added} بريب | حُدِّث ${updated} بريب`:`✅ Added ${added} | Updated ${updated}`):t.noMatch,total>0?"success":"warning");
+        setPreviewData({items,module:"prep"});
+        setShowImport(false);
       }catch(err){console.error(err);showToast(lang==="ar"?"خطأ في الملف":"File error","error");}
     };
     r.readAsBinaryString(file); e.target.value="";
   };
 
+  // Commit import after preview
+  const confirmImport=(editedItems)=>{
+    const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
+    let updated=0,added=0;
+    setPrepList(prev=>{
+      const u=[...prev];
+      editedItems.forEach(item=>{
+        if(item._skip) return;
+        const ings=item._ingredients||[];
+        const idx=item._existing?u.findIndex(p=>p.id===item._existing.id):-1;
+        if(idx!==-1){
+          u[idx]={...u[idx],name:item.name.trim(),class:item.class||u[idx].class,unit:item.unit||u[idx].unit,ingredients:ings,lastUpdated:now};
+          updated++;
+        } else {
+          const newCode=item.code&&!["undefined","nan",""].includes(item.code)?item.code:genCode("Prep",u);
+          u.push({id:Date.now()+Math.random(),code:newCode,name:item.name.trim(),class:item.class||"",unit:item.unit||"kg",yieldOverride:"",ingredients:ings,lastUpdated:now});
+          added++;
+        }
+      });
+      return u;
+    });
+    setPreviewData(null);
+    showToast(lang==="ar"?`✅ أضيف ${added} بريب | حُدِّث ${updated} بريب`:`✅ Added ${added} | Updated ${updated}`,(added+updated)>0?"success":"warning");
+  };
+
+  const [selected,setSelected]=useState(new Set());
+  const toggleSel=(id)=>setSelected(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
+  const toggleAll=()=>setSelected(p=>p.size===filtered.length?new Set():new Set(filtered.map(m=>m.id)));
+  const bulkDelete=()=>{setPrepList(p=>p.filter(m=>!selected.has(m.id)));setSelected(new Set());showToast(lang==="ar"?`تم حذف ${selected.size} بريب`:`Deleted ${selected.size} items`,"error");};
+
   const filtered=prepList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
 
   return (
     <div>
+      {/* Duplicate warning banner */}
+      {dups.length>0&&<div style={{background:"#3d2205",border:"1px solid #ca8a04",borderRadius:10,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:16}}>⚠️</span>
+          <span style={{fontSize:12,color:"#fcd34d",fontWeight:700}}>{lang==="ar"?`يوجد ${dups.length} بريب بأسماء مكررة`:`${dups.length} duplicate prep names found`}</span>
+        </div>
+        <button onClick={()=>setBulkDelModal({items:dups,module:"prep"})} style={{background:"#ca8a04",color:"#060810",border:"none",borderRadius:6,padding:"5px 12px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+          {lang==="ar"?"عرض وإدارة التكرارات":"View & Manage Duplicates"}
+        </button>
+      </div>}
       <div className="card" style={{padding:"12px 14px",marginBottom:12,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",justifyContent:"space-between"}}>
-        <input style={{maxWidth:240}} placeholder={t.search} value={search} onChange={e=>setSearch(e.target.value)}/>
+        <input style={{maxWidth:240}} placeholder={t.search} value={search} onChange={e=>{setSearch(e.target.value);setSelected(new Set());}}/>
         <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
         </div>
       </div>
+
+      {/* Bulk action bar */}
+      {selected.size>0&&hasPerm(mod,"delete")&&<div style={{background:"#1a0f0f",border:"1px solid #dc262666",borderRadius:10,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+        <span style={{fontSize:13,color:"#fca5a5",fontWeight:700}}>{lang==="ar"?`تم تحديد ${selected.size} بريب`:`${selected.size} item(s) selected`}</span>
+        <div style={{display:"flex",gap:7}}>
+          <button onClick={()=>setSelected(new Set())} style={{background:"transparent",color:C.muted,border:`1px solid ${C.border}`,borderRadius:6,padding:"5px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>{lang==="ar"?"إلغاء":"Deselect"}</button>
+          <button onClick={bulkDelete} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"5px 14px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>🗑 {lang==="ar"?`حذف ${selected.size}`:`Delete ${selected.size}`}</button>
+        </div>
+      </div>}
+
       <div style={{display:"flex",gap:7,marginBottom:12,flexWrap:"wrap"}}>
         <button className={`fbtn${fcls==="all"?" active":""}`} onClick={()=>setFcls("all")}>{t.all} ({prepList.length})</button>
         {cls.map(c=><button key={c} className={`fbtn${fcls===c?" active":""}`} onClick={()=>setFcls(c)}>{c} ({prepList.filter(m=>m.class===c).length})</button>)}
       </div>
       <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr>{["#",t.code,t.name,t.class,t.unit,lang==="ar"?"مكونات":"Ing.",t.yieldWeight,t.costPerUnit,t.usedInProducts,t.actions].map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
+          <thead><tr>
+            {hasPerm(mod,"delete")&&<th style={{width:36,padding:"10px 8px"}}><input type="checkbox" checked={filtered.length>0&&selected.size===filtered.length} onChange={toggleAll} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/></th>}
+            {["#",t.code,t.name,t.class,t.unit,lang==="ar"?"مكونات":"Ing.",t.yieldWeight,t.costPerUnit,t.usedInProducts,t.actions].map((h,i)=><th key={i}>{h}</th>)}
+          </tr></thead>
           <tbody>
-            {filtered.length===0?<tr><td colSpan={10} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            {filtered.length===0?<tr><td colSpan={hasPerm(mod,"delete")?11:10} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
             :filtered.map((m,i)=>{
               const {costPerUnit,yieldKg}=calcPrepCost(m);
               const nProd=prodList.filter(p=>p.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(m.id))).length;
-              return <tr key={m.id}>
+              const isDup=dups.some(d=>d.id===m.id);
+              const isSel=selected.has(m.id);
+              return <tr key={m.id} style={{background:isSel?C.accent+"12":isDup?"#3d220511":""}}>
+                {hasPerm(mod,"delete")&&<td style={{padding:"10px 8px",textAlign:"center"}}><input type="checkbox" checked={isSel} onChange={()=>toggleSel(m.id)} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/></td>}
                 <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
                 <td><code style={{background:C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.code}</code></td>
-                <td style={{fontWeight:600}}>{m.name}</td>
+                <td style={{fontWeight:600}}>
+                  {isDup&&<span title={lang==="ar"?"اسم مكرر":"Duplicate"} style={{color:"#f59e0b",marginLeft:4,marginRight:4,fontSize:12}}>⚠</span>}
+                  {m.name}
+                </td>
                 <td><span className="badge badge-cls">{m.class||"—"}</span></td>
                 <td><span className={`badge badge-${m.unit}`}>{unitLbl(m.unit,t)}</span></td>
                 <td style={{color:C.muted}}>{m.ingredients?.length||0}</td>
@@ -1353,6 +1653,8 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
 
       {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.prepItem} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={doImport}/>}
       {usageModal&&<UsageModal t={t} C={C} usageModal={usageModal} onClose={()=>setUsageModal(null)}/>}
+      {previewData&&previewData.module==="prep"&&<PreviewModal t={t} lang={lang} C={C} data={previewData} onConfirm={confirmImport} onCancel={()=>setPreviewData(null)} classes={cls} moduleType="prep"/>}
+      {bulkDelModal&&bulkDelModal.module==="prep"&&<DupDeleteModal t={t} lang={lang} C={C} items={bulkDelModal.items} onDelete={ids=>{setPrepList(p=>p.filter(m=>!ids.includes(m.id)));setBulkDelModal(null);showToast(lang==="ar"?`تم حذف ${ids.length} بريب مكرر`:`Deleted ${ids.length} duplicates`,"error");}} onClose={()=>setBulkDelModal(null)}/>}
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.prepItem}</h2>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:12}}>
@@ -1409,28 +1711,47 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
     const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Products");XLSX.writeFile(wb,"TALA_Products_Export.xlsx");
   };
   const doImport=e=>{ const file=e.target.files[0]; if(!file) return; const r=new FileReader(); r.onload=ev=>{ try{ const wb=XLSX.read(ev.target.result,{type:"binary"}); const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]); let n=0; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); setProdList(prev=>{ const u=[...prev]; rows.forEach(row=>{ const rn=String(row[t.name]||row.Name||row["الاسم"]||"").trim(); const rc=String(row[t.code]||row.Code||row["الكود"]||"").trim(); const rsp=parseFloat(row[t.sellingPrice]||row["Selling Price"]||0); let i=u.findIndex(m=>m.name.toLowerCase()===rn.toLowerCase()); if(i===-1) i=u.findIndex(m=>m.code===rc); if(i!==-1){u[i]={...u[i],lastUpdated:now}; if(rsp>0)u[i].sellingPrice=rsp; n++;} }); return u; }); showToast(n>0?`${t.importedOk} ${n} ${t.importedItems}`:t.noMatch,n>0?"success":"warning"); }catch{ showToast("error","error"); } }; r.readAsBinaryString(file); e.target.value=""; };
+  const [selected,setSelected]=useState(new Set());
+  const toggleSel=(id)=>setSelected(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
+  const toggleAll=()=>setSelected(p=>p.size===filtered.length?new Set():new Set(filtered.map(m=>m.id)));
+  const bulkDelete=()=>{setProdList(p=>p.filter(m=>!selected.has(m.id)));setSelected(new Set());showToast(lang==="ar"?`تم حذف ${selected.size} منتج`:`Deleted ${selected.size} items`,"error");};
+
   const filtered=prodList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
   return (
     <div>
       <div className="card" style={{padding:"12px 14px",marginBottom:12,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",justifyContent:"space-between"}}>
-        <input style={{maxWidth:220}} placeholder={t.search} value={search} onChange={e=>setSearch(e.target.value)}/>
+        <input style={{maxWidth:220}} placeholder={t.search} value={search} onChange={e=>{setSearch(e.target.value);setSelected(new Set());}}/>
         <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
         </div>
       </div>
+
+      {/* Bulk action bar */}
+      {selected.size>0&&hasPerm(mod,"delete")&&<div style={{background:"#1a0f0f",border:"1px solid #dc262666",borderRadius:10,padding:"10px 14px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+        <span style={{fontSize:13,color:"#fca5a5",fontWeight:700}}>{lang==="ar"?`تم تحديد ${selected.size} منتج`:`${selected.size} item(s) selected`}</span>
+        <div style={{display:"flex",gap:7}}>
+          <button onClick={()=>setSelected(new Set())} style={{background:"transparent",color:C.muted,border:`1px solid ${C.border}`,borderRadius:6,padding:"5px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>{lang==="ar"?"إلغاء":"Deselect"}</button>
+          <button onClick={bulkDelete} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"5px 14px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>🗑 {lang==="ar"?`حذف ${selected.size}`:`Delete ${selected.size}`}</button>
+        </div>
+      </div>}
+
       <div style={{display:"flex",gap:7,marginBottom:10,flexWrap:"wrap"}}>
         <button className={`filter-btn${fcls==="all"?" active":""}`} onClick={()=>setFcls("all")}>{t.all}</button>
         {cls.map(c=><button key={c} className={`filter-btn${fcls===c?" active":""}`} onClick={()=>setFcls(c)}>{c}</button>)}
       </div>
       <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr>{["#",t.code,t.productName,t.class,lang==="ar"?"مكونات":"Ing.",t.totalCost,t.sellingPrice,t.margin,(hasPerm(mod,"edit")||hasPerm(mod,"delete"))?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
+          <thead><tr>
+            {hasPerm(mod,"delete")&&<th style={{width:36,padding:"10px 8px"}}><input type="checkbox" checked={filtered.length>0&&selected.size===filtered.length} onChange={toggleAll} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/></th>}
+            {["#",t.code,t.productName,t.class,lang==="ar"?"مكونات":"Ing.",t.totalCost,t.sellingPrice,t.margin,(hasPerm(mod,"edit")||hasPerm(mod,"delete"))?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}
+          </tr></thead>
           <tbody>
-            {filtered.length===0?<tr><td colSpan={9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
-            :filtered.map((m,i)=>{ const {totalCost,margin}=calcProductCost(m); return(
-              <tr key={m.id}>
+            {filtered.length===0?<tr><td colSpan={hasPerm(mod,"delete")?10:9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            :filtered.map((m,i)=>{ const {totalCost,margin}=calcProductCost(m); const isSel=selected.has(m.id); return(
+              <tr key={m.id} style={{background:isSel?C.accent+"12":""}}>
+                {hasPerm(mod,"delete")&&<td style={{padding:"10px 8px",textAlign:"center"}}><input type="checkbox" checked={isSel} onChange={()=>toggleSel(m.id)} style={{width:14,height:14,accentColor:C.accent,cursor:"pointer"}}/></td>}
                 <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
                 <td><code style={{background:C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.code}</code></td>
                 <td style={{fontWeight:600}}>{m.name}</td>
