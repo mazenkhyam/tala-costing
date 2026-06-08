@@ -60,16 +60,6 @@ const T = {
     noSelling:"بدون سعر بيع",
     productsOverBudget:"منتجات تجاوزت المعياري",
     view:"عرض",
-    usedInPrepLbl:"مستخدم في Prep", usedInProdsLbl:"مستخدم في منتجات",
-    rawMaterialsUsed:"المواد الخام المستخدمة", prepItemsUsed:"Prep المستخدمة",
-    noIngredients:"لا توجد مكونات",
-    profitabilityMatrix:"مصفوفة الربحية", atRiskProducts:"منتجات تحتاج مراجعة",
-    statusExcellent:"ممتاز", statusGood:"جيد", statusLow:"منخفض", statusLoss:"خسارة",
-    marginPct:"هامش %", costPct:"تكلفة %",
-    prepContribution:"نسبة مساهمة Prep في التكلفة",
-    rawPriceImpact:"تأثير سعر المواد الخام",
-    topDriversTitle:"أعلى مكونات التكلفة",
-    rawCountLbl:"خام", prepCountLbl:"Prep",
   },
   en: {
     dir:"ltr", font:"'DM Sans',sans-serif",
@@ -121,16 +111,6 @@ const T = {
     noSelling:"No Selling Price",
     productsOverBudget:"Products Over Budget",
     view:"View",
-    usedInPrepLbl:"Used in Prep", usedInProdsLbl:"Used in Products",
-    rawMaterialsUsed:"Raw Materials Used", prepItemsUsed:"Prep Items Used",
-    noIngredients:"No ingredients",
-    profitabilityMatrix:"Profitability Matrix", atRiskProducts:"At-Risk Products",
-    statusExcellent:"Excellent", statusGood:"Good", statusLow:"Low", statusLoss:"Loss",
-    marginPct:"Margin %", costPct:"Cost %",
-    prepContribution:"Prep Cost Contribution",
-    rawPriceImpact:"Raw Price Impact",
-    topDriversTitle:"Top Cost Drivers",
-    rawCountLbl:"Raw", prepCountLbl:"Prep",
   }
 };
 
@@ -311,7 +291,6 @@ export default function App() {
         .badge-piece{background:#1a0f33;color:#a78bfa}
         .badge-cls{background:#1a1a33;color:#94a3b8;border:1px solid #2a2a4a}
         .filter-btn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
-        .filter-btn:hover{color:${DARK.text};border-color:#3a4060}
         .filter-btn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
         .divider{height:1px;background:${DARK.border};margin:14px 0}
         .nav-item{display:flex;align-items:center;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:${DARK.muted};transition:all .14s;border:none;background:transparent;font-family:inherit;width:100%;text-align:${lang==="ar"?"right":"left"}}
@@ -323,25 +302,6 @@ export default function App() {
         .section-hd{font-size:14px;font-weight:700;color:${DARK.text};margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid ${DARK.border}}
         .top-n-btn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .14s}
         .top-n-btn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
-        .btn-sm-v{background:#0a2a3a;color:#38bdf8;padding:4px 11px;font-size:12px;border:1px solid #0ea5e933;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
-        .btn-sm-v:hover{background:#0d3a50;border-color:#0ea5e966}
-        .chip-prep{display:inline-flex;align-items:center;background:#0f2040;color:#60a5fa;border:1px solid #1e3a6044;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .14s;gap:4px}
-        .chip-prep:hover{background:#1e3060;border-color:#3b82f666}
-        .chip-prod{display:inline-flex;align-items:center;background:#062018;color:#4ade80;border:1px solid #16a34a33;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .14s;gap:4px}
-        .chip-prod:hover{background:#0a3328;border-color:#16a34a66}
-        .chip-raw{display:inline-flex;align-items:center;background:#1a0f33;color:#a78bfa;border:1px solid #7c3aed33;border-radius:6px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .14s;gap:4px}
-        .chip-raw:hover{background:#2a1850}
-        .chip-zero{display:inline-flex;align-items:center;background:${DARK.surface};color:${DARK.muted};border:1px solid ${DARK.border};border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600;font-family:inherit}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-        .animate-in{animation:fadeIn .2s ease}
-        .fbtn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:6px 14px;font-size:12px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .14s}
-        .fbtn:hover{color:${DARK.text};border-color:#3a4060}
-        .fbtn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
-        .topn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:5px 12px;font-size:12px;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .14s}
-        .topn.active{background:${DARK.accent}20;border-color:${DARK.accent}66;color:${DARK.accent}}
-        .kpi-card{background:${DARK.card};border:1px solid ${DARK.border};border-radius:14px;padding:18px 20px;position:relative;overflow:hidden;transition:transform .14s}
-        .kpi-card:hover{transform:translateY(-2px)}
-        .status-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700}
       `}</style>
 
       {/* SIDEBAR */}
@@ -630,49 +590,14 @@ function NoPerm({t,C=DARK}) {
 // ═══════════════════════════════════════════════════════════════
 // DASHBOARD / ANALYTICS
 // ═══════════════════════════════════════════════════════════════
-function RelModal({title,subtitle,list,onClose,lang,C=DARK,t}) {
-  return (
-    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal animate-in" style={{maxWidth:520}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-          <div>
-            <div style={{fontWeight:800,fontSize:15,color:C.accent}}>{title}</div>
-            <div style={{fontSize:12,color:C.muted,marginTop:2}}>{subtitle} ({list.length})</div>
-          </div>
-          <button onClick={onClose} style={{background:"transparent",border:"none",color:C.muted,fontSize:20,cursor:"pointer"}}>✕</button>
-        </div>
-        <div style={{display:"flex",flexDirection:"column",gap:8,maxHeight:400,overflowY:"auto"}}>
-          {list.length===0
-            ? <div style={{color:C.muted,textAlign:"center",padding:24}}>{t.noData}</div>
-            : list.map((item,i)=>(
-              <div key={item.id||i} style={{background:C.surface,borderRadius:9,padding:"10px 14px",border:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div style={{display:"flex",alignItems:"center",gap:8}}>
-                  <code style={{background:C.bg,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{item.code}</code>
-                  <span style={{fontWeight:600,fontSize:13}}>{item.name}</span>
-                </div>
-                <span className="badge badge-cls">{item.class||"—"}</span>
-              </div>
-            ))
-          }
-        </div>
-        <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}>
-          <button className="btn btn-secondary" onClick={onClose}>{t.cancel}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calcProductCost}) {
   const [topN,setTopN]=useState(10);
   const [section,setSection]=useState("all");
   const [relModal,setRelModal]=useState(null);
 
-  const isAr=lang==="ar";
   const prodCalc=prodList.map(p=>({...p,...calcProductCost(p)}));
   const prepCalc=prepList.map(p=>({...p,...calcPrepCost(p)}));
 
-  // KPI data
   const withSP=prodCalc.filter(p=>parseFloat(p.sellingPrice)>0);
   const avgMargin=withSP.length?withSP.reduce((a,p)=>a+p.margin,0)/withSP.length:0;
   const avgCost=prodCalc.length?prodCalc.reduce((a,p)=>a+p.totalCost,0)/prodCalc.length:0;
@@ -685,7 +610,6 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
   const lowM=prodCalc.filter(p=>p.margin<15&&parseFloat(p.sellingPrice)>0&&p.margin>0).length;
   const noPrice=prodCalc.filter(p=>!parseFloat(p.sellingPrice)).length;
 
-  // Cost drivers
   const driverMap={};
   prodList.forEach(prod=>{prod.ingredients?.forEach(ing=>{
     if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(!r)return;driverMap[r.name]=(driverMap[r.name]||0)+(parseFloat(ing.qty)||0)/1000*r.price;}
@@ -694,47 +618,27 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
   const drivers=Object.entries(driverMap).sort((a,b)=>b[1]-a[1]).slice(0,topN);
   const maxDrv=drivers[0]?.[1]||1;
 
-  // Prep usage
   const prepUsage=prepCalc.map(p=>({...p,
     usedIn:prodList.filter(pr=>pr.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(p.id))).length,
     relatedProds:prodList.filter(pr=>pr.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(p.id)))
   }));
-
-  // Raw usage
   const rawUsage=rawList.map(r=>({...r,
     inPrep:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(r.id))).length,
     inProd:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(r.id))).length,
     relatedPreps:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(r.id))),
     relatedProds:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(r.id))),
   }));
-
   const atRisk=prodCalc.filter(p=>p.totalCost>0&&p.margin<20&&parseFloat(p.sellingPrice)>0).sort((a,b)=>a.margin-b.margin);
 
-  // Helpers
-  const Bar=({val,max,color,height=6})=>(<div style={{background:C.surface,borderRadius:3,height,flex:1}}><div style={{width:Math.min((val/(max||1))*100,100)+"%",height,borderRadius:3,background:color,transition:"width .5s ease"}}/></div>);
-
+  const Bar=({val,max,color})=>(<div style={{background:C.surface,borderRadius:3,height:6,flex:1}}><div style={{width:Math.min((val/(max||1))*100,100)+"%",height:6,borderRadius:3,background:color,transition:"width .4s"}}/></div>);
+  const SecHd=({c,sub})=>(<div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{c}</div>{sub&&<div style={{fontSize:11,color:C.muted,marginTop:2}}>{sub}</div>}<div style={{height:2,background:C.border,marginTop:8}}/></div>);
+  const KCard=({label,value,color,sub})=>(<div className="card" style={{padding:"16px 18px"}}><div style={{fontSize:26,fontWeight:800,color:color||C.accent,lineHeight:1}}>{value}</div><div style={{fontSize:12,color:C.muted,marginTop:4}}>{label}</div>{sub&&<div style={{fontSize:10,color:C.muted,marginTop:2}}>{sub}</div>}</div>);
   const noMsg=<div style={{color:C.muted,fontSize:13,textAlign:"center",padding:"24px 0"}}>{t.noData}</div>;
-
-  const secs=[
-    {id:"all",     label:isAr?"الكل":"All"},
-    {id:"products",label:isAr?"تحليل المنتجات":"Products"},
-    {id:"prep",    label:isAr?"تحليل Prep":"Prep"},
-    {id:"raw",     label:isAr?"تحليل الخام":"Raw"},
-    {id:"variance",label:isAr?"الانحراف":"Variance"},
-  ];
+  const secs=[{id:"all",label:lang==="ar"?"الكل":"All"},{id:"products",label:t.secProducts},{id:"prep",label:t.secPrep},{id:"raw",label:t.secRaw},{id:"variance",label:t.varianceReport}];
   const show=s=>section==="all"||section===s;
 
-  const getStatus=(m,hasSP)=>{
-    if(!hasSP) return {label:isAr?"بدون سعر":"No Price",bg:"#1a1a33",color:"#94a3b8"};
-    if(m>30)   return {label:t.statusExcellent,bg:"#053d2a",color:"#4ade80"};
-    if(m>15)   return {label:t.statusGood,bg:"#3d2900",color:"#fbbf24"};
-    if(m>0)    return {label:t.statusLow,bg:"#3d1a0a",color:"#f97316"};
-    return {label:t.statusLoss,bg:"#3d0505",color:"#f87171"};
-  };
-
   return (
-    <div style={{maxWidth:1200,margin:"0 auto"}}>
-      {/* ── HEADER BAR ── */}
+    <div style={{maxWidth:1100,margin:"0 auto"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20,flexWrap:"wrap",gap:10}}>
         <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
           {secs.map(s=><button key={s.id} className={`fbtn${section===s.id?" active":""}`} onClick={()=>setSection(s.id)}>{s.label}</button>)}
@@ -745,131 +649,64 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
         </div>
       </div>
 
-      {/* ── KPI CARDS ── */}
-      {show("products")&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:12,marginBottom:20}}>
-        {[
-          {label:isAr?"إجمالي المنتجات":"Total Products", value:prodList.length, color:C.accent, icon:"🛍"},
-          {label:isAr?"إجمالي Prep":"Total Prep",         value:prepList.length, color:C.blue,   icon:"⚗️"},
-          {label:isAr?"إجمالي الخام":"Total Raw",          value:rawList.length,  color:"#a78bfa", icon:"📦"},
-          {label:t.avgMarginLbl, value:avgMargin.toFixed(1)+"%", color:avgMargin>30?C.green:avgMargin>15?C.yellow:C.red, icon:"📊",
-            sub:isAr?`أعلى: ${maxCost.toFixed(2)} | أقل: ${minCost.toFixed(2)}`:`High: ${maxCost.toFixed(2)} | Low: ${minCost.toFixed(2)}`},
-          {label:t.avgCostLbl,   value:avgCost.toFixed(2), color:"#f87171", icon:"💰"},
-          {label:t.productsOverBudget, value:overBudget.length, icon:"⚠️",
-            sub:withStd.length>0?`/ ${withStd.length} ${isAr?"لهم معياري":"with target"}`:isAr?"لا يوجد معياري":"No target set",
-            color:overBudget.length>0?C.red:C.green},
-        ].map((k,i)=>(
-          <div key={i} className="kpi-card">
-            <div style={{position:"absolute",top:10,left:isAr?10:undefined,right:isAr?undefined:10,fontSize:28,opacity:.12}}>{k.icon}</div>
-            <div style={{fontSize:26,fontWeight:800,color:k.color,lineHeight:1}}>{k.value}</div>
-            <div style={{fontSize:12,color:C.muted,marginTop:5,fontWeight:600}}>{k.label}</div>
-            {k.sub&&<div style={{fontSize:10,color:C.muted,marginTop:3}}>{k.sub}</div>}
-          </div>
-        ))}
+      {show("products")&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12,marginBottom:20}}>
+        <KCard label={lang==="ar"?"إجمالي المنتجات":"Total Products"} value={prodList.length} color={C.accent}/>
+        <KCard label={lang==="ar"?"إجمالي Prep":"Total Prep"} value={prepList.length} color={C.blue}/>
+        <KCard label={lang==="ar"?"إجمالي الخام":"Total Raw"} value={rawList.length} color="#a78bfa"/>
+        <KCard label={t.avgMarginLbl} value={avgMargin.toFixed(1)+"%"} color={avgMargin>30?C.green:avgMargin>15?C.yellow:C.red} sub={lang==="ar"?`أعلى تكلفة: ${maxCost.toFixed(2)} | أقل: ${minCost.toFixed(2)}`:`Max: ${maxCost.toFixed(2)} | Min: ${minCost.toFixed(2)}`}/>
+        <KCard label={t.avgCostLbl} value={avgCost.toFixed(2)} color="#f87171"/>
+        <KCard label={t.productsOverBudget} value={overBudget.length} sub={withStd.length>0?`/ ${withStd.length} ${lang==="ar"?"لهم معياري":"with target"}`:""} color={overBudget.length>0?C.red:C.green}/>
       </div>}
 
-      {/* ── MARGIN DISTRIBUTION ── */}
       {show("products")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <div style={{marginBottom:14}}>
-          <div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.marginDistribution}</div>
-          <div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"توزيع المنتجات حسب هامش الربح":"Products distributed by profit margin"}</div>
-          <div style={{height:2,background:C.border,marginTop:8}}/>
-        </div>
+        <SecHd c={t.marginDistribution} sub={lang==="ar"?"توزيع المنتجات حسب هامش الربح":"Products distributed by profit margin"}/>
         {prodCalc.length===0?noMsg:<>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(130px,1fr))",gap:10,marginBottom:14}}>
-            {[
-              {l:t.highMargin,n:highM,col:C.green},
-              {l:t.midMargin,n:midM,col:C.yellow},
-              {l:t.lowMargin,n:lowM,col:C.red},
-              {l:t.noSelling,n:noPrice,col:C.muted},
-            ].map((s,i)=>{
+            {[{l:t.highMargin,n:highM,col:C.green},{l:t.midMargin,n:midM,col:C.yellow},{l:t.lowMargin,n:lowM,col:C.red},{l:t.noSelling,n:noPrice,col:C.muted}].map((s,i)=>{
               const pct=prodList.length?((s.n/prodList.length)*100).toFixed(0):0;
               return <div key={i} style={{background:C.surface,borderRadius:10,padding:"12px 14px",border:`1px solid ${C.border}`}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-                  <span style={{fontSize:10,color:C.muted,fontWeight:600}}>{s.l}</span>
-                  <span style={{fontSize:11,color:s.col,fontWeight:700}}>{pct}%</span>
-                </div>
-                <div style={{fontSize:24,fontWeight:800,color:s.col}}>{s.n}</div>
-                <div style={{background:C.border,borderRadius:3,height:4,marginTop:8}}>
-                  <div style={{width:pct+"%",height:4,borderRadius:3,background:s.col,transition:"width .5s"}}/>
-                </div>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span style={{fontSize:11,color:C.muted,fontWeight:600}}>{s.l}</span><span style={{fontSize:11,color:s.col,fontWeight:700}}>{pct}%</span></div>
+                <div style={{fontSize:22,fontWeight:800,color:s.col}}>{s.n}</div>
+                <div style={{background:C.border,borderRadius:3,height:4,marginTop:8}}><div style={{width:pct+"%",height:4,borderRadius:3,background:s.col}}/></div>
               </div>;
             })}
           </div>
           <div style={{display:"flex",height:8,borderRadius:4,overflow:"hidden",gap:1}}>
-            {[[highM,C.green],[midM,C.yellow],[lowM,C.red],[noPrice,C.muted]].map(([n,col],i)=>(
-              <div key={i} style={{flex:n||0,background:col,minWidth:n>0?2:0}}/>
-            ))}
+            {[[highM,C.green],[midM,C.yellow],[lowM,C.red],[noPrice,C.muted]].map(([n,col],i)=><div key={i} style={{flex:n||0,background:col,minWidth:n>0?2:0}}/>)}
           </div>
         </>}
       </div>}
 
-      {/* ── PRODUCTS ANALYSIS ── */}
       {show("products")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{isAr?"تحليل المنتجات":"Products Analysis"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
+        <SecHd c={t.secProducts}/>
         {prodCalc.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16}}>
           {[
-            {title:isAr?"أعلى هامش ربح":"Highest Margin",  data:[...prodCalc].filter(p=>parseFloat(p.sellingPrice)>0).sort((a,b)=>b.margin-a.margin),  fn:p=>p.margin,     fmt:v=>v.toFixed(1)+"%", col:p=>p.margin>30?C.green:p.margin>15?C.yellow:C.red},
-            {title:isAr?"أعلى تكلفة":"Highest Cost",        data:[...prodCalc].sort((a,b)=>b.totalCost-a.totalCost),                                      fn:p=>p.totalCost,  fmt:v=>v.toFixed(2),     col:()=>"#f87171"},
-            {title:isAr?"أقل تكلفة":"Lowest Cost",          data:[...prodCalc].filter(p=>p.totalCost>0).sort((a,b)=>a.totalCost-b.totalCost),             fn:p=>p.totalCost,  fmt:v=>v.toFixed(2),     col:()=>C.green},
-          ].map((sec,si)=>(
-            <div key={si}>
-              <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10,letterSpacing:".05em"}}>{sec.title}</div>
-              {sec.data.slice(0,topN).map((p,i)=>{const val=sec.fn(p),max=sec.fn(sec.data[0])||1,col=sec.col(p);return(
-                <div key={p.id} style={{marginBottom:8}}>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                    <span style={{fontSize:12,color:C.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
-                    <span style={{fontSize:12,color:col,fontWeight:700,marginRight:6}}>{sec.fmt(val)}</span>
-                  </div>
-                  <Bar val={val} max={max} color={col}/>
+            {title:lang==="ar"?"أعلى هامش ربح":"Highest Margin",data:[...prodCalc].filter(p=>parseFloat(p.sellingPrice)>0).sort((a,b)=>b.margin-a.margin),fn:p=>p.margin,fmt:v=>v.toFixed(1)+"%",col:p=>p.margin>30?C.green:p.margin>15?C.yellow:C.red},
+            {title:lang==="ar"?"أعلى تكلفة":"Highest Cost",data:[...prodCalc].sort((a,b)=>b.totalCost-a.totalCost),fn:p=>p.totalCost,fmt:v=>v.toFixed(2),col:()=>"#f87171"},
+            {title:lang==="ar"?"أقل تكلفة":"Lowest Cost",data:[...prodCalc].filter(p=>p.totalCost>0).sort((a,b)=>a.totalCost-b.totalCost),fn:p=>p.totalCost,fmt:v=>v.toFixed(2),col:()=>C.green},
+          ].map((sec,si)=><div key={si}>
+            <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{sec.title}</div>
+            {sec.data.slice(0,topN).map((p,i)=>{const val=sec.fn(p),max=sec.fn(sec.data[0])||1,col=sec.col(p);return(
+              <div key={p.id} style={{marginBottom:8}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                  <span style={{fontSize:12,color:C.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
+                  <span style={{fontSize:12,color:col,fontWeight:700,marginRight:6}}>{sec.fmt(val)}</span>
                 </div>
-              );})}
-            </div>
-          ))}
+                <Bar val={val} max={max} color={col}/>
+              </div>
+            );})}
+          </div>)}
         </div>}
       </div>}
 
-      {/* ── PROFITABILITY MATRIX ── */}
-      {show("products")&&prodCalc.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.profitabilityMatrix}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"جميع المنتجات مع تقييم الربحية":"All products with profitability rating"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
-        <div style={{overflowX:"auto"}}>
-          <table style={{width:"100%",borderCollapse:"collapse"}}>
-            <thead><tr>{[isAr?"#":"#",t.productName,t.class,t.totalCost,t.sellingPrice,t.marginPct,isAr?"الحالة":"Status"].map((h,i)=>(
-              <th key={i} style={{padding:"9px 12px",textAlign:isAr?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>
-            ))}</tr></thead>
-            <tbody>{[...prodCalc].sort((a,b)=>b.margin-a.margin).slice(0,topN).map((p,i)=>{
-              const hasSP=parseFloat(p.sellingPrice)>0;
-              const st=getStatus(p.margin,hasSP);
-              return (
-                <tr key={p.id} style={{borderBottom:`1px solid ${C.border}22`}}>
-                  <td style={{padding:"9px 12px",color:C.muted,fontSize:11}}>{i+1}</td>
-                  <td style={{padding:"9px 12px",fontWeight:600}}>{p.name}</td>
-                  <td style={{padding:"9px 12px"}}><span className="badge badge-cls">{p.class||"—"}</span></td>
-                  <td style={{padding:"9px 12px",color:"#f87171",fontWeight:600}}>{p.totalCost.toFixed(2)}</td>
-                  <td style={{padding:"9px 12px",color:C.green,fontWeight:600}}>{hasSP?parseFloat(p.sellingPrice).toFixed(2):"—"}</td>
-                  <td style={{padding:"9px 12px",fontWeight:700,color:hasSP?(p.margin>30?C.green:p.margin>15?C.yellow:C.red):C.muted}}>{hasSP?p.margin.toFixed(1)+"%":"—"}</td>
-                  <td style={{padding:"9px 12px"}}><span className="status-badge" style={{background:st.bg,color:st.color}}>{st.label}</span></td>
-                </tr>
-              );
-            })}</tbody>
-          </table>
-        </div>
-      </div>}
-
-      {/* ── AT-RISK PRODUCTS ── */}
       {show("products")&&atRisk.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.atRiskProducts} <span style={{background:"#f8717122",color:"#f87171",padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700,marginRight:8}}>{atRisk.length}</span></div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"منتجات هامشها أقل من 20%":"Products with margin below 20%"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
+        <SecHd c={lang==="ar"?"منتجات تحتاج مراجعة (هامش أقل من 20%)":"Products Needing Review (Margin < 20%)"} sub={lang==="ar"?"تحقق من التسعير أو خفض التكلفة":"Check pricing or reduce costs"}/>
         <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse"}}>
-            <thead><tr>{[t.productName,t.totalCost,t.sellingPrice,t.margin,t.topCostDriver].map((h,i)=>(
-              <th key={i} style={{padding:"9px 12px",textAlign:isAr?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface}}>{h}</th>
-            ))}</tr></thead>
-            <tbody>{atRisk.slice(0,topN).map(p=>{
+            <thead><tr>{[t.productName,t.totalCost,t.sellingPrice,t.margin,t.topCostDriver].map((h,i)=><th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+            <tbody>{atRisk.slice(0,topN).map((p,i)=>{
               let topDrv="—",topC=0;
-              p.ingredients?.forEach(ing=>{let cost=0,name="";
-                if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}
-                else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}
-                if(cost>topC){topC=cost;topDrv=name;}
-              });
+              p.ingredients?.forEach(ing=>{let cost=0,name="";if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}if(cost>topC){topC=cost;topDrv=name;}});
               return <tr key={p.id} style={{borderBottom:`1px solid ${C.border}22`}}>
                 <td style={{padding:"10px 12px",fontWeight:600}}>{p.name}</td>
                 <td style={{padding:"10px 12px",color:"#f87171",fontWeight:600}}>{p.totalCost.toFixed(2)}</td>
@@ -882,22 +719,15 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
         </div>
       </div>}
 
-      {/* ── VARIANCE REPORT ── */}
       {show("variance")&&withStd.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.varianceReport}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"مقارنة التكلفة الفعلية بالمعيارية":"Actual vs Standard Cost"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
+        <SecHd c={t.varianceReport} sub={lang==="ar"?"مقارنة التكلفة الفعلية بالمعيارية":"Actual vs Standard Cost"}/>
         <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse"}}>
-            <thead><tr>{[t.productName,t.totalCost,t.stdCost,t.variance,t.variancePct,t.topCostDriver].map((h,i)=>(
-              <th key={i} style={{padding:"9px 12px",textAlign:isAr?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>
-            ))}</tr></thead>
-            <tbody>{[...withStd].sort((a,b)=>(b.totalCost-parseFloat(b.stdCost))-(a.totalCost-parseFloat(a.stdCost))).slice(0,topN).map(p=>{
+            <thead><tr>{[t.productName,t.totalCost,t.stdCost,t.variance,t.variancePct,t.topCostDriver].map((h,i)=><th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+            <tbody>{[...withStd].sort((a,b)=>(b.totalCost-parseFloat(b.stdCost))-(a.totalCost-parseFloat(a.stdCost))).slice(0,topN).map((p,i)=>{
               const v=p.totalCost-parseFloat(p.stdCost); const vp=(v/parseFloat(p.stdCost))*100;
               let topDrv="—",topC=0;
-              p.ingredients?.forEach(ing=>{let cost=0,name="";
-                if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}
-                else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}
-                if(cost>topC){topC=cost;topDrv=name;}
-              });
+              p.ingredients?.forEach(ing=>{let cost=0,name="";if(ing.source==="raw"){const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){cost=(parseFloat(ing.qty)||0)/1000*r.price;name=r.name;}}else{const pr=prepList.find(pr=>String(pr.id)===String(ing.srcId));if(pr){const {costPerUnit}=calcPrepCost(pr);cost=(parseFloat(ing.qty)||0)/1000*costPerUnit;name=pr.name;}}if(cost>topC){topC=cost;topDrv=name;}});
               return <tr key={p.id} style={{borderBottom:`1px solid ${C.border}22`,background:v>0?C.red+"08":"transparent"}}>
                 <td style={{padding:"10px 12px",fontWeight:600}}>{p.name}</td>
                 <td style={{padding:"10px 12px",color:"#f87171",fontWeight:600}}>{p.totalCost.toFixed(2)}</td>
@@ -911,172 +741,87 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
         </div>
       </div>}
 
-      {/* ── TOP COST DRIVERS ── */}
       {show("products")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.topDriversTitle}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"أعلى المكونات تكلفة عبر جميع المنتجات":"Top cost ingredients across all products"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
+        <SecHd c={t.topCostDriversReport} sub={lang==="ar"?"أعلى المكونات تكلفة عبر جميع المنتجات":"Top cost ingredients across all products"}/>
         {drivers.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-          <div>{drivers.slice(0,Math.ceil(drivers.length/2)).map(([name,cost],i)=>(
-            <div key={i} style={{marginBottom:9}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                <span style={{fontSize:12,fontWeight:600,color:C.text}}>{i+1}. {name}</span>
-                <span style={{fontSize:12,color:C.yellow,fontWeight:700}}>{cost.toFixed(2)}</span>
-              </div>
-              <Bar val={cost} max={maxDrv} color={C.yellow}/>
-            </div>
-          ))}</div>
-          <div>{drivers.slice(Math.ceil(drivers.length/2)).map(([name,cost],i)=>(
-            <div key={i} style={{marginBottom:9}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                <span style={{fontSize:12,fontWeight:600,color:C.text}}>{Math.ceil(drivers.length/2)+i+1}. {name}</span>
-                <span style={{fontSize:12,color:C.yellow,fontWeight:700}}>{cost.toFixed(2)}</span>
-              </div>
-              <Bar val={cost} max={maxDrv} color={C.yellow}/>
-            </div>
-          ))}</div>
+          <div>{drivers.slice(0,Math.ceil(topN/2)).map(([name,cost],i)=><div key={i} style={{marginBottom:9}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:600,color:C.text}}>{i+1}. {name}</span><span style={{fontSize:12,color:C.yellow,fontWeight:700}}>{cost.toFixed(2)}</span></div>
+            <Bar val={cost} max={maxDrv} color={C.yellow}/>
+          </div>)}</div>
+          <div>{drivers.slice(Math.ceil(topN/2)).map(([name,cost],i)=><div key={i} style={{marginBottom:9}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:600,color:C.text}}>{Math.ceil(topN/2)+i+1}. {name}</span><span style={{fontSize:12,color:C.yellow,fontWeight:700}}>{cost.toFixed(2)}</span></div>
+            <Bar val={cost} max={maxDrv} color={C.yellow}/>
+          </div>)}</div>
         </div>}
       </div>}
 
-      {/* ── PREP ANALYSIS ── */}
       {show("prep")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{isAr?"تحليل Prep":"Prep Analysis"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
+        <SecHd c={t.secPrep}/>
         {prepCalc.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
           <div>
             <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.prepHighCost}</div>
-            {[...prepCalc].sort((a,b)=>b.costPerUnit-a.costPerUnit).slice(0,topN).map((p,i)=>(
-              <div key={p.id} style={{marginBottom:8}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                  <span style={{fontSize:12,color:C.text,fontWeight:600}}>{i+1}. {p.name}</span>
-                  <span style={{fontSize:12,color:C.accent,fontWeight:700}}>{p.costPerUnit.toFixed(3)}</span>
-                </div>
-                <Bar val={p.costPerUnit} max={prepCalc.reduce((a,x)=>Math.max(a,x.costPerUnit),0.001)} color={C.accent}/>
-              </div>
-            ))}
+            {[...prepCalc].sort((a,b)=>b.costPerUnit-a.costPerUnit).slice(0,topN).map((p,i)=><div key={p.id} style={{marginBottom:8}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,color:C.text,fontWeight:600}}>{i+1}. {p.name}</span><span style={{fontSize:12,color:C.accent,fontWeight:700}}>{p.costPerUnit.toFixed(3)}</span></div>
+              <Bar val={p.costPerUnit} max={prepCalc.reduce((a,x)=>Math.max(a,x.costPerUnit),0.001)} color={C.accent}/>
+            </div>)}
           </div>
           <div>
             <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.prepMostUsed}</div>
-            {[...prepUsage].sort((a,b)=>b.usedIn-a.usedIn).slice(0,topN).map((p,i)=>(
-              <div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:C.surface,borderRadius:8,marginBottom:6,border:`1px solid ${C.border}`}}>
-                <span style={{fontSize:12,fontWeight:600,color:C.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
-                <button onClick={()=>p.usedIn>0&&setRelModal({title:p.name,subtitle:t.relatedProducts,list:p.relatedProds})}
-                  className={p.usedIn>0?"chip-prod":"chip-zero"}>
-                  {p.usedIn} {isAr?"منتج":"products"}
-                </button>
-              </div>
-            ))}
+            {[...prepUsage].sort((a,b)=>b.usedIn-a.usedIn).slice(0,topN).map((p,i)=><div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 12px",background:C.surface,borderRadius:8,marginBottom:6,border:`1px solid ${C.border}`}}>
+              <span style={{fontSize:12,fontWeight:600,color:C.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {p.name}</span>
+              <button onClick={()=>p.usedIn>0&&setRelModal({title:p.name,list:p.relatedProds,type:"products"})}
+                style={{background:p.usedIn>0?C.blue+"22":"transparent",color:p.usedIn>0?C.blue:C.muted,padding:"2px 10px",borderRadius:20,fontSize:12,fontWeight:700,border:"none",cursor:p.usedIn>0?"pointer":"default",fontFamily:"inherit"}}>
+                {p.usedIn} {t.productsCount}
+              </button>
+            </div>)}
           </div>
         </div>}
       </div>}
 
-      {/* ── PREP CONTRIBUTION TABLE ── */}
-      {show("prep")&&prepCalc.length>0&&prodCalc.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.prepContribution}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"مساهمة Prep مقابل المواد الخام في تكلفة كل منتج":"Prep vs Raw contribution per product"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
-        <div style={{overflowX:"auto"}}>
-          <table style={{width:"100%",borderCollapse:"collapse"}}>
-            <thead><tr>{[t.productName,isAr?"تكلفة Prep":"Prep Cost",isAr?"تكلفة الخام":"Raw Cost",t.totalCost,isAr?"% Prep":"Prep %",isAr?"% خام":"Raw %"].map((h,i)=>(
-              <th key={i} style={{padding:"9px 12px",textAlign:isAr?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>
-            ))}</tr></thead>
-            <tbody>{prodCalc.slice(0,topN).map(prod=>{
-              let prepCost=0, rawCost=0;
-              prod.ingredients?.forEach(ing=>{
-                if(ing.source==="prep"){const p=prepList.find(p=>String(p.id)===String(ing.srcId));if(p){const {costPerUnit}=calcPrepCost(p);prepCost+=(parseFloat(ing.qty)||0)/1000*costPerUnit;}}
-                else{const r=rawList.find(r=>String(r.id)===String(ing.srcId));if(r){rawCost+=(parseFloat(ing.qty)||0)/1000*r.price;}}
-              });
-              const total=prepCost+rawCost||1;
-              const prepPct=(prepCost/total*100).toFixed(0);
-              const rawPct=(rawCost/total*100).toFixed(0);
-              return (
-                <tr key={prod.id} style={{borderBottom:`1px solid ${C.border}22`}}>
-                  <td style={{padding:"10px 12px",fontWeight:600}}>{prod.name}</td>
-                  <td style={{padding:"10px 12px",color:"#a78bfa",fontWeight:600}}>{prepCost.toFixed(2)}</td>
-                  <td style={{padding:"10px 12px",color:C.accent,fontWeight:600}}>{rawCost.toFixed(2)}</td>
-                  <td style={{padding:"10px 12px",color:"#f87171",fontWeight:700}}>{prod.totalCost.toFixed(2)}</td>
-                  <td style={{padding:"10px 12px"}}>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}>
-                      <span style={{color:"#a78bfa",fontWeight:700,minWidth:36}}>{prepPct}%</span>
-                      <div style={{flex:1,height:6,background:C.surface,borderRadius:3}}>
-                        <div style={{width:prepPct+"%",height:6,borderRadius:3,background:"#a78bfa",transition:"width .5s"}}/>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{padding:"10px 12px"}}>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}>
-                      <span style={{color:C.accent,fontWeight:700,minWidth:36}}>{rawPct}%</span>
-                      <div style={{flex:1,height:6,background:C.surface,borderRadius:3}}>
-                        <div style={{width:rawPct+"%",height:6,borderRadius:3,background:C.accent,transition:"width .5s"}}/>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}</tbody>
-          </table>
-        </div>
-      </div>}
-
-      {/* ── RAW ANALYSIS ── */}
       {show("raw")&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{isAr?"تحليل المواد الخام":"Raw Materials Analysis"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
+        <SecHd c={t.secRaw}/>
         {rawList.length===0?noMsg:<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
           <div>
             <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.rawHighPrice}</div>
-            {[...rawUsage].sort((a,b)=>b.price-a.price).slice(0,topN).map((r,i)=>(
-              <div key={r.id} style={{marginBottom:8}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                  <span style={{fontSize:12,color:C.text,fontWeight:600}}>{i+1}. {r.name}</span>
-                  <span style={{fontSize:12,color:C.accent,fontWeight:700}}>{r.price.toFixed(2)}</span>
-                </div>
-                <Bar val={r.price} max={rawUsage.reduce((a,x)=>Math.max(a,x.price),0.001)} color={C.accent}/>
-              </div>
-            ))}
+            {[...rawUsage].sort((a,b)=>b.price-a.price).slice(0,topN).map((r,i)=><div key={r.id} style={{marginBottom:8}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,color:C.text,fontWeight:600}}>{i+1}. {r.name}</span><span style={{fontSize:12,color:C.accent,fontWeight:700}}>{r.price.toFixed(2)}</span></div>
+              <Bar val={r.price} max={rawUsage.reduce((a,x)=>Math.max(a,x.price),0.001)} color={C.accent}/>
+            </div>)}
           </div>
           <div>
             <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.rawMostUsed}</div>
-            {[...rawUsage].sort((a,b)=>(b.inPrep+b.inProd)-(a.inPrep+a.inProd)).slice(0,topN).map((r,i)=>(
-              <div key={r.id} style={{padding:"8px 12px",background:C.surface,borderRadius:8,marginBottom:6,border:`1px solid ${C.border}`}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span style={{fontSize:12,fontWeight:600,color:C.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {r.name}</span>
-                  <div style={{display:"flex",gap:6}}>
-                    <button onClick={()=>r.inPrep>0&&setRelModal({title:r.name,subtitle:t.relatedPreps,list:r.relatedPreps})}
-                      className={r.inPrep>0?"chip-prep":"chip-zero"}>
-                      P: {r.inPrep}
-                    </button>
-                    <button onClick={()=>r.inProd>0&&setRelModal({title:r.name,subtitle:t.relatedProducts,list:r.relatedProds})}
-                      className={r.inProd>0?"chip-prod":"chip-zero"}>
-                      M: {r.inProd}
-                    </button>
-                  </div>
+            {[...rawUsage].sort((a,b)=>(b.inPrep+b.inProd)-(a.inPrep+a.inProd)).slice(0,topN).map((r,i)=><div key={r.id} style={{padding:"8px 12px",background:C.surface,borderRadius:8,marginBottom:6,border:`1px solid ${C.border}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:12,fontWeight:600,color:C.text,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i+1}. {r.name}</span>
+                <div style={{display:"flex",gap:6}}>
+                  <button onClick={()=>r.inPrep>0&&setRelModal({title:r.name,list:r.relatedPreps,type:"prep"})}
+                    style={{background:r.inPrep>0?"#1e3a5f":"transparent",color:r.inPrep>0?"#60a5fa":C.muted,padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700,border:"none",cursor:r.inPrep>0?"pointer":"default",fontFamily:"inherit"}}>P:{r.inPrep}</button>
+                  <button onClick={()=>r.inProd>0&&setRelModal({title:r.name,list:r.relatedProds,type:"products"})}
+                    style={{background:r.inProd>0?"#0a3326":"transparent",color:r.inProd>0?"#4ade80":C.muted,padding:"2px 8px",borderRadius:20,fontSize:11,fontWeight:700,border:"none",cursor:r.inProd>0?"pointer":"default",fontFamily:"inherit"}}>M:{r.inProd}</button>
                 </div>
               </div>
-            ))}
+            </div>)}
           </div>
         </div>}
       </div>}
 
-      {/* ── RAW PRICE IMPACT ── */}
-      {show("raw")&&rawUsage.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{t.rawPriceImpact}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{isAr?"تأثير كل مادة خام على التكلفة الإجمالية":"Impact of each raw material on total cost"}</div><div style={{height:2,background:C.border,marginTop:8}}/></div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10}}>
-          {[...rawUsage].sort((a,b)=>((b.inPrep+b.inProd)-(a.inPrep+a.inProd))).slice(0,topN).map(r=>(
-            <div key={r.id} style={{background:C.surface,borderRadius:10,padding:"12px 14px",border:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div>
-                <div style={{fontWeight:700,fontSize:13,color:C.text}}>{r.name}</div>
-                <div style={{fontSize:11,color:C.muted,marginTop:3}}>{isAr?"سعر:":"Price:"} <span style={{color:C.accent,fontWeight:700}}>{r.price.toFixed(2)}</span> / {r.unit}</div>
-              </div>
-              <div style={{display:"flex",gap:6}}>
-                <button onClick={()=>r.inPrep>0&&setRelModal({title:r.name,subtitle:t.relatedPreps,list:r.relatedPreps})} className={r.inPrep>0?"chip-prep":"chip-zero"}>
-                  {r.inPrep} {isAr?"Prep":"Prep"}
-                </button>
-                <button onClick={()=>r.inProd>0&&setRelModal({title:r.name,subtitle:t.relatedProducts,list:r.relatedProds})} className={r.inProd>0?"chip-prod":"chip-zero"}>
-                  {r.inProd} {isAr?"منتج":"Prod"}
-                </button>
-              </div>
+      {relModal&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&setRelModal(null)}>
+        <div className="modal" style={{maxWidth:500}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+            <div><div style={{fontWeight:800,fontSize:15,color:C.accent}}>{relModal.title}</div>
+              <div style={{fontSize:12,color:C.muted,marginTop:2}}>{relModal.type==="prep"?t.relatedPreps:t.relatedProducts} ({relModal.list.length})</div>
             </div>
-          ))}
+            <button onClick={()=>setRelModal(null)} style={{background:"transparent",border:"none",color:C.muted,fontSize:20,cursor:"pointer"}}>✕</button>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {relModal.list.map((item,i)=><div key={item.id||i} style={{background:C.surface,borderRadius:9,padding:"10px 14px",border:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div><code style={{background:C.bg||C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8",marginLeft:8}}>{item.code}</code><span style={{fontWeight:600,fontSize:13}}>{item.name}</span></div>
+              <span className="badge badge-cls">{item.class||"—"}</span>
+            </div>)}
+          </div>
+          <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}><button className="btn btn-secondary" onClick={()=>setRelModal(null)}>{t.cancel}</button></div>
         </div>
       </div>}
-
-      {/* ── REL MODAL ── */}
-      {relModal&&<RelModal title={relModal.title} subtitle={relModal.subtitle} list={relModal.list} onClose={()=>setRelModal(null)} lang={lang} C={C} t={t}/>}
     </div>
   );
 }
@@ -1084,196 +829,193 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,calcPrepCost,calc
 // ═══════════════════════════════════════════════════════════════
 // RAW MATERIALS
 // ═══════════════════════════════════════════════════════════════
-function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[],showToast,hasPerm,mod}) {
-  const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
-  const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
-  const [form,setForm]=useState({name:"",unit:"kg",price:"",class:""}); const [errs,setErrs]=useState({});
-  const [delId,setDelId]=useState(null); const [usageModal,setUsageModal]=useState(null); const fileRef=useRef();
-  const cls=classes.raw||[];
-  const ok=()=>{ const e={}; if(!form.name.trim())e.name=t.required; if(!form.price)e.price=t.required; else if(parseFloat(form.price)<=0)e.price=t.positiveNum; setErrs(e); return !Object.keys(e).length; };
-  const reset=()=>{ setForm({name:"",unit:"kg",price:"",class:""}); setErrs({}); setShowForm(false); setEditId(null); };
-  const save=()=>{ if(!ok()) return; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); if(editId!==null) setRawList(p=>p.map(m=>m.id===editId?{...m,name:form.name.trim(),unit:form.unit,price:parseFloat(form.price),class:form.class,lastUpdated:now}:m)); else { const code=genCode("Raw",rawList); setRawList(p=>[...p,{id:Date.now(),code,name:form.name.trim(),unit:form.unit,price:parseFloat(form.price),class:form.class,lastUpdated:now}]); } reset(); showToast(t.savedOk); };
-  const doEdit=m=>{ setForm({name:m.name,unit:m.unit,price:String(m.price),class:m.class||""}); setEditId(m.id); setShowForm(true); };
-  const doDelete=id=>{ setRawList(p=>p.filter(m=>m.id!==id)); setDelId(null); showToast(t.deletedOk,"error"); };
-  const doExport=()=>{ const ws=XLSX.utils.json_to_sheet(rawList.map((m,i)=>({"#":i+1,[t.code]:m.code,[t.name]:m.name,[t.class]:m.class||"",[t.unit]:m.unit,[t.price]:m.price}))); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,t.rawMat); XLSX.writeFile(wb,`raw_${Date.now()}.xlsx`); };
-  const doImport=e=>{ const file=e.target.files[0]; if(!file) return; const r=new FileReader(); r.onload=ev=>{ try{ const wb=XLSX.read(ev.target.result,{type:"binary"}); const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]); let n=0; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); setRawList(prev=>{ const u=[...prev]; rows.forEach(row=>{ const rn=String(row[t.name]||row.Name||row["الاسم"]||"").trim(); const rc=String(row[t.code]||row.Code||row["الكود"]||"").trim(); const rp=parseFloat(row[t.price]||row.Price||row["السعر"]||0); if(!rp||rp<=0) return; let i=u.findIndex(m=>m.name.toLowerCase()===rn.toLowerCase()); if(i===-1) i=u.findIndex(m=>m.code===rc); if(i!==-1){u[i]={...u[i],price:rp,lastUpdated:now};n++;} }); return u; }); showToast(n>0?`${t.importedOk} ${n} ${t.importedItems}`:t.noMatch,n>0?"success":"warning"); }catch{ showToast(lang==="ar"?"خطأ في الملف":"File error","error"); } }; r.readAsBinaryString(file); e.target.value=""; };
-  const filtered=rawList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
+// ─── USAGE MODAL ─────────────────────────────────────────────
+function UsageModal({t,C=DARK,usageModal,onClose}) {
+  return <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+    <div className="modal" style={{maxWidth:500}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+        <div><div style={{fontWeight:800,fontSize:15,color:C.accent}}>{usageModal.item.name}</div>
+          <div style={{fontSize:12,color:C.muted,marginTop:2}}>{usageModal.type==="prep"?t.relatedPreps:t.relatedProducts} ({usageModal.list.length})</div>
+        </div>
+        <button onClick={onClose} style={{background:"transparent",border:"none",color:C.muted,fontSize:20,cursor:"pointer"}}>✕</button>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8,maxHeight:360,overflowY:"auto"}}>
+        {usageModal.list.map((item,i)=><div key={item.id||i} style={{background:C.surface,borderRadius:9,padding:"10px 14px",border:`1px solid ${C.border}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div><code style={{background:C.bg||C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8",marginLeft:8}}>{item.code}</code><span style={{fontWeight:600,fontSize:13}}>{item.name}</span></div>
+          <span className="badge badge-cls">{item.class||"—"}</span>
+        </div>)}
+      </div>
+      <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}><button className="btn btn-secondary" onClick={onClose}>{t.cancel}</button></div>
+    </div>
+  </div>;
+}
+
+// ─── IMPORT MODAL ─────────────────────────────────────────────
+function ImportModal({t,lang,C=DARK,type,onClose,onFileSelect,onDownloadTemplate}) {
+  const fileRef=useRef();
   return (
-    <div>
-      <div className="card" style={{padding:"12px 14px",marginBottom:12,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",justifyContent:"space-between"}}>
-        <input style={{maxWidth:220}} placeholder={t.search} value={search} onChange={e=>setSearch(e.target.value)}/>
-        <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
-          {hasPerm(mod,"edit")&&<><button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button><button className="btn btn-secondary" onClick={()=>fileRef.current.click()}>{t.importXlsx}</button><input ref={fileRef} type="file" accept=".xlsx,.xls" style={{display:"none"}} onChange={doImport}/></>}
-          {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal" style={{maxWidth:420}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <div>
+            <div style={{fontWeight:800,fontSize:15,color:C.accent}}>{lang==="ar"?"استيراد البيانات":"Import Data"}</div>
+            <div style={{fontSize:12,color:C.muted,marginTop:2}}>{type}</div>
+          </div>
+          <button onClick={onClose} style={{background:"transparent",border:"none",color:C.muted,fontSize:22,cursor:"pointer",lineHeight:1}}>✕</button>
         </div>
-      </div>
-      <div style={{display:"flex",gap:7,marginBottom:10,flexWrap:"wrap"}}>
-        <button className={`filter-btn${fcls==="all"?" active":""}`} onClick={()=>setFcls("all")}>{t.all}</button>
-        {cls.map(c=><button key={c} className={`filter-btn${fcls===c?" active":""}`} onClick={()=>setFcls(c)}>{c}</button>)}
-      </div>
-      <div style={{fontSize:11,color:"#2e3a55",marginBottom:10}}>* {t.importNote}</div>
-      <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
-        <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr>
-            <th>#</th><th>{t.code}</th><th>{t.name}</th><th>{t.class}</th><th>{t.unit}</th><th>{t.price}</th>
-            <th style={{color:"#60a5fa"}}>{t.usedInPrepLbl}</th>
-            <th style={{color:"#4ade80"}}>{t.usedInProdsLbl}</th>
-            {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<th>{t.actions}</th>}
-          </tr></thead>
-          <tbody>
-            {filtered.length===0?<tr><td colSpan={9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
-            :filtered.map((m,i)=>{
-              const nPrep=prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id))).length;
-              const nProd=prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id))).length;
-              return (
-              <tr key={m.id}>
-                <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
-                <td><code style={{background:C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.code}</code></td>
-                <td style={{fontWeight:600}}>{m.name}</td>
-                <td><span className="badge badge-cls">{m.class||"—"}</span></td>
-                <td><span className={`badge badge-${m.unit}`}>{unitLbl(m.unit,t)}</span></td>
-                <td style={{color:C.accent,fontWeight:700}}>{m.price.toFixed(2)}</td>
-                <td>
-                  <button
-                    className={nPrep>0?"chip-prep":"chip-zero"}
-                    onClick={()=>nPrep>0&&setUsageModal({item:m,type:"prep",list:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id)))})}
-                    disabled={nPrep===0}
-                    title={nPrep>0?t.clickToView:""}
-                  >{nPrep}</button>
-                </td>
-                <td>
-                  <button
-                    className={nProd>0?"chip-prod":"chip-zero"}
-                    onClick={()=>nProd>0&&setUsageModal({item:m,type:"product",list:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id)))})}
-                    disabled={nProd===0}
-                    title={nProd>0?t.clickToView:""}
-                  >{nProd}</button>
-                </td>
-                {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<td><div style={{display:"flex",gap:5}}>
-                  {hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}
-                  {hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}
-                </div></td>}
-              </tr>
-            );})}
-          </tbody>
-        </table>
-      </div></div>
-
-      {/* USAGE MODAL */}
-      {usageModal&&(
-        <div className="overlay" onClick={e=>e.target===e.currentTarget&&setUsageModal(null)}>
-          <div className="modal" style={{maxWidth:500}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <div>
-                <div style={{fontWeight:800,fontSize:15,color:DARK.accent}}>{usageModal.item.name}</div>
-                <div style={{fontSize:12,color:DARK.muted,marginTop:2}}>{usageModal.type==="prep"?t.relatedPreps:t.relatedProducts} ({usageModal.list.length})</div>
-              </div>
-              <button onClick={()=>setUsageModal(null)} style={{background:"transparent",border:"none",color:DARK.muted,fontSize:20,cursor:"pointer"}}>✕</button>
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {usageModal.list.map((item,i)=>(
-                <div key={item.id} style={{background:DARK.surface,borderRadius:9,padding:"10px 14px",border:"1px solid "+DARK.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div>
-                    <code style={{background:DARK.bg,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8",marginLeft:8}}>{item.code}</code>
-                    <span style={{fontWeight:600,fontSize:13}}>{item.name}</span>
-                  </div>
-                  <span className="badge badge-cls">{item.class||"—"}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}>
-              <button className="btn btn-secondary" onClick={()=>setUsageModal(null)}>{t.cancel}</button>
-            </div>
+        <div onClick={onDownloadTemplate} style={{background:C.surface,border:`2px solid ${C.accent}44`,borderRadius:12,padding:"18px 20px",marginBottom:12,cursor:"pointer",transition:"all .18s",display:"flex",alignItems:"center",gap:14}}
+          onMouseOver={e=>{e.currentTarget.style.borderColor=C.accent;e.currentTarget.style.background=C.accent+"11";}}
+          onMouseOut={e=>{e.currentTarget.style.borderColor=C.accent+"44";e.currentTarget.style.background=C.surface;}}>
+          <div style={{fontSize:28,flexShrink:0}}>📥</div>
+          <div>
+            <div style={{fontWeight:700,color:C.accent,fontSize:13,marginBottom:3}}>{lang==="ar"?"تحميل النموذج الفارغ":"Download Empty Template"}</div>
+            <div style={{fontSize:11,color:C.muted}}>{lang==="ar"?"احصل على النموذج الصحيح وعبّأه بالبيانات":"Get the correct format and fill it with your data"}</div>
           </div>
         </div>
-      )}
-
-      {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal">
-        <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.rawMat}</h2>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <div><label className="lbl">{t.name}</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>{errs.name&&<div className="err">{errs.name}</div>}</div>
-          <div><label className="lbl">{t.class}</label><select value={form.class} onChange={e=>setForm({...form,class:e.target.value})}><option value="">—</option>{cls.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-            <div><label className="lbl">{t.unit}</label><select value={form.unit} onChange={e=>setForm({...form,unit:e.target.value})}><option value="kg">{t.kg}</option><option value="liter">{t.liter}</option><option value="piece">{t.piece}</option></select></div>
-            <div><label className="lbl">{t.price}</label><input type="number" min="0" step="0.01" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0.00"/>{errs.price&&<div className="err">{errs.price}</div>}</div>
+        <div onClick={()=>fileRef.current.click()} style={{background:C.surface,border:`2px solid ${C.blue}44`,borderRadius:12,padding:"18px 20px",cursor:"pointer",transition:"all .18s",display:"flex",alignItems:"center",gap:14}}
+          onMouseOver={e=>{e.currentTarget.style.borderColor=C.blue;e.currentTarget.style.background=C.blue+"11";}}
+          onMouseOut={e=>{e.currentTarget.style.borderColor=C.blue+"44";e.currentTarget.style.background=C.surface;}}>
+          <div style={{fontSize:28,flexShrink:0}}>📤</div>
+          <div>
+            <div style={{fontWeight:700,color:C.blue,fontSize:13,marginBottom:3}}>{lang==="ar"?"رفع ملف Excel":"Upload Excel File"}</div>
+            <div style={{fontSize:11,color:C.muted}}>{lang==="ar"?"ارفع ملف Excel مملوء بالبيانات":"Upload a filled Excel file"}</div>
           </div>
-          <div style={{display:"flex",gap:8,marginTop:4}}><button className="btn btn-primary" style={{flex:1}} onClick={save}>{t.save}</button><button className="btn btn-secondary" style={{flex:1}} onClick={reset}>{t.cancel}</button></div>
         </div>
-      </div></div>}
-      {delId&&<DelModal t={t} onOk={()=>doDelete(delId)} onCancel={()=>setDelId(null)}/>}
+        <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={e=>{onFileSelect(e);onClose();}}/>
+        <div style={{marginTop:14,padding:"10px 14px",background:"#060810",borderRadius:8,fontSize:11,color:C.muted}}>💡 {lang==="ar"?"النظام يتعرف تلقائياً على أي تنسيق — لا يهم أسماء الأعمدة":"Auto-detects any column format"}</div>
+        <button className="btn btn-secondary" onClick={onClose} style={{width:"100%",marginTop:12,textAlign:"center"}}>{t.cancel}</button>
+      </div>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// PREP ITEMS
-// ═══════════════════════════════════════════════════════════════
-function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes,calcPrepCost,showToast,hasPerm,mod}) {
-  const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
-  const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
-  const [form,setForm]=useState({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); const [errs,setErrs]=useState({});
-  const [delId,setDelId]=useState(null); const fileRef=useRef();
-  const [ingSearch,setIngSearch]=useState("");
-  const [viewItem,setViewItem]=useState(null);
+// ─── INGREDIENT ROW (PREP) ────────────────────────────────────
+function IngRow({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
+  const [q,setQ]=useState(""); const [open,setOpen]=useState(false);
+  const srcList=ing.source==="prep"?(prepList||[]):(rawList||[]);
+  const filtered=srcList.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.code?.toLowerCase().includes(q.toLowerCase()));
+  const selected=srcList.find(r=>String(r.id)===String(ing.rawId));
+  return (
+    <div style={{display:"grid",gap:7,gridTemplateColumns:"1fr 2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:C.surface,padding:9,borderRadius:8,border:`1px solid ${C.border}`}}>
+      <div>
+        <label style={{fontSize:11,color:C.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase"}}>{t.source}</label>
+        <select value={ing.source||"raw"} onChange={e=>{onUpdate("source",e.target.value);onUpdate("rawId","");}} style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:7,padding:"8px 10px",fontSize:12,width:"100%",outline:"none"}}>
+          <option value="raw">{lang==="ar"?"مادة خام":"Raw"}</option>
+          <option value="prep">{lang==="ar"?"بريب":"Prep"}</option>
+        </select>
+      </div>
+      <div style={{position:"relative"}}>
+        <label style={{fontSize:11,color:C.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase"}}>{t.ingredient}</label>
+        <div onClick={()=>setOpen(o=>!o)} style={{background:C.surface,border:`1px solid ${open?C.accent:C.border}`,borderRadius:7,padding:"8px 10px",cursor:"pointer",fontSize:12,color:selected?C.text:C.muted,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selected?selected.name+" ("+selected.code+")":"—"}</span>
+          <span style={{fontSize:9}}>▼</span>
+        </div>
+        {open&&<div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:200,background:C.card,border:`1px solid ${C.border}`,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.6)",marginTop:2}}>
+          <div style={{padding:6}}><input autoFocus placeholder={lang==="ar"?"بحث...":"Search..."} value={q} onChange={e=>setQ(e.target.value)} onClick={e=>e.stopPropagation()} style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:5,padding:"6px 10px",fontSize:11,outline:"none",width:"100%"}}/></div>
+          <div style={{maxHeight:200,overflowY:"auto"}}>
+            <div onClick={()=>{onUpdate("rawId","");setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>—</div>
+            {filtered.map(r=><div key={r.id} onClick={()=>{onUpdate("rawId",r.id);setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:String(r.id)===String(ing.rawId)?C.accent:C.text,background:String(r.id)===String(ing.rawId)?C.accent+"15":"transparent"}}>{r.name} <span style={{color:C.muted,fontSize:10}}>({r.code})</span></div>)}
+            {filtered.length===0&&<div style={{padding:"7px 10px",color:C.muted,fontSize:11}}>{t.noData}</div>}
+          </div>
+        </div>}
+      </div>
+      <div><label style={{fontSize:11,color:C.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase"}}>{t.qty} g</label><input type="number" min="0" step="1" value={ing.qty} onChange={e=>onUpdate("qty",e.target.value)} placeholder="0" style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:7,padding:"8px 10px",fontSize:12,width:"100%",outline:"none"}}/></div>
+      <div><label style={{fontSize:11,color:C.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase"}}>{t.waste} %</label><input type="number" min="0" max="100" step="0.5" value={ing.waste} onChange={e=>onUpdate("waste",e.target.value)} placeholder="0" style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:7,padding:"8px 10px",fontSize:12,width:"100%",outline:"none"}}/></div>
+      <button onClick={onRemove} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"4px 10px",cursor:"pointer",marginTop:22,fontFamily:"inherit",fontWeight:600,fontSize:12}}>✕</button>
+    </div>
+  );
+}
+
+// ─── INGREDIENT ROW (PRODUCT) ─────────────────────────────────
+function IngRowProd({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
+  const [q,setQ]=useState(""); const [open,setOpen]=useState(false);
+  const srcList=ing.source==="raw"?rawList:prepList;
+  const filtered=srcList.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.code?.toLowerCase().includes(q.toLowerCase()));
+  const selected=srcList.find(r=>String(r.id)===String(ing.srcId));
+  return (
+    <div style={{display:"grid",gap:7,gridTemplateColumns:"1fr 2fr 1fr 1fr auto",alignItems:"end",marginBottom:7,background:C.surface,padding:9,borderRadius:8,border:`1px solid ${C.border}`}}>
+      <div>
+        <label style={{fontSize:11,color:C.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase"}}>{t.source}</label>
+        <select value={ing.source||"raw"} onChange={e=>{onUpdate("source",e.target.value);onUpdate("srcId","");}} style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:7,padding:"8px 10px",fontSize:12,width:"100%",outline:"none"}}>
+          <option value="raw">{t.rawMat}</option>
+          <option value="prep">{t.prepItem}</option>
+        </select>
+      </div>
+      <div style={{position:"relative"}}>
+        <label style={{fontSize:11,color:C.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase"}}>{t.ingredient}</label>
+        <div onClick={()=>setOpen(o=>!o)} style={{background:C.surface,border:`1px solid ${open?C.accent:C.border}`,borderRadius:7,padding:"8px 10px",cursor:"pointer",fontSize:12,color:selected?C.text:C.muted,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selected?selected.name+" ("+selected.code+")":"—"}</span>
+          <span style={{fontSize:9}}>▼</span>
+        </div>
+        {open&&<div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:200,background:C.card,border:`1px solid ${C.border}`,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.6)",marginTop:2}}>
+          <div style={{padding:6}}><input autoFocus placeholder={lang==="ar"?"بحث...":"Search..."} value={q} onChange={e=>setQ(e.target.value)} onClick={e=>e.stopPropagation()} style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:5,padding:"6px 10px",fontSize:11,outline:"none",width:"100%"}}/></div>
+          <div style={{maxHeight:200,overflowY:"auto"}}>
+            <div onClick={()=>{onUpdate("srcId","");setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>—</div>
+            {filtered.map(r=><div key={r.id} onClick={()=>{onUpdate("srcId",r.id);setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:String(r.id)===String(ing.srcId)?C.accent:C.text,background:String(r.id)===String(ing.srcId)?C.accent+"15":"transparent"}}>{r.name} <span style={{color:C.muted,fontSize:10}}>({r.code})</span></div>)}
+            {filtered.length===0&&<div style={{padding:"7px 10px",color:C.muted,fontSize:11}}>{t.noData}</div>}
+          </div>
+        </div>}
+      </div>
+      <div><label style={{fontSize:11,color:C.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase"}}>{t.qty} g</label><input type="number" min="0" step="1" value={ing.qty} onChange={e=>onUpdate("qty",e.target.value)} placeholder="0" style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:7,padding:"8px 10px",fontSize:12,width:"100%",outline:"none"}}/></div>
+      <div><label style={{fontSize:11,color:C.muted,marginBottom:4,display:"block",fontWeight:600,textTransform:"uppercase"}}>{t.waste} %</label><input type="number" min="0" max="100" step="0.5" value={ing.waste} onChange={e=>onUpdate("waste",e.target.value)} placeholder="0" style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:7,padding:"8px 10px",fontSize:12,width:"100%",outline:"none"}}/></div>
+      <button onClick={onRemove} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"4px 10px",cursor:"pointer",marginTop:22,fontFamily:"inherit",fontWeight:600,fontSize:12}}>✕</button>
+    </div>
+  );
+}
+
+
+function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[],showToast,hasPerm,mod}) {
+  const [search,setSearch]=useState("");
+  const [fcls,setFcls]=useState("all");
+  const [showForm,setShowForm]=useState(false);
+  const [editId,setEditId]=useState(null);
+  const [form,setForm]=useState({name:"",unit:"kg",price:"",class:""});
+  const [errs,setErrs]=useState({});
+  const [delId,setDelId]=useState(null);
   const [usageModal,setUsageModal]=useState(null);
-  const cls=classes.prep||[];
-  const blank=()=>({id:Date.now()+Math.random(),source:"raw",rawId:"",qty:"",waste:"0"});
-  const reset=()=>{ setForm({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
-  const ok=()=>{ const e={}; if(!form.name.trim())e.name=t.required; setErrs(e); return !Object.keys(e).length; };
-  const save=()=>{ if(!ok()) return; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); const ings=form.ingredients.filter(i=>i.rawId&&parseFloat(i.qty)>0); if(editId!==null) setPrepList(p=>p.map(m=>m.id===editId?{...m,name:form.name.trim(),unit:form.unit,class:form.class,yieldOverride:form.yieldOverride,ingredients:ings,lastUpdated:now}:m)); else { const code=genCode("Prep",prepList); setPrepList(p=>[...p,{id:Date.now(),code,name:form.name.trim(),unit:form.unit,class:form.class,yieldOverride:form.yieldOverride,ingredients:ings,lastUpdated:now}]); } reset(); showToast(t.savedOk); };
-  const doEdit=m=>{ setForm({name:m.name,unit:m.unit,class:m.class||"",yieldOverride:m.yieldOverride||"",ingredients:m.ingredients||[]}); setEditId(m.id); setShowForm(true); };
-  const doDelete=id=>{ setPrepList(p=>p.filter(m=>m.id!==id)); setDelId(null); showToast(t.deletedOk,"error"); };
-  const addI=()=>setForm(f=>({...f,ingredients:[...f.ingredients,blank()]}));
-  const remI=id=>setForm(f=>({...f,ingredients:f.ingredients.filter(i=>i.id!==id)}));
-  const updI=(id,k,v)=>setForm(f=>({...f,ingredients:f.ingredients.map(i=>i.id===id?{...i,[k]:v}:i)}));
-  const live=calcPrepCost({ingredients:form.ingredients,unit:form.unit,yieldOverride:form.yieldOverride});
-  const doExport=()=>{
-    const rows=[];
-    prepList.forEach(p=>{
-      const ings=p.ingredients||[];
-      if(ings.length===0){
-        rows.push({
-          [lang==="ar"?"كود Prep":"Prep Code"]:p.code,
-          [lang==="ar"?"اسم Prep":"Prep Name"]:p.name,
-          [lang==="ar"?"الكلاس":"Class"]:p.class||"",
-          [lang==="ar"?"الوحدة":"Unit"]:p.unit,
-          [lang==="ar"?"نوع المكون":"Ingredient Type"]:"",
-          [lang==="ar"?"كود المكون":"Ingredient Code"]:"",
-          [lang==="ar"?"اسم المكون":"Ingredient Name"]:"",
-          [lang==="ar"?"الكمية (g/ml)":"Qty (g/ml)"]:"",
-          [lang==="ar"?"الهدر %":"Waste %"]:"",
-        });
-      } else {
-        ings.forEach(ing=>{
-          let ingCode="", ingName="", ingType="";
-          if(ing.source==="prep"){
-            const p=prepList.find(p=>String(p.id)===String(ing.rawId));
-            if(p){ ingCode=p.code; ingName=p.name; ingType=lang==="ar"?"بريب":"Prep"; }
-          } else {
-            const raw=rawList.find(r=>String(r.id)===String(ing.rawId));
-            if(raw){ ingCode=raw.code; ingName=raw.name; ingType=lang==="ar"?"مادة خام":"Raw"; }
-          }
-          rows.push({
-            [lang==="ar"?"كود Prep":"Prep Code"]:p.code,
-            [lang==="ar"?"اسم Prep":"Prep Name"]:p.name,
-            [lang==="ar"?"الكلاس":"Class"]:p.class||"",
-            [lang==="ar"?"الوحدة":"Unit"]:p.unit,
-            [lang==="ar"?"نوع المكون":"Ingredient Type"]:ingType,
-            [lang==="ar"?"كود المكون":"Ingredient Code"]:ingCode,
-            [lang==="ar"?"اسم المكون":"Ingredient Name"]:ingName,
-            [lang==="ar"?"الكمية (g/ml)":"Qty (g/ml)"]:parseFloat(ing.qty)||0,
-            [lang==="ar"?"الهدر %":"Waste %"]:parseFloat(ing.waste)||0,
-          });
-        });
-      }
-    });
-    const ws=XLSX.utils.json_to_sheet(rows);
-    // set column widths
-    ws["!cols"]=[{wch:14},{wch:20},{wch:14},{wch:10},{wch:16},{wch:14},{wch:22},{wch:14},{wch:10}];
-    const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,t.prepItem);
-    XLSX.writeFile(wb,`prep_items_${Date.now()}.xlsx`);
+  const [showImport,setShowImport]=useState(false);
+  const fileRef=useRef();
+  const cls=classes.raw||[];
+
+  const ok=()=>{ const e={}; if(!form.name.trim())e.name=t.required; if(!form.price||parseFloat(form.price)<=0)e.price=t.positiveNum; setErrs(e); return !Object.keys(e).length; };
+  const reset=()=>{ setForm({name:"",unit:"kg",price:"",class:""}); setErrs({}); setShowForm(false); setEditId(null); };
+  const save=()=>{
+    if(!ok()) return;
+    const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
+    if(editId!==null) setRawList(p=>p.map(m=>m.id===editId?{...m,name:form.name.trim(),unit:form.unit,price:parseFloat(form.price),class:form.class,lastUpdated:now}:m));
+    else { const code=genCode("Raw",rawList); setRawList(p=>[...p,{id:Date.now(),code,name:form.name.trim(),unit:form.unit,price:parseFloat(form.price),class:form.class,lastUpdated:now}]); }
+    reset(); showToast(t.savedOk);
   };
+  const doEdit=m=>{ setForm({name:m.name,unit:m.unit,price:String(m.price),class:m.class||""}); setEditId(m.id); setShowForm(true); };
+  const doDelete=id=>{ setRawList(p=>p.filter(m=>m.id!==id)); setDelId(null); showToast(t.deletedOk,"error"); };
+
+  // Download template
+  const doDownloadTemplate=()=>{
+    const sample=[
+      {Code:"Raw-00001",Name:lang==="ar"?"دجاج خام":"Chicken Raw",Class:"Food Item",Unit:"kg",Price:20},
+      {Code:"Raw-00002",Name:lang==="ar"?"طماطم":"Tomato",Class:"Food Item",Unit:"kg",Price:5},
+      {Code:"Raw-00003",Name:lang==="ar"?"زيت نباتي":"Vegetable Oil",Class:"Food Item",Unit:"liter",Price:8},
+      {Code:"",Name:"",Class:"",Unit:"",Price:""},
+    ];
+    const ws=XLSX.utils.json_to_sheet(sample);
+    ws["!cols"]=[{wch:14},{wch:30},{wch:14},{wch:10},{wch:12}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Raw Materials");
+    XLSX.writeFile(wb,"TALA_Raw_Materials_Template.xlsx");
+  };
+
+  // Export current data
+  const doExport=()=>{
+    const data=rawList.map(m=>({Code:m.code,Name:m.name,Class:m.class||"",Unit:m.unit,Price:m.price}));
+    if(!data.length){doDownloadTemplate();return;}
+    const ws=XLSX.utils.json_to_sheet(data);
+    ws["!cols"]=[{wch:14},{wch:30},{wch:14},{wch:10},{wch:12}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Raw Materials");
+    XLSX.writeFile(wb,"TALA_Raw_Materials_Export.xlsx");
+  };
+
+  // Smart import — reads any column format
   const doImport=e=>{
     const file=e.target.files[0]; if(!file) return;
     const r=new FileReader();
@@ -1281,85 +1023,261 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
       try{
         const wb=XLSX.read(ev.target.result,{type:"binary"});
         const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-        let updated=0;
+        if(!rows.length){showToast(t.noMatch,"warning");return;}
+        const fv=(row,keys)=>{ for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v).trim();}return ""; };
         const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
-        // group rows by prep code
-        const prepGroups={};
-        rows.forEach(row=>{
-          const pc=String(row[lang==="ar"?"كود Prep":"Prep Code"]||row["Prep Code"]||row["كود Prep"]||"").trim();
-          const pn=String(row[lang==="ar"?"اسم Prep":"Prep Name"]||row["Prep Name"]||row["اسم Prep"]||"").trim();
-          const key=pc||pn;
-          if(!key) return;
-          if(!prepGroups[key]) prepGroups[key]={code:pc,name:pn,ingredients:[]};
-          const ingCode=String(row[lang==="ar"?"كود المكون":"Ingredient Code"]||row["Ingredient Code"]||row["كود المكون"]||"").trim();
-          const ingName=String(row[lang==="ar"?"اسم المكون":"Ingredient Name"]||row["Ingredient Name"]||row["اسم المكون"]||"").trim();
-          const ingType=String(row[lang==="ar"?"نوع المكون":"Ingredient Type"]||row["Ingredient Type"]||row["نوع المكون"]||"raw").trim().toLowerCase();
-          const qty=parseFloat(row[lang==="ar"?"الكمية (g/ml)":"Qty (g/ml)"]||row["Qty (g/ml)"]||row["الكمية (g/ml)"]||0);
-          const waste=parseFloat(row[lang==="ar"?"الهدر %":"Waste %"]||row["Waste %"]||row["الهدر %"]||0);
-          if(ingCode||ingName){
-            // find raw material by code or name
-            const isPrep = ingType.includes("prep") || ingType.includes("بريب");
-            if(isPrep){
-              const p=prepList.find(p=>p.code===ingCode||p.name.toLowerCase()===ingName.toLowerCase());
-              if(p) prepGroups[key].ingredients.push({id:Date.now()+Math.random(),source:"prep",rawId:p.id,qty,waste});
-            } else {
-              const raw=rawList.find(r=>r.code===ingCode||r.name.toLowerCase()===ingName.toLowerCase());
-              if(raw) prepGroups[key].ingredients.push({id:Date.now()+Math.random(),source:"raw",rawId:raw.id,qty,waste});
-            }
-          }
-        });
-        setPrepList(prev=>{
+        let updated=0,added=0;
+        setRawList(prev=>{
           const u=[...prev];
-          Object.values(prepGroups).forEach(pg=>{
-            // find prep by code then name
-            let idx=u.findIndex(p=>p.code===pg.code);
-            if(idx===-1) idx=u.findIndex(p=>p.name.toLowerCase()===pg.name.toLowerCase());
-            if(idx===-1) return; // only update existing
-            // smart sync ingredients
-            const newIngs=pg.ingredients;
-            u[idx]={...u[idx],ingredients:newIngs,lastUpdated:now};
-            updated++;
+          rows.forEach(row=>{
+            const rn=fv(row,["Name","الاسم","name","اسم الصنف","Item Name","المادة","المادة الخام","Raw Material"]);
+            const rc=fv(row,["Code","الكود","code","كود الصنف","Item Code","الرمز"]);
+            const rpRaw=fv(row,["Price","السعر","price","Cost","التكلفة","تكلفة","سعر","Cost Per KG","التكلفة بالكيلو","New Cost"]);
+            const rp=parseFloat(rpRaw)||0;
+            const ruRaw=fv(row,["Unit","الوحدة","unit","وحدة","UOM"]);
+            const ru=ruRaw.toLowerCase();
+            const rcls=fv(row,["Class","الكلاس","class","كلاس","Category","فئة","Type","النوع"])||"Food Item";
+            if(!rn) return;
+            const unit=["liter","litre","l","لتر"].includes(ru)?"liter":["piece","pieces","pcs","حبة","قطعة"].includes(ru)?"piece":"kg";
+            let i=u.findIndex(m=>m.name.toLowerCase()===rn.toLowerCase());
+            if(i===-1&&rc) i=u.findIndex(m=>m.code===rc);
+            if(i!==-1){u[i]={...u[i],price:rp,unit,class:rcls||u[i].class,lastUpdated:now};updated++;}
+            else{const newCode=rc&&!["undefined","nan",""].includes(rc)?rc:genCode("Raw",u);u.push({id:Date.now()+Math.random(),code:newCode,name:rn,unit,price:rp,class:rcls,lastUpdated:now});added++;}
           });
           return u;
         });
-        showToast(updated>0?`${t.importedOk} ${updated} ${t.importedItems}`:t.noMatch,updated>0?"success":"warning");
-      }catch(err){ showToast(lang==="ar"?"خطأ في الملف":"File error","error"); }
+        showToast(lang==="ar"?`✅ أضيف ${added} | حُدِّث ${updated}`:`✅ Added ${added} | Updated ${updated}`,(added+updated)>0?"success":"warning");
+      }catch(err){showToast(lang==="ar"?"خطأ في الملف":"File error","error");}
     };
     r.readAsBinaryString(file); e.target.value="";
   };
-  const filtered=prepList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
+
+  const filtered=rawList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
+
   return (
     <div>
       <div className="card" style={{padding:"12px 14px",marginBottom:12,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",justifyContent:"space-between"}}>
-        <input style={{maxWidth:220}} placeholder={t.search} value={search} onChange={e=>setSearch(e.target.value)}/>
-        <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
-          {hasPerm(mod,"edit")&&<><button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button><button className="btn btn-secondary" onClick={()=>fileRef.current.click()}>{t.importXlsx}</button><input ref={fileRef} type="file" accept=".xlsx,.xls" style={{display:"none"}} onChange={doImport}/></>}
+        <input style={{maxWidth:240}} placeholder={t.search} value={search} onChange={e=>setSearch(e.target.value)}/>
+        <div style={{display:"flex",gap:7,flexWrap:"wrap",alignItems:"center"}}>
+          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
+          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
         </div>
       </div>
-      <div style={{display:"flex",gap:7,marginBottom:10,flexWrap:"wrap"}}>
-        <button className={`filter-btn${fcls==="all"?" active":""}`} onClick={()=>setFcls("all")}>{t.all}</button>
-        {cls.map(c=><button key={c} className={`filter-btn${fcls===c?" active":""}`} onClick={()=>setFcls(c)}>{c}</button>)}
+      <div style={{display:"flex",gap:7,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
+        <button className={`fbtn${fcls==="all"?" active":""}`} onClick={()=>setFcls("all")}>{t.all} ({rawList.length})</button>
+        {cls.map(c=><button key={c} className={`fbtn${fcls===c?" active":""}`} onClick={()=>setFcls(c)}>{c} ({rawList.filter(m=>m.class===c).length})</button>)}
       </div>
       <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr>
-            <th>#</th><th>{t.code}</th><th>{t.name}</th><th>{t.class}</th><th>{t.unit}</th>
-            <th>{lang==="ar"?"مكونات":"Ing."}</th><th>{t.yieldWeight}</th><th>{t.costPerUnit}</th>
-            <th style={{color:"#4ade80"}}>{t.usedInProdsLbl}</th>
-            <th style={{color:"#60a5fa"}}>{t.rawMaterialsUsed}</th>
-            <th>{t.actions}</th>
-          </tr></thead>
+          <thead><tr>{["#",t.code,t.name,t.class,t.unit,t.price,t.usedInPrep,t.usedInProducts,hasPerm(mod,"edit")||hasPerm(mod,"delete")?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
           <tbody>
-            {filtered.length===0?<tr><td colSpan={11} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            {filtered.length===0?<tr><td colSpan={9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            :filtered.map((m,i)=>{
+              const nPrep=prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id))).length;
+              const nProd=prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id))).length;
+              return <tr key={m.id}>
+                <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
+                <td><code style={{background:C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.code}</code></td>
+                <td style={{fontWeight:600}}>{m.name}</td>
+                <td><span className="badge badge-cls">{m.class||"—"}</span></td>
+                <td><span className={`badge badge-${m.unit}`}>{unitLbl(m.unit,t)}</span></td>
+                <td style={{color:C.accent,fontWeight:700}}>{m.price.toFixed(2)}</td>
+                <td>{nPrep>0?<button onClick={()=>setUsageModal({item:m,type:"prep",list:prepList.filter(p=>p.ingredients?.some(i=>String(i.rawId)===String(m.id)))})} style={{background:"#0f2a4a",color:"#60a5fa",border:"1px solid #1e3a6033",borderRadius:6,padding:"3px 10px",cursor:"pointer",fontWeight:700,fontSize:13}}>{nPrep}</button>:<span style={{color:C.muted}}>0</span>}</td>
+                <td>{nProd>0?<button onClick={()=>setUsageModal({item:m,type:"product",list:prodList.filter(p=>p.ingredients?.some(i=>i.source==="raw"&&String(i.srcId)===String(m.id)))})} style={{background:"#0a2a1a",color:"#4ade80",border:"1px solid #16a34a33",borderRadius:6,padding:"3px 10px",cursor:"pointer",fontWeight:700,fontSize:13}}>{nProd}</button>:<span style={{color:C.muted}}>0</span>}</td>
+                {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<td><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}</div></td>}
+              </tr>;
+            })}
+          </tbody>
+        </table>
+      </div></div>
+
+      {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.rawMat} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={doImport}/>}
+      {usageModal&&<UsageModal t={t} C={C} usageModal={usageModal} onClose={()=>setUsageModal(null)}/>}
+      {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal">
+        <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.rawMat}</h2>
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          <div><label className="lbl">{t.name}</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>{errs.name&&<div className="err">{errs.name}</div>}</div>
+          <div><label className="lbl">{t.class}</label><select value={form.class} onChange={e=>setForm({...form,class:e.target.value})}><option value="">—</option>{cls.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+            <div><label className="lbl">{t.unit}</label><select value={form.unit} onChange={e=>setForm({...form,unit:e.target.value})}><option value="kg">{t.kg}</option><option value="liter">{t.liter}</option><option value="piece">{t.piece}</option></select></div>
+            <div><label className="lbl">{t.price} / {t.unit}</label><input type="number" min="0" step="0.01" value={form.price} onChange={e=>setForm({...form,price:e.target.value})} placeholder="0.00"/>{errs.price&&<div className="err">{errs.price}</div>}</div>
+          </div>
+          <div style={{display:"flex",gap:8,marginTop:4}}><button className="btn btn-primary" style={{flex:1}} onClick={save}>{t.save}</button><button className="btn btn-secondary" style={{flex:1}} onClick={reset}>{t.cancel}</button></div>
+        </div>
+      </div></div>}
+      {delId&&<DelModal t={t} C={C} onOk={()=>doDelete(delId)} onCancel={()=>setDelId(null)}/>}
+    </div>
+  );
+}
+
+
+function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes,calcPrepCost,showToast,hasPerm,mod}) {
+  const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
+  const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
+  const [form,setForm]=useState({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); const [errs,setErrs]=useState({});
+  const [delId,setDelId]=useState(null); const [viewItem,setViewItem]=useState(null);
+  const [usageModal,setUsageModal]=useState(null); const [showImport,setShowImport]=useState(false);
+  const fileRef=useRef(); const cls=classes.prep||[];
+
+  const blank=()=>({id:Date.now()+Math.random(),source:"raw",rawId:"",qty:"",waste:"0"});
+  const reset=()=>{ setForm({name:"",unit:"kg",class:"",yieldOverride:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
+  const ok=()=>{ const e={}; if(!form.name.trim())e.name=t.required; setErrs(e); return !Object.keys(e).length; };
+  const save=()=>{
+    if(!ok()) return;
+    const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
+    const ings=form.ingredients.filter(i=>i.rawId&&parseFloat(i.qty)>0);
+    if(editId!==null) setPrepList(p=>p.map(m=>m.id===editId?{...m,name:form.name.trim(),unit:form.unit,class:form.class,yieldOverride:form.yieldOverride,ingredients:ings,lastUpdated:now}:m));
+    else { const code=genCode("Prep",prepList); setPrepList(p=>[...p,{id:Date.now(),code,name:form.name.trim(),unit:form.unit,class:form.class,yieldOverride:form.yieldOverride,ingredients:ings,lastUpdated:now}]); }
+    reset(); showToast(t.savedOk);
+  };
+  const doEdit=m=>{ setForm({name:m.name,unit:m.unit,class:m.class||"",yieldOverride:m.yieldOverride||"",ingredients:m.ingredients||[]}); setEditId(m.id); setShowForm(true); };
+  const doDelete=id=>{ setPrepList(p=>p.filter(m=>m.id!==id)); setDelId(null); showToast(t.deletedOk,"error"); };
+  const addI=()=>setForm(f=>({...f,ingredients:[...f.ingredients,blank()]}));
+  const remI=id=>setForm(f=>({...f,ingredients:f.ingredients.filter(i=>i.id!==id)}));
+  const updI=(id,k,v)=>setForm(f=>({...f,ingredients:f.ingredients.map(i=>i.id===id?{...i,[k]:v}:i)}));
+  const live=calcPrepCost({ingredients:form.ingredients,unit:form.unit,yieldOverride:form.yieldOverride});
+
+  // Download template
+  const doDownloadTemplate=()=>{
+    const rows=[
+      {"Prep Name":lang==="ar"?"دجاج متبل":"Marinated Chicken","Prep Code":"Prep-00001","Ingredient Type":"Raw","Ingredient Code":"Raw-00001","Ingredient Name":lang==="ar"?"دجاج خام":"Raw Chicken","Qty (g/ml)":1000,"Waste %":20},
+      {"Prep Name":lang==="ar"?"دجاج متبل":"Marinated Chicken","Prep Code":"Prep-00001","Ingredient Type":"Raw","Ingredient Code":"Raw-00002","Ingredient Name":lang==="ar"?"بهارات":"Spices","Qty (g/ml)":30,"Waste %":0},
+      {"Prep Name":lang==="ar"?"صوص ثوم":"Garlic Sauce","Prep Code":"Prep-00002","Ingredient Type":"Raw","Ingredient Code":"Raw-00003","Ingredient Name":lang==="ar"?"ثوم خام":"Raw Garlic","Qty (g/ml)":500,"Waste %":30},
+    ];
+    const ws=XLSX.utils.json_to_sheet(rows);
+    ws["!cols"]=[{wch:22},{wch:14},{wch:16},{wch:14},{wch:25},{wch:12},{wch:10}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Prep Items");
+    XLSX.writeFile(wb,"TALA_Prep_Items_Template.xlsx");
+  };
+
+  // Export current data
+  const doExport=()=>{
+    if(!prepList.length){doDownloadTemplate();return;}
+    const rows=[];
+    prepList.forEach(p=>{
+      const ings=p.ingredients||[];
+      if(!ings.length){
+        rows.push({"Prep Name":p.name,"Prep Code":p.code,"Ingredient Type":"","Ingredient Code":"","Ingredient Name":"","Qty (g/ml)":"","Waste %":""});
+      } else {
+        ings.forEach(ing=>{
+          let ingCode="",ingName="",ingType="";
+          if(ing.source==="prep"){const pp=prepList.find(pp=>String(pp.id)===String(ing.rawId));if(pp){ingCode=pp.code;ingName=pp.name;ingType="Prep";}}
+          else{const raw=rawList.find(r=>String(r.id)===String(ing.rawId));if(raw){ingCode=raw.code;ingName=raw.name;ingType="Raw";}}
+          rows.push({"Prep Name":p.name,"Prep Code":p.code,"Ingredient Type":ingType,"Ingredient Code":ingCode,"Ingredient Name":ingName,"Qty (g/ml)":parseFloat(ing.qty)||0,"Waste %":parseFloat(ing.waste)||0});
+        });
+      }
+    });
+    const ws=XLSX.utils.json_to_sheet(rows);
+    ws["!cols"]=[{wch:22},{wch:14},{wch:16},{wch:14},{wch:25},{wch:12},{wch:10}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Prep Items");
+    XLSX.writeFile(wb,"TALA_Prep_Export.xlsx");
+  };
+
+  // Smart import — handles repeated prep names, any column format
+  const doImport=e=>{
+    const file=e.target.files[0]; if(!file) return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      try{
+        const wb=XLSX.read(ev.target.result,{type:"binary"});
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        if(!rows.length){showToast(t.noMatch,"warning");return;}
+        const fv=(row,keys)=>{ for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v).trim();}return ""; };
+        const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
+
+        // Group by prep name (first column / Prep Name column)
+        const groups={};
+        rows.forEach(row=>{
+          // Detect prep name — usually first non-empty repeating column
+          const pn=fv(row,["Prep Name","اسم Prep","prep name","prep","اسم البريب","البريب","Prep","اسم"]) || fv(row,[Object.keys(row)[0]]);
+          const pc=fv(row,["Prep Code","كود Prep","prep code","كود البريب"]);
+          if(!pn) return;
+          const key=pn.toLowerCase();
+          if(!groups[key]) groups[key]={code:pc,name:pn,ingredients:[]};
+
+          // Ingredient info
+          const ingCode=fv(row,["Ingredient Code","كود المكون","code","الكود","Raw Code","Prep Code 2"]);
+          const ingName=fv(row,["Ingredient Name","اسم المكون","ingredient","المكون","Raw Name","Prep Name 2","name","الاسم"]);
+          const ingTypeRaw=fv(row,["Ingredient Type","نوع المكون","type","النوع","Type"]);
+          const ingType=ingTypeRaw.toLowerCase().includes("prep")||ingTypeRaw.includes("بريب")?"prep":"raw";
+          
+          // Quantity — detect column with g/ml or quantity keywords
+          const qtyRaw=fv(row,["Qty (g/ml)","الكمية (g/ml)","qty","quantity","الكمية","Qty","weight","الوزن","Amount","الكمية بالجرام","g","gram","ml"]);
+          let qty=parseFloat(qtyRaw)||0;
+          // If qty seems to be in kg (small number like 0.5), convert to grams
+          const uomCheck=fv(row,["UOM","وحدة","unit","الوحدة"]).toLowerCase();
+          if(["kg","kilo","كيلو","l","liter","litre"].includes(uomCheck) && qty>0 && qty<100) qty*=1000;
+
+          const wasteRaw=fv(row,["Waste %","الهدر %","waste","هدر","Waste","Wastage"]);
+          let waste=parseFloat(wasteRaw)||0;
+          // If waste is decimal (0.2 instead of 20%), convert
+          if(waste>0&&waste<1) waste=Math.round(waste*100*10)/10;
+
+          if(!ingName&&!ingCode) return;
+          
+          // Find the actual ingredient
+          if(ingType==="prep"){
+            const p=prepList.find(p=>p.code===ingCode||p.name.toLowerCase()===ingName.toLowerCase());
+            if(p) groups[key].ingredients.push({id:Date.now()+Math.random(),source:"prep",rawId:p.id,qty,waste});
+          } else {
+            const raw=rawList.find(r=>r.code===ingCode||r.name.toLowerCase()===ingName.toLowerCase());
+            if(raw) groups[key].ingredients.push({id:Date.now()+Math.random(),source:"raw",rawId:raw.id,qty,waste});
+          }
+        });
+
+        let updated=0,added=0;
+        setPrepList(prev=>{
+          const u=[...prev];
+          Object.values(groups).forEach(pg=>{
+            if(!pg.name) return;
+            let idx=u.findIndex(p=>p.name.toLowerCase()===pg.name.toLowerCase());
+            if(idx===-1&&pg.code) idx=u.findIndex(p=>p.code===pg.code);
+            if(idx===-1){
+              const newCode=pg.code&&!["undefined","nan",""].includes(pg.code)?pg.code:genCode("Prep",u);
+              u.push({id:Date.now()+Math.random(),code:newCode,name:pg.name,unit:"kg",class:"",yieldOverride:"",ingredients:pg.ingredients,lastUpdated:now});
+              added++;
+            } else {
+              u[idx]={...u[idx],ingredients:pg.ingredients,lastUpdated:now};
+              updated++;
+            }
+          });
+          return u;
+        });
+        const total=added+updated;
+        showToast(total>0?(lang==="ar"?`✅ أضيف ${added} بريب | حُدِّث ${updated} بريب`:`✅ Added ${added} | Updated ${updated}`):t.noMatch,total>0?"success":"warning");
+      }catch(err){console.error(err);showToast(lang==="ar"?"خطأ في الملف":"File error","error");}
+    };
+    r.readAsBinaryString(file); e.target.value="";
+  };
+
+  const filtered=prepList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
+
+  return (
+    <div>
+      <div className="card" style={{padding:"12px 14px",marginBottom:12,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",justifyContent:"space-between"}}>
+        <input style={{maxWidth:240}} placeholder={t.search} value={search} onChange={e=>setSearch(e.target.value)}/>
+        <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
+          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
+          {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
+        </div>
+      </div>
+      <div style={{display:"flex",gap:7,marginBottom:12,flexWrap:"wrap"}}>
+        <button className={`fbtn${fcls==="all"?" active":""}`} onClick={()=>setFcls("all")}>{t.all} ({prepList.length})</button>
+        {cls.map(c=><button key={c} className={`fbtn${fcls===c?" active":""}`} onClick={()=>setFcls(c)}>{c} ({prepList.filter(m=>m.class===c).length})</button>)}
+      </div>
+      <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
+        <table style={{width:"100%",borderCollapse:"collapse"}}>
+          <thead><tr>{["#",t.code,t.name,t.class,t.unit,lang==="ar"?"مكونات":"Ing.",t.yieldWeight,t.costPerUnit,t.usedInProducts,t.actions].map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
+          <tbody>
+            {filtered.length===0?<tr><td colSpan={10} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
             :filtered.map((m,i)=>{
               const {costPerUnit,yieldKg}=calcPrepCost(m);
               const nProd=prodList.filter(p=>p.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(m.id))).length;
-              const nRaw=m.ingredients?.filter(i=>i.source==="raw"||!i.source).length||0;
-              const relatedProds=prodList.filter(p=>p.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(m.id)));
-              const relatedRaws=m.ingredients?.map(i=>{const r=rawList.find(r=>String(r.id)===String(i.rawId));return r||null;}).filter(Boolean)||[];
-              return (
-              <tr key={m.id}>
+              return <tr key={m.id}>
                 <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
                 <td><code style={{background:C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.code}</code></td>
                 <td style={{fontWeight:600}}>{m.name}</td>
@@ -1368,174 +1286,73 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
                 <td style={{color:C.muted}}>{m.ingredients?.length||0}</td>
                 <td style={{color:C.muted}}>{yieldKg.toFixed(3)}</td>
                 <td style={{color:C.accent,fontWeight:700}}>{costPerUnit.toFixed(4)}</td>
-                <td>
-                  <button
-                    className={nProd>0?"chip-prod":"chip-zero"}
-                    onClick={()=>nProd>0&&setUsageModal({item:m,type:"product",list:relatedProds})}
-                    disabled={nProd===0}
-                  >{nProd}</button>
-                </td>
-                <td>
-                  <button
-                    className={nRaw>0?"chip-prep":"chip-zero"}
-                    onClick={()=>nRaw>0&&setUsageModal({item:m,type:"raw",list:relatedRaws})}
-                    disabled={nRaw===0}
-                  >{nRaw}</button>
-                </td>
+                <td>{nProd>0?<button onClick={()=>setUsageModal({item:m,type:"product",list:prodList.filter(p=>p.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(m.id)))})} style={{background:"#0a2a1a",color:"#4ade80",border:"1px solid #16a34a33",borderRadius:6,padding:"3px 10px",cursor:"pointer",fontWeight:700,fontSize:13}}>{nProd}</button>:<span style={{color:C.muted}}>0</span>}</td>
                 <td><div style={{display:"flex",gap:5}}>
-                  <button className="btn-sm-v" onClick={()=>setViewItem(m)}>{t.view}</button>
+                  <button style={{background:"#0a2a3a",color:"#38bdf8",padding:"4px 10px",fontSize:12,border:"1px solid #0ea5e933",borderRadius:6,cursor:"pointer",fontFamily:"inherit",fontWeight:600}} onClick={()=>setViewItem(m)}>{t.view}</button>
                   {hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}
                   {hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}
                 </div></td>
-              </tr>
-            );})}
+              </tr>;
+            })}
           </tbody>
         </table>
       </div></div>
 
-      {/* VIEW MODAL */}
       {viewItem&&(()=>{
-        const {costPerUnit,yieldKg}=calcPrepCost(viewItem);
-        const totalCost=costPerUnit*yieldKg;
-        return(
-          <div className="overlay" onClick={e=>e.target===e.currentTarget&&setViewItem(null)}>
-            <div className="modal modal-lg" style={{maxWidth:820}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
-                <div>
-                  <div style={{fontWeight:800,fontSize:16,color:DARK.accent}}>{viewItem.name}</div>
-                  <div style={{fontSize:12,color:DARK.muted,marginTop:2}}>{viewItem.code} · {viewItem.class||"—"} · {unitLbl(viewItem.unit,t)}</div>
-                </div>
-                <button onClick={()=>setViewItem(null)} style={{background:"transparent",border:"none",color:DARK.muted,fontSize:20,cursor:"pointer"}}>✕</button>
-              </div>
-
-              {/* summary cards */}
-              {(()=>{
-                const nProdView=prodList.filter(p=>p.ingredients?.some(i=>i.source==="prep"&&String(i.srcId)===String(viewItem.id))).length;
-                return <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:18}}>
-                  {[
-                    {l:lang==="ar"?"عدد المكونات":"Ingredients", v:viewItem.ingredients?.length||0, c:DARK.blue},
-                    {l:lang==="ar"?"وزن الناتج":"Yield Weight",  v:yieldKg.toFixed(3)+" "+unitLbl(viewItem.unit,t), c:DARK.green},
-                    {l:lang==="ar"?"تكلفة/وحدة":"Cost/Unit",    v:costPerUnit.toFixed(4), c:DARK.accent},
-                    {l:lang==="ar"?"مستخدم في منتجات":"Used in Products", v:nProdView, c:nProdView>0?"#4ade80":DARK.muted},
-                  ].map((s,i)=>(
-                    <div key={i} style={{background:DARK.surface,borderRadius:10,padding:"12px 16px",border:"1px solid "+DARK.border}}>
-                      <div style={{fontSize:11,color:DARK.muted,marginBottom:4,textTransform:"uppercase",letterSpacing:".05em"}}>{s.l}</div>
-                      <div style={{fontSize:18,fontWeight:800,color:s.c}}>{s.v}</div>
-                    </div>
-                  ))}
-                </div>;
-              })()}
-
-              {/* ingredients table */}
-              <div style={{overflowX:"auto"}}>
-                <table style={{width:"100%",borderCollapse:"collapse"}}>
-                  <thead>
-                    <tr style={{background:DARK.surface}}>
-                      {["#",
-                        lang==="ar"?"المادة":"Material",
-                        lang==="ar"?"الكمية الصافية":"Net Qty",
-                        lang==="ar"?"الهدر %":"Wastage %",
-                        lang==="ar"?"الكمية الإجمالية":"Gross Qty",
-                        lang==="ar"?"سعر/وحدة":"Cost/Unit",
-                        lang==="ar"?"إجمالي التكلفة":"Total Cost"
-                      ].map((h,i)=><th key={i} style={{padding:"10px 13px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:DARK.muted,textTransform:"uppercase",letterSpacing:".06em",whiteSpace:"nowrap"}}>{h}</th>)}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(viewItem.ingredients||[]).map((ing,i)=>{
-                      const raw=rawList.find(r=>String(r.id)===String(ing.rawId));
-                      if(!raw) return null;
-                      const qty=parseFloat(ing.qty)||0;
-                      const waste=(parseFloat(ing.waste)||0)/100;
-                      const grossQty=qty; // raw qty (cost basis)
-                      const netQty=qty*(1-waste); // after waste
-                      const ingCost=(raw.unit==="piece"?grossQty:grossQty/1000)*raw.price;
-                      const unit=raw.unit==="kg"?"g":raw.unit==="liter"?"ml":"pcs";
-                      return(
-                        <tr key={i} style={{borderBottom:"1px solid "+DARK.border+"22"}}>
-                          <td style={{padding:"11px 13px",color:DARK.muted,fontSize:11}}>{i+1}</td>
-                          <td style={{padding:"11px 13px",fontWeight:600,color:DARK.text}}>
-                            {raw.name}
-                            <span style={{color:DARK.muted,fontSize:11,marginRight:6}}> ({raw.code})</span>
-                          </td>
-                          <td style={{padding:"11px 13px",color:DARK.text}}>{qty.toFixed(0)} {unit}</td>
-                          <td style={{padding:"11px 13px"}}>
-                            {ing.waste>0
-                              ? <span style={{background:DARK.yellow+"22",color:DARK.yellow,padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700}}>{ing.waste}%</span>
-                              : <span style={{color:DARK.muted}}>0%</span>
-                            }
-                          </td>
-                          <td style={{padding:"11px 13px",color:DARK.green,fontWeight:600}}>{netQty.toFixed(0)} {unit}</td>
-                          <td style={{padding:"11px 13px",color:DARK.muted}}>{raw.price.toFixed(2)}/{unitLbl(raw.unit,t)}</td>
-                          <td style={{padding:"11px 13px",color:DARK.accent,fontWeight:700}}>{ingCost.toFixed(4)}</td>
-                        </tr>
-                      );
-                    })}
-                    {/* totals row */}
-                    <tr style={{background:DARK.surface,borderTop:"2px solid "+DARK.border}}>
-                      <td colSpan={2} style={{padding:"12px 13px",fontWeight:800,color:DARK.text,fontSize:13}}>
-                        {lang==="ar"?"الإجمالي":"Total"}
-                      </td>
-                      <td style={{padding:"12px 13px",fontWeight:700,color:DARK.text}}>
-                        {((viewItem.ingredients||[]).reduce((a,i)=>a+(parseFloat(i.qty)||0),0)).toFixed(0)} g
-                      </td>
-                      <td/>
-                      <td style={{padding:"12px 13px",fontWeight:700,color:DARK.green}}>
-                        {((viewItem.ingredients||[]).reduce((a,ing)=>{
-                          const w=(parseFloat(ing.waste)||0)/100;
-                          const q=parseFloat(ing.qty)||0;
-                          return a+q*(1-w);
-                        },0)).toFixed(0)} g
-                      </td>
-                      <td/>
-                      <td style={{padding:"12px 13px",fontWeight:800,color:DARK.accent,fontSize:14}}>{totalCost.toFixed(4)}</td>
-                    </tr>
-                    {/* cost per unit row */}
-                    <tr style={{background:DARK.accent+"10"}}>
-                      <td colSpan={6} style={{padding:"10px 13px",fontWeight:700,color:DARK.text,fontSize:13,textAlign:lang==="ar"?"right":"left"}}>
-                        {lang==="ar"?"تكلفة الكيلو الواحد":"Cost per "+unitLbl(viewItem.unit,t)}
-                      </td>
-                      <td style={{padding:"10px 13px",fontWeight:900,color:DARK.accent,fontSize:16}}>{costPerUnit.toFixed(4)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div style={{display:"flex",justifyContent:"flex-end",marginTop:16}}>
-                <button className="btn btn-secondary" onClick={()=>setViewItem(null)}>{t.cancel}</button>
-              </div>
+        const {costPerUnit,yieldKg,totalCost}=calcPrepCost(viewItem);
+        return <div className="overlay" onClick={e=>e.target===e.currentTarget&&setViewItem(null)}>
+          <div className="modal modal-lg" style={{maxWidth:820}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+              <div><div style={{fontWeight:800,fontSize:16,color:C.accent}}>{viewItem.name}</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{viewItem.code} · {viewItem.class||"—"} · {unitLbl(viewItem.unit,t)}</div></div>
+              <button onClick={()=>setViewItem(null)} style={{background:"transparent",border:"none",color:C.muted,fontSize:22,cursor:"pointer"}}>✕</button>
             </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:18}}>
+              {[
+                {l:lang==="ar"?"عدد المكونات":"Ingredients",v:viewItem.ingredients?.length||0,c:C.blue},
+                {l:lang==="ar"?"وزن الناتج":"Yield",v:yieldKg.toFixed(3)+" "+unitLbl(viewItem.unit,t),c:C.green},
+                {l:lang==="ar"?"تكلفة الباتش":"Batch Cost",v:(totalCost).toFixed(2),c:"#f87171"},
+                {l:lang==="ar"?"تكلفة/وحدة":"Cost/Unit",v:costPerUnit.toFixed(4),c:C.accent},
+              ].map((s,i)=><div key={i} style={{background:C.surface,borderRadius:10,padding:"12px 14px",border:`1px solid ${C.border}`}}><div style={{fontSize:10,color:C.muted,marginBottom:4,textTransform:"uppercase"}}>{s.l}</div><div style={{fontSize:17,fontWeight:800,color:s.c}}>{s.v}</div></div>)}
+            </div>
+            <div style={{overflowX:"auto"}}>
+              <table style={{width:"100%",borderCollapse:"collapse"}}>
+                <thead><tr>{["#",lang==="ar"?"المادة":"Material",lang==="ar"?"الكمية الخام":"Raw Qty",lang==="ar"?"الهدر %":"Waste %",lang==="ar"?"الكمية الصافية":"Net Qty",lang==="ar"?"سعر/وحدة":"Price/Unit",lang==="ar"?"التكلفة":"Cost"].map((h,i)=><th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                <tbody>
+                  {(viewItem.ingredients||[]).map((ing,i)=>{
+                    const raw=rawList.find(r=>String(r.id)===String(ing.rawId)); if(!raw) return null;
+                    const qty=parseFloat(ing.qty)||0; const waste=(parseFloat(ing.waste)||0)/100;
+                    const netQty=qty*(1-waste); const ingCost=(raw.unit==="piece"?qty:qty/1000)*raw.price;
+                    const unit=raw.unit==="kg"?"g":raw.unit==="liter"?"ml":"pcs";
+                    return <tr key={i} style={{borderBottom:`1px solid ${C.border}22`}}>
+                      <td style={{padding:"10px 12px",color:C.muted,fontSize:11}}>{i+1}</td>
+                      <td style={{padding:"10px 12px",fontWeight:600}}>{raw.name} <span style={{color:C.muted,fontSize:11}}>({raw.code})</span></td>
+                      <td style={{padding:"10px 12px"}}>{qty.toFixed(0)} {unit}</td>
+                      <td style={{padding:"10px 12px"}}>{ing.waste>0?<span style={{background:C.yellow+"22",color:C.yellow,padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700}}>{ing.waste}%</span>:<span style={{color:C.muted}}>0%</span>}</td>
+                      <td style={{padding:"10px 12px",color:C.green,fontWeight:600}}>{netQty.toFixed(0)} {unit}</td>
+                      <td style={{padding:"10px 12px",color:C.muted,fontSize:11}}>{raw.price.toFixed(2)}/{unitLbl(raw.unit,t)}</td>
+                      <td style={{padding:"10px 12px",color:C.accent,fontWeight:700}}>{ingCost.toFixed(4)}</td>
+                    </tr>;
+                  })}
+                  <tr style={{background:C.surface,borderTop:`2px solid ${C.border}`}}>
+                    <td colSpan={2} style={{padding:"11px 12px",fontWeight:800}}>{lang==="ar"?"الإجمالي":"Total"}</td>
+                    <td style={{padding:"11px 12px",fontWeight:700}}>{((viewItem.ingredients||[]).reduce((a,i)=>a+(parseFloat(i.qty)||0),0)).toFixed(0)} g</td>
+                    <td/><td style={{padding:"11px 12px",fontWeight:700,color:C.green}}>{((viewItem.ingredients||[]).reduce((a,ing)=>{const w=(parseFloat(ing.waste)||0)/100,q=parseFloat(ing.qty)||0;return a+q*(1-w);},0)).toFixed(0)} g</td>
+                    <td/><td style={{padding:"11px 12px",fontWeight:800,color:"#f87171",fontSize:14}}>{(totalCost).toFixed(4)}</td>
+                  </tr>
+                  <tr style={{background:C.accent+"12"}}>
+                    <td colSpan={6} style={{padding:"10px 12px",fontWeight:700,textAlign:lang==="ar"?"right":"left"}}>{lang==="ar"?"تكلفة الكيلو":"Cost per "+unitLbl(viewItem.unit,t)}</td>
+                    <td style={{padding:"10px 12px",fontWeight:900,color:C.accent,fontSize:15}}>{costPerUnit.toFixed(4)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}><button className="btn btn-secondary" onClick={()=>setViewItem(null)}>{t.cancel}</button></div>
           </div>
-        );
+        </div>;
       })()}
 
-      {usageModal&&(
-        <div className="overlay" onClick={e=>e.target===e.currentTarget&&setUsageModal(null)}>
-          <div className="modal" style={{maxWidth:500}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <div>
-                <div style={{fontWeight:800,fontSize:15,color:DARK.accent}}>{usageModal.item.name}</div>
-                <div style={{fontSize:12,color:DARK.muted,marginTop:2}}>{usageModal.type==="raw"?(lang==="ar"?"المواد الخام المستخدمة":"Raw Materials Used"):t.relatedProducts} ({usageModal.list.length})</div>
-              </div>
-              <button onClick={()=>setUsageModal(null)} style={{background:"transparent",border:"none",color:DARK.muted,fontSize:20,cursor:"pointer"}}>✕</button>
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:8}}>
-              {usageModal.list.map((item,i)=>(
-                <div key={item.id} style={{background:DARK.surface,borderRadius:9,padding:"10px 14px",border:"1px solid "+DARK.border,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div>
-                    <code style={{background:DARK.bg,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8",marginLeft:8}}>{item.code}</code>
-                    <span style={{fontWeight:600,fontSize:13}}>{item.name}</span>
-                  </div>
-                  <span className="badge badge-cls">{item.class||"—"}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{display:"flex",justifyContent:"flex-end",marginTop:14}}>
-              <button className="btn btn-secondary" onClick={()=>setUsageModal(null)}>{t.cancel}</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.prepItem} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={doImport}/>}
+      {usageModal&&<UsageModal t={t} C={C} usageModal={usageModal} onClose={()=>setUsageModal(null)}/>}
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.prepItem}</h2>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:12}}>
@@ -1549,33 +1366,26 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
           <span style={{fontWeight:700,fontSize:13}}>{t.ingredients}</span>
           <button className="btn btn-secondary" style={{padding:"5px 12px",fontSize:12}} onClick={addI}>+ {t.addIngredient}</button>
         </div>
-        {form.ingredients.map(ing=>(
-          <IngRow key={ing.id} ing={ing} rawList={rawList} prepList={prepList} lang={lang} t={t} C={C}
-            onUpdate={(field,val)=>updI(ing.id,field,val)}
-            onRemove={()=>remI(ing.id)}
-          />
-        ))}
-        <div style={{background:C.bg,borderRadius:8,padding:"10px 13px",marginTop:8,display:"flex",gap:16,flexWrap:"wrap"}}>
-          <span style={{fontSize:12,color:C.muted}}>{t.yieldWeight}: <strong style={{color:C.green}}>{live.yieldKg.toFixed(3)}</strong></span>
+        {form.ingredients.map(ing=><IngRow key={ing.id} ing={ing} rawList={rawList} prepList={prepList} lang={lang} t={t} C={C} onUpdate={(k,v)=>updI(ing.id,k,v)} onRemove={()=>remI(ing.id)}/>)}
+        <div style={{background:"#060810",borderRadius:8,padding:"10px 14px",marginTop:10,display:"flex",gap:20,flexWrap:"wrap"}}>
+          <span style={{fontSize:12,color:C.muted}}>{t.yieldWeight}: <strong style={{color:C.green}}>{live.yieldKg.toFixed(3)} {form.unit}</strong></span>
+          <span style={{fontSize:12,color:C.muted}}>{lang==="ar"?"تكلفة الباتش":"Batch Cost"}: <strong style={{color:"#f87171"}}>{live.totalCost.toFixed(2)}</strong></span>
           <span style={{fontSize:12,color:C.muted}}>{t.costPerUnit}: <strong style={{color:C.accent}}>{live.costPerUnit.toFixed(4)}</strong></span>
         </div>
-        <div style={{display:"flex",gap:8,marginTop:16}}><button className="btn btn-primary" style={{flex:1}} onClick={save}>{t.save}</button><button className="btn btn-secondary" style={{flex:1}} onClick={reset}>{t.cancel}</button></div>
+        <div style={{display:"flex",gap:8,marginTop:14}}><button className="btn btn-primary" style={{flex:1}} onClick={save}>{t.save}</button><button className="btn btn-secondary" style={{flex:1}} onClick={reset}>{t.cancel}</button></div>
       </div></div>}
-      {delId&&<DelModal t={t} onOk={()=>doDelete(delId)} onCancel={()=>setDelId(null)}/>}
+      {delId&&<DelModal t={t} C={C} onOk={()=>doDelete(delId)} onCancel={()=>setDelId(null)}/>}
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// PRODUCTS
-// ═══════════════════════════════════════════════════════════════
+
 function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classes,calcPrepCost,calcProductCost,showToast,hasPerm,mod}) {
   const [search,setSearch]=useState(""); const [fcls,setFcls]=useState("all");
   const [showForm,setShowForm]=useState(false); const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:"",class:"",sellingPrice:"",stdCost:"",ingredients:[]}); const [errs,setErrs]=useState({});
-  const [delId,setDelId]=useState(null); const fileRef=useRef();
+  const [delId,setDelId]=useState(null); const [showImport,setShowImport]=useState(false); const fileRef=useRef();
   const [ingSearch,setIngSearch]=useState("");
-  const [viewItem,setViewItem]=useState(null);
   const cls=[...(classes.raw||[]),...(classes.prep||[])];
   const blank=()=>({id:Date.now()+Math.random(),source:"raw",srcId:"",qty:"",waste:"0"});
   const reset=()=>{ setForm({name:"",class:"",sellingPrice:"",stdCost:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
@@ -1588,7 +1398,16 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
   const updI=(id,k,v)=>setForm(f=>({...f,ingredients:f.ingredients.map(i=>i.id===id?{...i,[k]:v}:i)}));
   const live=calcProductCost({ingredients:form.ingredients,sellingPrice:form.sellingPrice});
   const srcOpts=s=>s==="raw"?rawList:prepList;
-  const doExport=()=>{ const rows=prodList.map((p,i)=>{ const {totalCost,margin}=calcProductCost(p); return {"#":i+1,[t.code]:p.code,[t.name]:p.name,[t.class]:p.class||"",[t.totalCost]:totalCost.toFixed(4),[t.sellingPrice]:p.sellingPrice||0,[t.margin]:margin.toFixed(2)+"%"}; }); const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,t.products); XLSX.writeFile(wb,`products_${Date.now()}.xlsx`); };
+  const doDownloadTemplate=()=>{
+    const rows=[{Code:"Prod-00001",Name:lang==="ar"?"بيتزا مرغريتا":"Margherita Pizza",Class:"Food Item","Selling Price":25,"Std Cost":10},{Code:"",Name:"",Class:"","Selling Price":"","Std Cost":""}];
+    const ws=XLSX.utils.json_to_sheet(rows);ws["!cols"]=[{wch:14},{wch:25},{wch:14},{wch:14},{wch:12}];
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Products");XLSX.writeFile(wb,"TALA_Products_Template.xlsx");
+  };
+  const doExport=()=>{
+    if(!prodList.length){doDownloadTemplate();return;}
+    const rows=prodList.map(p=>{const {totalCost,margin}=calcProductCost(p);return {Code:p.code,Name:p.name,Class:p.class||"","Selling Price":p.sellingPrice||0,"Std Cost":p.stdCost||0,"Total Cost":totalCost.toFixed(4),"Margin %":margin.toFixed(2)+"%"};});
+    const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Products");XLSX.writeFile(wb,"TALA_Products_Export.xlsx");
+  };
   const doImport=e=>{ const file=e.target.files[0]; if(!file) return; const r=new FileReader(); r.onload=ev=>{ try{ const wb=XLSX.read(ev.target.result,{type:"binary"}); const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]); let n=0; const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US"); setProdList(prev=>{ const u=[...prev]; rows.forEach(row=>{ const rn=String(row[t.name]||row.Name||row["الاسم"]||"").trim(); const rc=String(row[t.code]||row.Code||row["الكود"]||"").trim(); const rsp=parseFloat(row[t.sellingPrice]||row["Selling Price"]||0); let i=u.findIndex(m=>m.name.toLowerCase()===rn.toLowerCase()); if(i===-1) i=u.findIndex(m=>m.code===rc); if(i!==-1){u[i]={...u[i],lastUpdated:now}; if(rsp>0)u[i].sellingPrice=rsp; n++;} }); return u; }); showToast(n>0?`${t.importedOk} ${n} ${t.importedItems}`:t.noMatch,n>0?"success":"warning"); }catch{ showToast("error","error"); } }; r.readAsBinaryString(file); e.target.value=""; };
   const filtered=prodList.filter(m=>(m.name.toLowerCase().includes(search.toLowerCase())||m.code?.toLowerCase().includes(search.toLowerCase()))&&(fcls==="all"||m.class===fcls));
   return (
@@ -1596,7 +1415,8 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
       <div className="card" style={{padding:"12px 14px",marginBottom:12,display:"flex",flexWrap:"wrap",gap:8,alignItems:"center",justifyContent:"space-between"}}>
         <input style={{maxWidth:220}} placeholder={t.search} value={search} onChange={e=>setSearch(e.target.value)}/>
         <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
-          {hasPerm(mod,"edit")&&<><button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button><button className="btn btn-secondary" onClick={()=>fileRef.current.click()}>{t.importXlsx}</button><input ref={fileRef} type="file" accept=".xlsx,.xls" style={{display:"none"}} onChange={doImport}/></>}
+          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
+          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
         </div>
       </div>
@@ -1606,150 +1426,28 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
       </div>
       <div className="card" style={{overflow:"hidden"}}><div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse"}}>
-          <thead><tr>
-            <th>#</th><th>{t.code}</th><th>{t.productName}</th><th>{t.class}</th>
-            <th style={{color:C.accent}}>{t.rawCountLbl}</th>
-            <th style={{color:"#a78bfa"}}>{t.prepCountLbl}</th>
-            <th>{t.totalCost}</th>
-            <th>{t.stdCost}</th>
-            <th>{t.variance}</th>
-            <th>{t.sellingPrice}</th>
-            <th>{t.margin}</th>
-            <th>{t.actions}</th>
-          </tr></thead>
+          <thead><tr>{["#",t.code,t.productName,t.class,lang==="ar"?"مكونات":"Ing.",t.totalCost,t.sellingPrice,t.margin,(hasPerm(mod,"edit")||hasPerm(mod,"delete"))?t.actions:""].filter(Boolean).map((h,i)=><th key={i}>{h}</th>)}</tr></thead>
           <tbody>
-            {filtered.length===0?<tr><td colSpan={12} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
-            :filtered.map((m,i)=>{
-              const {totalCost,margin}=calcProductCost(m);
-              const nRaw=m.ingredients?.filter(i=>i.source==="raw").length||0;
-              const nPrep=m.ingredients?.filter(i=>i.source==="prep").length||0;
-              const relRaws=m.ingredients?.filter(i=>i.source==="raw").map(i=>{const r=rawList.find(r=>String(r.id)===String(i.srcId));return r||null;}).filter(Boolean)||[];
-              const relPreps=m.ingredients?.filter(i=>i.source==="prep").map(i=>{const p=prepList.find(p=>String(p.id)===String(i.srcId));return p||null;}).filter(Boolean)||[];
-              return (
+            {filtered.length===0?<tr><td colSpan={9} style={{textAlign:"center",padding:"40px",color:C.muted}}>{t.noData}</td></tr>
+            :filtered.map((m,i)=>{ const {totalCost,margin}=calcProductCost(m); return(
               <tr key={m.id}>
                 <td style={{color:C.muted,fontSize:11}}>{i+1}</td>
                 <td><code style={{background:C.surface,padding:"2px 6px",borderRadius:4,fontSize:11,color:"#94a3b8"}}>{m.code}</code></td>
                 <td style={{fontWeight:600}}>{m.name}</td>
                 <td><span className="badge badge-cls">{m.class||"—"}</span></td>
-                <td>
-                  <button className={nRaw>0?"chip-raw":"chip-zero"} disabled={nRaw===0}
-                    onClick={()=>nRaw>0&&setViewItem({...m,_scrollTo:"raw"})}
-                    title={nRaw>0?t.clickToView:""}
-                  >{nRaw}</button>
-                </td>
-                <td>
-                  <button className={nPrep>0?"chip-prep":"chip-zero"} disabled={nPrep===0}
-                    onClick={()=>nPrep>0&&setViewItem({...m,_scrollTo:"prep"})}
-                    title={nPrep>0?t.clickToView:""}
-                  >{nPrep}</button>
-                </td>
+                <td style={{color:C.muted}}>{m.ingredients?.length||0}</td>
                 <td style={{color:"#f87171",fontWeight:600}}>{totalCost.toFixed(2)}</td>
-                <td style={{color:DARK.muted,fontWeight:500}}>{m.stdCost>0?parseFloat(m.stdCost).toFixed(2):"—"}</td>
-                <td>{m.stdCost>0?(()=>{const v=totalCost-parseFloat(m.stdCost);return <span style={{color:v>0?"#f87171":"#4ade80",fontWeight:700}}>{v>0?"+":""}{v.toFixed(2)}</span>;})():<span style={{color:DARK.muted}}>—</span>}</td>
+                <td style={{color:DARK.muted,fontWeight:500}}>{m.stdCost>0?m.stdCost.toFixed(2):"—"}</td>
+                <td>{m.stdCost>0?(()=>{const v=totalCost-m.stdCost;return <span style={{color:v>0?"#f87171":"#4ade80",fontWeight:700}}>{v>0?"+":""}{v.toFixed(2)}</span>;})():<span style={{color:DARK.muted}}>—</span>}</td>
+                <td>{m.stdCost>0?(()=>{const vp=((totalCost-m.stdCost)/m.stdCost)*100;return <span style={{color:vp>0?"#f87171":vp<0?"#4ade80":DARK.muted,fontWeight:700,background:vp>0?"#f8717115":"#4ade8015",padding:"2px 7px",borderRadius:20}}>{vp>0?"+":""}{vp.toFixed(1)}%</span>;})():<span style={{color:DARK.muted}}>—</span>}</td>
                 <td style={{color:"#4ade80",fontWeight:600}}>{parseFloat(m.sellingPrice||0).toFixed(2)}</td>
                 <td><span style={{color:margin>30?"#4ade80":margin>15?"#fbbf24":"#f87171",fontWeight:700}}>{margin.toFixed(1)}%</span></td>
-                <td><div style={{display:"flex",gap:5}}>
-                  <button className="btn-sm-v" onClick={()=>setViewItem(m)}>{t.view}</button>
-                  {hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}
-                  {hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}
-                </div></td>
+                {(hasPerm(mod,"edit")||hasPerm(mod,"delete"))&&<td><div style={{display:"flex",gap:5}}>{hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}{hasPerm(mod,"delete")&&<button className="btn-sm-d" onClick={()=>setDelId(m.id)}>{t.delete}</button>}</div></td>}
               </tr>
             );})}
           </tbody>
         </table>
       </div></div>
-      {/* ── PRODUCT VIEW MODAL ── */}
-      {viewItem&&(()=>{
-        const {totalCost,margin}=calcProductCost(viewItem);
-        const rawIngs=viewItem.ingredients?.filter(i=>i.source==="raw")||[];
-        const prepIngs=viewItem.ingredients?.filter(i=>i.source==="prep")||[];
-        const sp=parseFloat(viewItem.sellingPrice||0);
-        const IngTable=({ings,type})=>(
-          <div style={{overflowX:"auto",marginBottom:16}}>
-            <div style={{fontWeight:700,fontSize:13,color:type==="raw"?DARK.accent:"#a78bfa",marginBottom:8,display:"flex",alignItems:"center",gap:8}}>
-              {type==="raw"?(lang==="ar"?"🥩 المواد الخام":"🥩 Raw Materials"):(lang==="ar"?"⚗️ Prep Items":"⚗️ Prep Items")}
-              <span style={{background:type==="raw"?DARK.accent+"22":"#a78bfa22",color:type==="raw"?DARK.accent:"#a78bfa",padding:"1px 8px",borderRadius:20,fontSize:11}}>{ings.length}</span>
-            </div>
-            {ings.length===0?<div style={{color:DARK.muted,fontSize:12,padding:"10px 0"}}>{t.noIngredients}</div>:(
-            <table style={{width:"100%",borderCollapse:"collapse"}}>
-              <thead><tr style={{background:DARK.surface}}>
-                {["#",lang==="ar"?"المادة":"Material",lang==="ar"?"الكمية":"Qty",lang==="ar"?"الهدر":"Waste",lang==="ar"?"التكلفة":"Cost"].map((h,i)=>(
-                  <th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:DARK.muted,textTransform:"uppercase",whiteSpace:"nowrap"}}>{h}</th>
-                ))}
-              </tr></thead>
-              <tbody>{ings.map((ing,i)=>{
-                let name="",unit2="",pricePerU=0,ingCost=0;
-                if(type==="raw"){
-                  const r=rawList.find(r=>String(r.id)===String(ing.srcId));
-                  if(!r) return null;
-                  name=r.name; unit2=r.unit==="kg"?"g":r.unit==="liter"?"ml":"pcs";
-                  pricePerU=r.price;
-                  ingCost=(r.unit==="piece"?parseFloat(ing.qty)||0:(parseFloat(ing.qty)||0)/1000)*r.price;
-                } else {
-                  const p=prepList.find(p=>String(p.id)===String(ing.srcId));
-                  if(!p) return null;
-                  const {costPerUnit:cpu}=calcPrepCost(p);
-                  name=p.name; unit2=p.unit==="kg"?"g":p.unit==="liter"?"ml":"pcs";
-                  pricePerU=cpu;
-                  ingCost=(p.unit==="piece"?parseFloat(ing.qty)||0:(parseFloat(ing.qty)||0)/1000)*cpu;
-                }
-                const qty=parseFloat(ing.qty)||0;
-                return (
-                  <tr key={i} style={{borderBottom:"1px solid "+DARK.border+"22"}}>
-                    <td style={{padding:"9px 12px",color:DARK.muted,fontSize:11}}>{i+1}</td>
-                    <td style={{padding:"9px 12px",fontWeight:600}}>{name}</td>
-                    <td style={{padding:"9px 12px",color:DARK.text}}>{qty.toFixed(0)} {unit2}</td>
-                    <td style={{padding:"9px 12px"}}>{ing.waste>0?<span style={{background:DARK.yellow+"22",color:DARK.yellow,padding:"2px 7px",borderRadius:20,fontSize:11,fontWeight:700}}>{ing.waste}%</span>:<span style={{color:DARK.muted}}>0%</span>}</td>
-                    <td style={{padding:"9px 12px",color:type==="raw"?DARK.accent:"#a78bfa",fontWeight:700}}>{ingCost.toFixed(4)}</td>
-                  </tr>
-                );
-              })}</tbody>
-            </table>)}
-          </div>
-        );
-        return (
-          <div className="overlay" onClick={e=>e.target===e.currentTarget&&setViewItem(null)}>
-            <div className="modal modal-lg animate-in" style={{maxWidth:860}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:18}}>
-                <div>
-                  <div style={{fontWeight:800,fontSize:16,color:DARK.accent}}>{viewItem.name}</div>
-                  <div style={{fontSize:12,color:DARK.muted,marginTop:2}}>{viewItem.code} · {viewItem.class||"—"}</div>
-                </div>
-                <button onClick={()=>setViewItem(null)} style={{background:"transparent",border:"none",color:DARK.muted,fontSize:20,cursor:"pointer"}}>✕</button>
-              </div>
-              {/* 5 summary cards */}
-              <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:18}}>
-                {[
-                  {l:lang==="ar"?"خام":"Raw",       v:rawIngs.length,          c:DARK.accent},
-                  {l:lang==="ar"?"Prep":"Prep",      v:prepIngs.length,         c:"#a78bfa"},
-                  {l:lang==="ar"?"إجمالي التكلفة":"Total Cost", v:totalCost.toFixed(2), c:"#f87171"},
-                  {l:lang==="ar"?"سعر البيع":"Selling", v:sp>0?sp.toFixed(2):"—", c:DARK.green},
-                  {l:lang==="ar"?"هامش الربح":"Margin", v:sp>0?margin.toFixed(1)+"%":"—",
-                    c:sp>0?(margin>30?DARK.green:margin>15?DARK.yellow:DARK.red):DARK.muted},
-                ].map((s,i)=>(
-                  <div key={i} style={{background:DARK.surface,borderRadius:10,padding:"12px 14px",border:"1px solid "+DARK.border}}>
-                    <div style={{fontSize:10,color:DARK.muted,textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>{s.l}</div>
-                    <div style={{fontSize:18,fontWeight:800,color:s.c}}>{s.v}</div>
-                  </div>
-                ))}
-              </div>
-              <IngTable ings={rawIngs} type="raw"/>
-              <IngTable ings={prepIngs} type="prep"/>
-              {/* cost summary */}
-              <div style={{background:DARK.surface,borderRadius:10,padding:"12px 16px",border:"1px solid "+DARK.border,display:"flex",gap:20,flexWrap:"wrap",marginTop:4}}>
-                <span style={{fontSize:12,color:DARK.muted}}>{t.totalCost}: <strong style={{color:"#f87171",fontSize:15}}>{totalCost.toFixed(4)}</strong></span>
-                {sp>0&&<span style={{fontSize:12,color:DARK.muted}}>{t.sellingPrice}: <strong style={{color:DARK.green,fontSize:15}}>{sp.toFixed(2)}</strong></span>}
-                {sp>0&&<span style={{fontSize:12,color:DARK.muted}}>{t.margin}: <strong style={{color:margin>30?DARK.green:margin>15?DARK.yellow:DARK.red,fontSize:15}}>{margin.toFixed(1)}%</strong></span>}
-                {viewItem.stdCost>0&&<span style={{fontSize:12,color:DARK.muted}}>{t.stdCost}: <strong style={{color:DARK.muted,fontSize:15}}>{parseFloat(viewItem.stdCost).toFixed(2)}</strong></span>}
-              </div>
-              <div style={{display:"flex",justifyContent:"flex-end",marginTop:16}}>
-                <button className="btn btn-secondary" onClick={()=>setViewItem(null)}>{t.cancel}</button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.products}</h2>
         <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:10,marginBottom:12}}>
