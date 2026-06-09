@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import * as XLSX from "xlsx";
 
 // ═══════════════════════════════════════════════════════════════
@@ -516,7 +516,7 @@ function LoginScreen({users,onLogin,lang:initLang}) {
 function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList,calcPrepCost,calcProductCost}) {
   const [topN,setTopN]=useState(10);
   const [section,setSection]=useState("all");
-  const [channel,setChannel]=useState("pos");
+  const channel="pos";
   const [relModal,setRelModal]=useState(null);
   const [cmpMonths,setCmpMonths]=useState(false);
   const ar=lang==="ar";
@@ -603,13 +603,6 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
           <span style={{fontSize:12,color:C.muted}}>{t.show}</span>
           {[5,10,20].map(n=><button key={n} className={`topn${topN===n?" active":""}`} onClick={()=>setTopN(n)}>{n}</button>)}
         </div>
-      </div>
-
-      {/* POS/AGG channel toggle */}
-      <div style={{display:"flex",gap:0,marginBottom:16,background:C.surface,borderRadius:10,padding:4,width:"fit-content",border:`1px solid ${C.border}`}}>
-        {[{id:"pos",label:t.dashPOS},{id:"agg",label:t.dashAGG}].map(ch=>(
-          <button key={ch.id} onClick={()=>setChannel(ch.id)} style={{background:channel===ch.id?C.accent:"transparent",color:channel===ch.id?"#080b14":C.muted,border:"none",borderRadius:7,padding:"7px 22px",fontFamily:"inherit",fontSize:13,fontWeight:700,cursor:"pointer",transition:"all .16s"}}>{ch.label}</button>
-        ))}
       </div>
 
       {/* KPI CARDS — always visible, show both POS & AGG */}
@@ -1099,9 +1092,16 @@ function DupDeleteModal({t,lang,C=DARK,items,onDelete,onClose}) {
 function IngRow({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
   const [q,setQ]=useState("");
   const [open,setOpen]=useState(false);
+  const dropRef=useRef(null);
   const srcList=ing.source==="prep"?(prepList||[]):(rawList||[]);
-  const filtered=srcList.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.code?.toLowerCase().includes(q.toLowerCase()));
+  const filtered=q.trim()?srcList.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.code?.toLowerCase().includes(q.toLowerCase())):srcList;
   const selected=srcList.find(r=>String(r.id)===String(ing.rawId));
+  useEffect(()=>{setQ(""); setOpen(false);},[ing.source]);
+  useEffect(()=>{
+    const close=(e)=>{ if(dropRef.current&&!dropRef.current.contains(e.target))setOpen(false); };
+    document.addEventListener("mousedown",close);
+    return ()=>document.removeEventListener("mousedown",close);
+  },[]);
 
   // Determine input unit options based on selected material's unit
   const baseUnit=selected?.unit||"kg";
@@ -1171,9 +1171,16 @@ function IngRow({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
 // ─── INGREDIENT ROW FOR PRODUCTS ─────────────────────────────
 function IngRowProd({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
   const [q,setQ]=useState(""); const [open,setOpen]=useState(false);
+  const dropRef=useRef(null);
   const srcList=ing.source==="raw"?rawList:prepList;
-  const filtered=srcList.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.code?.toLowerCase().includes(q.toLowerCase()));
+  const filtered=q.trim()?srcList.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.code?.toLowerCase().includes(q.toLowerCase())):srcList;
   const selected=srcList.find(r=>String(r.id)===String(ing.srcId));
+  useEffect(()=>{setQ(""); setOpen(false);},[ing.source]);
+  useEffect(()=>{
+    const close=(e)=>{ if(dropRef.current&&!dropRef.current.contains(e.target))setOpen(false); };
+    document.addEventListener("mousedown",close);
+    return ()=>document.removeEventListener("mousedown",close);
+  },[]);
   const baseUnit=selected?.unit||"kg";
   const inputUnitOpts=INPUT_UNITS[baseUnit]||INPUT_UNITS.kg;
   const currentInputUnit=ing.inputUnit||inputUnitOpts[0].val;
@@ -1481,7 +1488,7 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
     const now=new Date().toLocaleDateString(lang==="ar"?"ar-EG":"en-US");
     const ings=form.ingredients.filter(i=>i.rawId&&parseFloat(i.qty)>0);
     if(editId!==null) setPrepList(p=>p.map(m=>m.id===editId?{...m,name:form.name.trim(),unit:form.unit,class:form.class,yieldOverride:form.yieldOverride,ingredients:ings,lastUpdated:now}:m));
-    else { const code=genCode("Prep",prepList); setPrepList(p=>[...p,{id:Date.now(),code,name:form.name.trim(),unit:form.unit,class:form.class,yieldOverride:form.yieldOverride,ingredients:ings,lastUpdated:now}]); }
+    else { const code=genCode("Prep",prepList); setPrepList(p=>[...p,{id:Date.now(),code,name:form.name.trim(),unit:form.unit,class:form.class,yieldOverride:form.yieldOverride,ingredients:ings,lastUpdated:now}]); setShowCount(c=>c+1); }
     reset(); showToast(t.savedOk);
   };
   const doEdit=m=>{ setForm({name:m.name,unit:m.unit,class:m.class||"",yieldOverride:m.yieldOverride||"",ingredients:m.ingredients||[]}); setEditId(m.id); setShowForm(true); };
@@ -1762,7 +1769,7 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
     const sp=parseFloat(form.sellingPrice)||posP||aggP;
     const prod={name:form.name.trim(),class:form.class,sellingPrice:sp,posSellPrice:posP,aggSellPrice:aggP,stdCost:parseFloat(form.stdCost)||0,ingredients:ings,lastUpdated:now};
     if(editId!==null) setProdList(p=>p.map(m=>m.id===editId?{...m,...prod}:m));
-    else { const code=genCode("Prod",prodList); setProdList(p=>[...p,{id:Date.now(),code,...prod}]); }
+    else { const code=genCode("Prod",prodList); setProdList(p=>[...p,{id:Date.now(),code,...prod}]); setShowCount(c=>c+1); }
     reset(); showToast(t.savedOk);
   };
   const doEdit=m=>{ setForm({name:m.name,class:m.class||"",sellingPrice:String(m.sellingPrice||""),posSellPrice:String(m.posSellPrice||""),aggSellPrice:String(m.aggSellPrice||""),stdCost:String(m.stdCost||""),ingredients:m.ingredients||[]}); setEditId(m.id); setShowForm(true); };
