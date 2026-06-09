@@ -312,7 +312,9 @@ export default function App() {
   const hasPerm = (mod,action) => {
     if(!currentUser) return false;
     if(currentUser.role==="admin") return true;
-    return currentUser.perms?.[mod]?.[action]===true;
+    // Support both "perms" (legacy default) and "permissions" (new users saved from UsersTab)
+    const p = currentUser.permissions || currentUser.perms || {};
+    return p[mod]?.[action]===true;
   };
 
   if(!currentUser) return <LoginScreen users={users} onLogin={u=>setSession({id:u.id})} lang={lang} />;
@@ -610,19 +612,14 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
         ))}
       </div>
 
-      {/* KPI CARDS — margin directly visible here */}
-      {show("products")&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12,marginBottom:20}}>
+      {/* KPI CARDS — always visible, show both POS & AGG */}
+      {show("products")&&<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:10,marginBottom:20}}>
         <KCard label={ar?"إجمالي المنتجات":"Total Products"} value={prodList.length} color={C.accent}/>
         <KCard label={ar?"إجمالي الخام":"Total Raw"} value={rawList.length} color="#a78bfa"/>
         <KCard label={ar?"إجمالي Prep":"Total Prep"} value={prepList.length} color={C.blue}/>
-        <KCard
-          label={channel==="pos"?t.posAvgMargin:t.aggAvgMargin}
-          value={(channel==="pos"?avgPOSMargin:avgAGGMargin).toFixed(1)+"%"}
-          color={(channel==="pos"?avgPOSMargin:avgAGGMargin)>30?C.green:(channel==="pos"?avgPOSMargin:avgAGGMargin)>15?C.yellow:C.red}
-          sub={ar?`أعلى تكلفة: ${maxCost.toFixed(2)} | أقل: ${minCost.toFixed(2)}`:`Max Cost: ${maxCost.toFixed(2)} | Min: ${minCost.toFixed(2)}`}
-          big
-        />
-        <KCard label={channel==="pos"?t.posCost:t.aggCost} value={(channel==="pos"?avgPOSCost:avgAGGCost).toFixed(2)} color="#f87171"/>
+        <KCard label={ar?"متوسط الهامش POS 🏪":"Avg Margin POS 🏪"} value={avgPOSMargin.toFixed(1)+"%"} color={avgPOSMargin>30?C.green:avgPOSMargin>15?C.yellow:C.red} sub={ar?`متوسط تكلفة: ${avgPOSCost.toFixed(2)}`:`Avg cost: ${avgPOSCost.toFixed(2)}`} big/>
+        <KCard label={ar?"متوسط الهامش AGG 🛵":"Avg Margin AGG 🛵"} value={avgAGGMargin.toFixed(1)+"%"} color={avgAGGMargin>30?C.green:avgAGGMargin>15?C.yellow:C.red} sub={ar?`متوسط تكلفة: ${avgAGGCost.toFixed(2)}`:`Avg cost: ${avgAGGCost.toFixed(2)}`} big/>
+        <KCard label={ar?"أعلى تكلفة":"Max Cost"} value={maxCost.toFixed(2)} color="#f87171" sub={ar?`أقل: ${minCost.toFixed(2)}`:`Min: ${minCost.toFixed(2)}`}/>
         <KCard label={t.productsOverBudget} value={overBudget.length} sub={withStd.length>0?`/ ${withStd.length} ${ar?"لهم معياري":"with target"}`:""}  color={overBudget.length>0?C.red:C.green}/>
       </div>}
 
@@ -740,6 +737,65 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
             </tbody>
           </table>
         </div>
+      </div>}
+
+      {/* ABC Classification — Star / Plow Horse / Puzzle / Dog */}
+      {show("products")&&prodList.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <SecHd c={ar?"تصنيف المنتجات (Star / Dog)":"Product Matrix (Star / Dog / Puzzle / Plow)"}
+          sub={ar?"حسب الهامش والمبيعات — هامش >30% = عالي":"Based on margin & sales — margin >30% = high"}/>
+        {(()=>{
+          // Build sales data per product
+          const salesMap={};
+          salesList.forEach(s=>{
+            const k=s.productCode;
+            if(!salesMap[k]) salesMap[k]={rev:0,qty:0};
+            salesMap[k].rev+=parseFloat(s.revenue||0);
+            salesMap[k].qty+=parseFloat(s.qty||0);
+          });
+          const avgRev=salesList.length>0?Object.values(salesMap).reduce((s,v)=>s+v.rev,0)/Object.keys(salesMap).length:0;
+          // For products, classify by POS margin (selected channel) and revenue
+          const classified=prodCalc.map(p=>{
+            const margin=getMargin(p);
+            const rev=(salesMap[p.code]?.rev||0);
+            const highMargin=margin>=30;
+            const highSales=salesList.length>0?(rev>=avgRev):true; // if no sales, classify by margin only
+            let cat,col,icon;
+            if(highMargin&&highSales){cat=ar?"⭐ نجم":"⭐ Star";col="#fbbf24";}
+            else if(highMargin&&!highSales){cat=ar?"🔮 لغز":"🔮 Puzzle";col="#a78bfa";}
+            else if(!highMargin&&highSales){cat=ar?"🐴 حصان المحراث":"🐴 Plow Horse";col="#3b82f6";}
+            else{cat=ar?"🐕 غير مربح":"🐕 Dog";col="#f87171";}
+            return {...p,cat,catColor:col,salesRev:rev};
+          });
+          const groups={};
+          classified.forEach(p=>{if(!groups[p.cat])groups[p.cat]=[];groups[p.cat].push(p);});
+          const order=ar?["⭐ نجم","🐴 حصان المحراث","🔮 لغز","🐕 غير مربح"]:["⭐ Star","🐴 Plow Horse","🔮 Puzzle","🐕 Dog"];
+          return(
+            <div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12}}>
+                {order.map(cat=>{
+                  const items=groups[cat]||[];
+                  const firstItem=classified.find(p=>p.cat===cat);
+                  const col=firstItem?.catColor||C.muted;
+                  return(
+                    <div key={cat} style={{background:C.surface,border:`1px solid ${col}44`,borderRadius:12,padding:"12px 14px"}}>
+                      <div style={{fontSize:13,fontWeight:800,color:col,marginBottom:8}}>{cat} <span style={{fontSize:11,color:C.muted}}>({items.length})</span></div>
+                      {items.length===0&&<div style={{fontSize:11,color:C.muted}}>—</div>}
+                      {items.slice(0,topN).map(p=>(
+                        <div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5,paddingBottom:5,borderBottom:`1px solid ${C.border}22`}}>
+                          <span style={{fontSize:11,color:C.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</span>
+                          <span style={{fontSize:11,color:col,fontWeight:700,marginRight:6}}>{getMargin(p).toFixed(1)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+              {salesList.length===0&&<div style={{marginTop:10,fontSize:11,color:C.muted,background:C.surface,borderRadius:8,padding:"8px 12px"}}>
+                {ar?"💡 أضف بيانات مبيعات للحصول على تصنيف دقيق بناءً على الإيرادات الفعلية":"💡 Add sales data for accurate classification based on actual revenue"}
+              </div>}
+            </div>
+          );
+        })()}
       </div>}
 
       {/* At risk products */}
@@ -1689,7 +1745,7 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
   const [pageSize,setPageSize]=useState(20); const [showCount,setShowCount]=useState(20);
   const [selected,setSelected]=useState(new Set());
   const fileRef=useRef();
-  const cls=[...(classes.products||[]),...(classes.raw||[]),...(classes.prep||[])].filter((v,i,a)=>a.indexOf(v)===i);
+  const cls=classes.products||[];
   const blank=()=>({id:Date.now()+Math.random(),source:"raw",srcId:"",qty:"",waste:"0",inputUnit:""});
   const reset=()=>{ setForm({name:"",class:"",sellingPrice:"",posSellPrice:"",aggSellPrice:"",stdCost:"",ingredients:[]}); setErrs({}); setShowForm(false); setEditId(null); };
   const ok=()=>{
@@ -2510,37 +2566,57 @@ function SalesTab({t,lang,C,mod,prodList,modList,rawList,hasPerm,selectedMonth,s
 }
 
 // ==================== CLASSES TAB ====================
-function ClassesTab({t,lang,C,mod,classes:clsList,setClasses:setClsList,hasPerm}){
+function ClassesTab({t,lang,C,mod,classes:clsObj,setClasses:setClsObj,hasPerm}){
+  // classes is an object: {raw:[], prep:[], products:[]}
   const [showForm,setShowForm]=React.useState(false);
   const [newClass,setNewClass]=React.useState("");
+  const [activeSection,setActiveSection]=React.useState("products");
   const [editIdx,setEditIdx]=React.useState(null);
   const [err,setErr]=React.useState("");
+  const ar=lang==="ar";
 
-  const persist=arr=>{setClsList(arr);localStorage.setItem("tc_cls_v1",JSON.stringify(arr));};
+  const sections=[
+    {key:"products",label:ar?"منتجات":"Products"},
+    {key:"prep",label:ar?"شبه مصنع":"Prep"},
+    {key:"raw",label:ar?"مواد خام":"Raw"},
+  ];
+
+  const curList=clsObj[activeSection]||[];
+  const persist=(sec,arr)=>{ const updated={...clsObj,[sec]:arr}; setClsObj(updated); localStorage.setItem("tc_cls_v1",JSON.stringify(updated)); };
 
   const save=()=>{
     const v=newClass.trim();
-    if(!v){setErr(lang==="ar"?"مطلوب":"Required");return;}
+    if(!v){setErr(ar?"مطلوب":"Required");return;}
     if(editIdx!==null){
-      const updated=[...clsList];updated[editIdx]=v;persist(updated);
+      const updated=[...curList];updated[editIdx]=v;persist(activeSection,updated);
     } else {
-      if(clsList.includes(v)){setErr(lang==="ar"?"مكرر":"Duplicate");return;}
-      persist([...clsList,v]);
+      if(curList.includes(v)){setErr(ar?"مكرر":"Duplicate");return;}
+      persist(activeSection,[...curList,v]);
     }
     setNewClass("");setShowForm(false);setEditIdx(null);setErr("");
   };
 
-  const doDelete=idx=>{persist(clsList.filter((_,i)=>i!==idx));};
-  const doEdit=idx=>{setNewClass(clsList[idx]);setEditIdx(idx);setShowForm(true);};
+  const doDelete=idx=>persist(activeSection,curList.filter((_,i)=>i!==idx));
+  const doEdit=idx=>{setNewClass(curList[idx]);setEditIdx(idx);setShowForm(true);};
+  const totalCount=Object.values(clsObj).reduce((s,a)=>s+(Array.isArray(a)?a.length:0),0);
 
   return(
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-        <h2 style={{fontSize:15,fontWeight:700,color:C.accent,margin:0}}>{t.classes} <span style={{fontSize:12,color:C.muted}}>({clsList.length})</span></h2>
-        {hasPerm(mod,"add")&&<button className="btn btn-primary" style={{fontSize:12}} onClick={()=>{setNewClass("");setEditIdx(null);setShowForm(true);}}>+ {t.add}</button>}
+        <h2 style={{fontSize:15,fontWeight:700,color:C.accent,margin:0}}>{t.classes} <span style={{fontSize:12,color:C.muted}}>({totalCount})</span></h2>
+        {hasPerm(mod,"add")&&<button className="btn btn-primary" style={{fontSize:12}} onClick={()=>{setNewClass("");setEditIdx(null);setShowForm(true);}}>+ {ar?"إضافة فئة":"Add Class"}</button>}
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:10}}>
-        {clsList.map((c,i)=>(
+      <div style={{display:"flex",gap:6,marginBottom:14}}>
+        {sections.map(s=>(
+          <button key={s.key} onClick={()=>{setActiveSection(s.key);setShowForm(false);setErr("");}}
+            style={{background:activeSection===s.key?C.accent:"transparent",color:activeSection===s.key?"#080b14":C.muted,border:`1px solid ${activeSection===s.key?C.accent:C.border}`,borderRadius:8,padding:"6px 16px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+            {s.label} ({(clsObj[s.key]||[]).length})
+          </button>
+        ))}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:10}}>
+        {curList.length===0&&<div style={{color:C.muted,fontSize:13,padding:"20px 0"}}>{t.noData}</div>}
+        {curList.map((c,i)=>(
           <div key={i} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <span style={{fontWeight:600,fontSize:13}}>{c}</span>
             <div style={{display:"flex",gap:4}}>
@@ -2552,8 +2628,8 @@ function ClassesTab({t,lang,C,mod,classes:clsList,setClasses:setClsList,hasPerm}
       </div>
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&setShowForm(false)}>
         <div className="modal">
-          <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:14}}>{editIdx!==null?t.edit:t.add} — {t.classes}</h2>
-          <input value={newClass} onChange={e=>{setNewClass(e.target.value);setErr("");}} placeholder={lang==="ar"?"اسم الفئة":"Class name"} autoFocus/>
+          <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:14}}>{editIdx!==null?t.edit:ar?"إضافة فئة":"Add Class"} — {sections.find(s=>s.key===activeSection)?.label}</h2>
+          <input value={newClass} onChange={e=>{setNewClass(e.target.value);setErr("");}} placeholder={ar?"اسم الفئة":"Class name"} autoFocus/>
           {err&&<div className="err">{err}</div>}
           <div style={{display:"flex",gap:8,marginTop:14}}><button className="btn btn-primary" style={{flex:1}} onClick={save}>{t.save}</button><button className="btn btn-secondary" style={{flex:1}} onClick={()=>{setShowForm(false);setErr("");}}>{t.cancel}</button></div>
         </div>
@@ -2571,7 +2647,7 @@ function UsersTab({t,lang,C,users:usersList,setUsers:setUsersList,currentUserId}
   const [showForm,setShowForm]=React.useState(false);
   const [editId,setEditId]=React.useState(null);
   const [delId,setDelId]=React.useState(null);
-  const blank={username:"",password:"",role:"viewer",permissions:{}};
+  const blank={id:"",pin:"",name:"",role:"viewer",permissions:{}};
   const [form,setForm]=React.useState(blank);
   const [errs,setErrs]=React.useState({});
 
@@ -2585,25 +2661,30 @@ function UsersTab({t,lang,C,users:usersList,setUsers:setUsersList,currentUserId}
 
   const validate=()=>{
     const e={};
-    if(!form.username.trim())e.username=lang==="ar"?"مطلوب":"Required";
-    const dupUser=usersList.find(u=>u.username.toLowerCase()===form.username.trim().toLowerCase()&&u.id!==editId);
-    if(dupUser)e.username=lang==="ar"?"مستخدم موجود":"User exists";
-    if(!editId&&!form.password)e.password=lang==="ar"?"مطلوب":"Required";
+    if(!form.id.toString().trim())e.id=lang==="ar"?"مطلوب":"Required";
+    if(!form.name.trim())e.name=lang==="ar"?"مطلوب":"Required";
+    const dupId=usersList.find(u=>String(u.id)===String(form.id).trim()&&String(u.id)!==String(editId));
+    if(dupId)e.id=lang==="ar"?"رقم المستخدم موجود":"User ID exists";
+    if(!editId&&(!form.pin||form.pin.length<4))e.pin=lang==="ar"?"PIN مطلوب (4-5 أرقام)":"PIN required (4-5 digits)";
     setErrs(e);
     return !Object.keys(e).length;
   };
 
   const save=()=>{
     if(!validate())return;
-    const rec={...form,username:form.username.trim(),id:editId||Date.now(),
+    const existing=editId?usersList.find(u=>String(u.id)===String(editId)):null;
+    const rec={...form,
+      id:String(form.id).trim()||String(editId),
+      name:form.name.trim(),
+      pin:form.pin||existing?.pin||"",
       permissions:Object.keys(form.permissions).length?form.permissions:DEFAULT_PERMS(form.role)};
-    if(editId){persist(usersList.map(u=>u.id===editId?rec:u));}
+    if(editId){persist(usersList.map(u=>String(u.id)===String(editId)?rec:u));}
     else{persist([...usersList,rec]);}
     reset();
   };
 
   const reset=()=>{setForm(blank);setEditId(null);setShowForm(false);setErrs({});};
-  const doEdit=u=>{setForm({...u,password:""});setEditId(u.id);setShowForm(true);};
+  const doEdit=u=>{setForm({...u,id:u.id,pin:""});setEditId(u.id);setShowForm(true);};
   const doDelete=id=>{persist(usersList.filter(u=>u.id!==id));setDelId(null);};
 
   const togglePerm=(mod,perm)=>{
@@ -2622,11 +2703,12 @@ function UsersTab({t,lang,C,users:usersList,setUsers:setUsersList,currentUserId}
         {hasPerm(mod,"add")&&<button className="btn btn-primary" style={{fontSize:12}} onClick={()=>{setForm(blank);setShowForm(true);}}>+ {t.add}</button>}
       </div>
       <div className="table-wrap"><table>
-        <thead><tr><th>{t.username}</th><th>{lang==="ar"?"الدور":"Role"}</th><th>{lang==="ar"?"آخر دخول":"Last Login"}</th><th>{t.actions}</th></tr></thead>
+        <thead><tr><th>{lang==="ar"?"رقم المستخدم":"User ID"}</th><th>{lang==="ar"?"الاسم":"Name"}</th><th>{lang==="ar"?"الدور":"Role"}</th><th>{lang==="ar"?"آخر دخول":"Last Login"}</th><th>{t.actions}</th></tr></thead>
         <tbody>
           {usersList.map(u=>(
             <tr key={u.id}>
-              <td style={{fontWeight:600}}>{u.username}{u.id===currentUser?.id&&<span style={{marginLeft:6,fontSize:10,color:C.accent}}>{lang==="ar"?"(أنت)":"(You)"}</span>}</td>
+              <td style={{fontWeight:600,fontFamily:"monospace"}}>{u.id}</td>
+              <td style={{fontWeight:600}}>{u.name||u.username||"—"}{String(u.id)===String(currentUser?.id)&&<span style={{marginLeft:6,fontSize:10,color:C.accent}}>{lang==="ar"?"(أنت)":"(You)"}</span>}</td>
               <td><span style={{background:u.role==="admin"?"#7c3aed22":u.role==="manager"?"#3b82f622":"#22c55e22",color:u.role==="admin"?"#a78bfa":u.role==="manager"?"#60a5fa":"#22c55e",padding:"2px 8px",borderRadius:6,fontSize:11,fontWeight:700}}>{u.role}</span></td>
               <td style={{color:C.muted,fontSize:11}}>{u.lastLogin?new Date(u.lastLogin).toLocaleDateString():"-"}</td>
               <td>
@@ -2640,9 +2722,10 @@ function UsersTab({t,lang,C,users:usersList,setUsers:setUsersList,currentUserId}
 
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:14}}>{editId?t.edit:t.add} — {t.users}</h2>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
-          <div><label className="lbl">{t.username}</label><input value={form.username} onChange={e=>setForm({...form,username:e.target.value})}/>{errs.username&&<div className="err">{errs.username}</div>}</div>
-          <div><label className="lbl">{t.password}{editId&&<span style={{fontSize:10,color:C.muted}}> ({lang==="ar"?"اتركه فارغ للإبقاء":"leave blank to keep"})</span>}</label><input type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/>{errs.password&&<div className="err">{errs.password}</div>}</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:10,marginBottom:14}}>
+          <div><label className="lbl">{lang==="ar"?"رقم المستخدم":"User ID"}</label><input value={form.id} disabled={!!editId} onChange={e=>setForm({...form,id:e.target.value.replace(/\D/g,"")})} placeholder="1002"/>{errs.id&&<div className="err">{errs.id}</div>}</div>
+          <div><label className="lbl">{lang==="ar"?"الاسم":"Name"}</label><input value={form.name||""} onChange={e=>setForm({...form,name:e.target.value})}/>{errs.name&&<div className="err">{errs.name}</div>}</div>
+          <div><label className="lbl">PIN{editId&&<span style={{fontSize:10,color:C.muted}}> ({lang==="ar"?"اتركه فارغ":"leave blank"})</span>}</label><input type="password" maxLength={5} value={form.pin||""} onChange={e=>setForm({...form,pin:e.target.value.replace(/\D/g,"")})}/>{errs.pin&&<div className="err">{errs.pin}</div>}</div>
           <div><label className="lbl">{lang==="ar"?"الدور":"Role"}</label>
             <select value={form.role} onChange={e=>setForm({...form,role:e.target.value,permissions:DEFAULT_PERMS(e.target.value)})}>
               <option value="admin">Admin</option>
