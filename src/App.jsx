@@ -429,7 +429,7 @@ export default function App() {
           {tab==="prep"      && (hasPerm("prep","view")?<PrepTab t={t} lang={lang} C={C} prepList={prepList} setPrepList={setPrepList} rawList={rawList} prodList={prodList} classes={classes} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="prep"/>:<NoPerm t={t}/>)}
           {tab==="products"  && (hasPerm("products","view")?<ProductsTab t={t} lang={lang} C={C} prodList={prodList} setProdList={setProdList} rawList={rawList} prepList={prepList} classes={classes} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost} showToast={showToast} hasPerm={hasPerm} mod="products"/>:<NoPerm t={t}/>)}
           {tab==="modifiers" && (hasPerm("modifiers","view")?<ModifiersTab t={t} lang={lang} C={C} rawList={rawList} prepList={prepList} classes={classes} hasPerm={hasPerm} mod="modifiers"/>:<NoPerm t={t}/>)}
-          {tab==="sales"     && (hasPerm("sales","view")?<SalesTab t={t} lang={lang} C={C} prodList={prodList} modList={modList} rawList={rawList} hasPerm={hasPerm} mod="sales"/>:<NoPerm t={t}/>)}
+          {tab==="sales"     && (hasPerm("sales","view")?<SalesTab t={t} lang={lang} C={C} prodList={prodList} prepList={prepList} modList={modList} rawList={rawList} hasPerm={hasPerm} mod="sales"/>:<NoPerm t={t}/>)}
           {tab==="classes"   && (hasPerm("classes","view")?<ClassesTab t={t} lang={lang} C={C} classes={classes} setClasses={setClasses} showToast={showToast} hasPerm={hasPerm} mod="classes"/>:<NoPerm t={t}/>)}
           {tab==="users"     && currentUser.role==="admin" && <UsersTab t={t} lang={lang} C={C} users={users} setUsers={setUsers} showToast={showToast} currentUserId={currentUser.id}/>}
         </div>
@@ -590,7 +590,7 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
   const SecHd=({c,sub})=>(<div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{c}</div>{sub&&<div style={{fontSize:11,color:C.muted,marginTop:2}}>{sub}</div>}<div style={{height:2,background:C.border,marginTop:8}}/></div>);
   const KCard=({label,value,color,sub,big})=>(<div className="card" style={{padding:"16px 18px"}}><div style={{fontSize:big?32:26,fontWeight:800,color:color||C.accent,lineHeight:1}}>{value}</div><div style={{fontSize:12,color:C.muted,marginTop:4}}>{label}</div>{sub&&<div style={{fontSize:10,color:C.muted,marginTop:2}}>{sub}</div>}</div>);
   const noMsg=<div style={{color:C.muted,fontSize:13,textAlign:"center",padding:"24px 0"}}>{t.noData}</div>;
-  const secs=[{id:"all",label:ar?"الكل":"All"},{id:"products",label:t.secProducts},{id:"prep",label:t.secPrep},{id:"raw",label:t.secRaw},{id:"variance",label:t.varianceReport},{id:"salesAnalysis",label:ar?"تحليل المبيعات":"Sales Analysis"}];
+  const secs=[{id:"all",label:ar?"الكل":"All"},{id:"classification",label:ar?"تصنيف المنتجات":"Classification"},{id:"variance",label:t.varianceReport},{id:"products",label:ar?"تحليل التكلفة":"Cost Analysis"},{id:"prep",label:t.secPrep},{id:"raw",label:t.secRaw},{id:"salesAnalysis",label:ar?"تحليل المبيعات":"Sales Analysis"}];
   const show=s=>section==="all"||section===s;
 
   return (
@@ -633,7 +633,7 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
           const high=prods.filter(p=>(ch==="pos"?p.posMargin:p.aggMargin)>30).length;
           const low=prods.filter(p=>(ch==="pos"?p.posMargin:p.aggMargin)<15&&(ch==="pos"?p.posMargin:p.aggMargin)>0).length;
           return (
-            <div key={ch} className="card" style={{padding:"14px 16px",border:`2px solid ${channel===ch?color:C.border}`}}>
+            <div key={ch} className="card" style={{padding:"14px 16px",border:`1px solid ${C.border}`}}>
               <div style={{fontWeight:700,fontSize:13,color,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
                 <span style={{width:8,height:8,borderRadius:"50%",background:color,display:"inline-block"}}/>
                 {label}
@@ -733,8 +733,8 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
       </div>}
 
       {/* ABC Classification — Star / Plow Horse / Puzzle / Dog */}
-      {show("products")&&prodList.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
-        <SecHd c={ar?"تصنيف المنتجات (Star / Dog)":"Product Matrix (Star / Dog / Puzzle / Plow)"}
+      {(show("classification")||show("all"))&&prodList.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <SecHd c={ar?"تصنيف المنتجات":"Product Classification"}
           sub={ar?"حسب الهامش والمبيعات — هامش >30% = عالي":"Based on margin & sales — margin >30% = high"}/>
         {(()=>{
           // Build sales data per product
@@ -771,14 +771,18 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
                   const col=firstItem?.catColor||C.muted;
                   return(
                     <div key={cat} style={{background:C.surface,border:`1px solid ${col}44`,borderRadius:12,padding:"12px 14px"}}>
-                      <div style={{fontSize:13,fontWeight:800,color:col,marginBottom:8}}>{cat} <span style={{fontSize:11,color:C.muted}}>({items.length})</span></div>
+                      <div style={{fontSize:13,fontWeight:800,color:col,marginBottom:8,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                        <span>{cat}</span>
+                        <span onClick={()=>setRelModal({type:"classification",cat,items,col})} style={{fontSize:12,background:col+"22",color:col,borderRadius:20,padding:"2px 10px",cursor:"pointer",fontWeight:700,border:`1px solid ${col}44`}}>{items.length} {ar?"منتج":"products"}</span>
+                      </div>
                       {items.length===0&&<div style={{fontSize:11,color:C.muted}}>—</div>}
-                      {items.slice(0,topN).map(p=>(
+                      {items.slice(0,3).map(p=>(
                         <div key={p.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5,paddingBottom:5,borderBottom:`1px solid ${C.border}22`}}>
                           <span style={{fontSize:11,color:C.text,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</span>
                           <span style={{fontSize:11,color:col,fontWeight:700,marginRight:6}}>{getMargin(p).toFixed(1)}%</span>
                         </div>
                       ))}
+                      {items.length>3&&<div style={{fontSize:10,color:C.muted,marginTop:4,cursor:"pointer"}} onClick={()=>setRelModal({type:"classification",cat,items,col})}>+{items.length-3} {ar?"أكثر...":"more..."}</div>}
                     </div>
                   );
                 })}
@@ -813,7 +817,7 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
       </div>}
 
       {/* Variance report */}
-      {show("variance")&&withStd.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
+      {(show("variance")||show("all"))&&withStd.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
         <SecHd c={t.varianceReport} sub={ar?"مقارنة التكلفة الفعلية بالمعيارية":"Actual vs Standard Cost"}/>
         <div style={{overflowX:"auto"}}>
           <table style={{width:"100%",borderCollapse:"collapse"}}>
@@ -1094,7 +1098,15 @@ function IngRow({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
   const [open,setOpen]=useState(false);
   const dropRef=useRef(null);
   const srcList=ing.source==="prep"?(prepList||[]):(rawList||[]);
-  const filtered=q.trim()?srcList.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.code?.toLowerCase().includes(q.toLowerCase())):srcList;
+  const filtered=q.trim()
+    ? [...srcList].filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.code?.toLowerCase().includes(q.toLowerCase()))
+        .sort((a,b)=>{
+          const aq=q.toLowerCase();
+          const an=a.name.toLowerCase().startsWith(aq)?0:1;
+          const bn=b.name.toLowerCase().startsWith(aq)?0:1;
+          return an-bn;
+        })
+    : srcList;
   const selected=srcList.find(r=>String(r.id)===String(ing.rawId));
   useEffect(()=>{setQ(""); setOpen(false);},[ing.source]);
   useEffect(()=>{
@@ -1136,8 +1148,8 @@ function IngRow({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
         {open&&<div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:200,background:C.card,border:`1px solid ${C.border}`,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.6)",marginTop:2}}>
           <div style={{padding:6}}><input autoFocus placeholder={lang==="ar"?"بحث...":"Search..."} value={q} onChange={e=>setQ(e.target.value)} onClick={e=>e.stopPropagation()} style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:5,padding:"6px 10px",fontSize:11,outline:"none",width:"100%"}}/></div>
           <div style={{maxHeight:200,overflowY:"auto"}}>
-            <div onClick={()=>{onUpdate("rawId","");setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>—</div>
-            {filtered.map(r=><div key={r.id} onClick={()=>{onUpdate("rawId",r.id);onUpdate("inputUnit","");setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:String(r.id)===String(ing.rawId)?C.accent:C.text,background:String(r.id)===String(ing.rawId)?C.accent+"15":"transparent"}}>{r.name} <span style={{color:C.muted,fontSize:10}}>({r.code})</span> <span style={{color:C.blue,fontSize:10}}>[{r.unit}]</span></div>)}
+            <div onMouseDown={(e)=>{e.preventDefault();onUpdate("rawId","");setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>—</div>
+            {filtered.map(r=><div key={r.id} onMouseDown={(e)=>{e.preventDefault();onUpdate("rawId",r.id);onUpdate("inputUnit","");setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:String(r.id)===String(ing.rawId)?C.accent:C.text,background:String(r.id)===String(ing.rawId)?C.accent+"15":"transparent"}}>{r.name} <span style={{color:C.muted,fontSize:10}}>({r.code})</span> <span style={{color:C.blue,fontSize:10}}>[{r.unit}]</span></div>)}
             {filtered.length===0&&<div style={{padding:"7px 10px",color:C.muted,fontSize:11}}>{t.noData}</div>}
           </div>
         </div>}
@@ -1173,7 +1185,15 @@ function IngRowProd({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
   const [q,setQ]=useState(""); const [open,setOpen]=useState(false);
   const dropRef=useRef(null);
   const srcList=ing.source==="raw"?rawList:prepList;
-  const filtered=q.trim()?srcList.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.code?.toLowerCase().includes(q.toLowerCase())):srcList;
+  const filtered=q.trim()
+    ? [...srcList].filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.code?.toLowerCase().includes(q.toLowerCase()))
+        .sort((a,b)=>{
+          const aq=q.toLowerCase();
+          const an=a.name.toLowerCase().startsWith(aq)?0:1;
+          const bn=b.name.toLowerCase().startsWith(aq)?0:1;
+          return an-bn;
+        })
+    : srcList;
   const selected=srcList.find(r=>String(r.id)===String(ing.srcId));
   useEffect(()=>{setQ(""); setOpen(false);},[ing.source]);
   useEffect(()=>{
@@ -1203,8 +1223,8 @@ function IngRowProd({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
         {open&&<div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:200,background:C.card,border:`1px solid ${C.border}`,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.6)",marginTop:2}}>
           <div style={{padding:6}}><input autoFocus placeholder={lang==="ar"?"بحث...":"Search..."} value={q} onChange={e=>setQ(e.target.value)} onClick={e=>e.stopPropagation()} style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:5,padding:"6px 10px",fontSize:11,outline:"none",width:"100%"}}/></div>
           <div style={{maxHeight:200,overflowY:"auto"}}>
-            <div onClick={()=>{onUpdate("srcId","");setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>—</div>
-            {filtered.map(r=><div key={r.id} onClick={()=>{onUpdate("srcId",r.id);onUpdate("inputUnit","");setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:String(r.id)===String(ing.srcId)?C.accent:C.text,background:String(r.id)===String(ing.srcId)?C.accent+"15":"transparent"}}>{r.name} <span style={{color:C.muted,fontSize:10}}>({r.code})</span> <span style={{color:C.blue,fontSize:10}}>[{r.unit}]</span></div>)}
+            <div onMouseDown={(e)=>{e.preventDefault();onUpdate("srcId","");setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>—</div>
+            {filtered.map(r=><div key={r.id} onMouseDown={(e)=>{e.preventDefault();onUpdate("srcId",r.id);onUpdate("inputUnit","");setOpen(false);setQ("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:String(r.id)===String(ing.srcId)?C.accent:C.text,background:String(r.id)===String(ing.srcId)?C.accent+"15":"transparent"}}>{r.name} <span style={{color:C.muted,fontSize:10}}>({r.code})</span> <span style={{color:C.blue,fontSize:10}}>[{r.unit}]</span></div>)}
             {filtered.length===0&&<div style={{padding:"7px 10px",color:C.muted,fontSize:11}}>{t.noData}</div>}
           </div>
         </div>}
@@ -1965,17 +1985,17 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
 // ==================== MODIFIERS TAB ====================
 function ModifiersTab({t,lang,C,mod,rawList,prepList,classes:clsList,hasPerm}){
   const SK_M="tc_mods_v1";
-  const [list,setList]=React.useState(()=>{try{return JSON.parse(localStorage.getItem(SK_M)||"[]")}catch{return []}});
-  const [showForm,setShowForm]=React.useState(false);
-  const [editId,setEditId]=React.useState(null);
-  const [delId,setDelId]=React.useState(null);
-  const [viewItem,setViewItem]=React.useState(null);
-  const [showImport,setShowImport]=React.useState(false);
-  const [filterName,setFilterName]=React.useState("");
-  const [filterClass,setFilterClass]=React.useState("");
+  const [list,setList]=useState(()=>{try{return JSON.parse(localStorage.getItem(SK_M)||"[]")}catch{return []}});
+  const [showForm,setShowForm]=useState(false);
+  const [editId,setEditId]=useState(null);
+  const [delId,setDelId]=useState(null);
+  const [viewItem,setViewItem]=useState(null);
+  const [showImport,setShowImport]=useState(false);
+  const [filterName,setFilterName]=useState("");
+  const [filterClass,setFilterClass]=useState("");
   const blank={name:"",code:"",class:"",addOnPrice:"",ingredients:[]};
-  const [form,setForm]=React.useState(blank);
-  const [errs,setErrs]=React.useState({});
+  const [form,setForm]=useState(blank);
+  const [errs,setErrs]=useState({});
 
   const persist=arr=>{setList(arr);localStorage.setItem(SK_M,JSON.stringify(arr));};
   const nextCode=()=>{
@@ -2007,7 +2027,7 @@ function ModifiersTab({t,lang,C,mod,rawList,prepList,classes:clsList,hasPerm}){
     },0);
   };
 
-  const live=React.useMemo(()=>{
+  const live=useMemo(()=>{
     const cost=calcCost(form.ingredients);
     const price=parseFloat(form.addOnPrice)||0;
     const margin=price>0?((price-cost)/price)*100:0;
@@ -2082,8 +2102,11 @@ function ModifiersTab({t,lang,C,mod,rawList,prepList,classes:clsList,hasPerm}){
     XLSX.writeFile(wb,"modifiers_export.xlsx");
   };
 
+  // flatten all classes from the {raw,prep,products} object
+  const allClasses=[...new Set([...(clsList?.products||[]),...(clsList?.prep||[]),...(clsList?.raw||[]),...list.map(r=>r.class).filter(Boolean)])].sort();
+
   const filtered=list.filter(r=>{
-    if(filterName&&!r.name.toLowerCase().includes(filterName.toLowerCase())&&!r.code.includes(filterName))return false;
+    if(filterName&&!r.name.toLowerCase().includes(filterName.toLowerCase())&&!r.code?.includes(filterName))return false;
     if(filterClass&&r.class!==filterClass)return false;
     return true;
   });
@@ -2103,7 +2126,7 @@ function ModifiersTab({t,lang,C,mod,rawList,prepList,classes:clsList,hasPerm}){
         <input placeholder={lang==="ar"?"بحث باسم/كود":"Search name/code"} value={filterName} onChange={e=>setFilterName(e.target.value)} style={{flex:1,minWidth:120}}/>
         <select value={filterClass} onChange={e=>setFilterClass(e.target.value)} style={{minWidth:100}}>
           <option value="">{lang==="ar"?"كل الفئات":"All Classes"}</option>
-          {clsList.map(c=><option key={c} value={c}>{c}</option>)}
+          {allClasses.map(c=><option key={c} value={c}>{c}</option>)}
         </select>
         {(filterName||filterClass)&&<button className="btn btn-secondary" style={{fontSize:11}} onClick={()=>{setFilterName("");setFilterClass("");}}>✕</button>}
       </div>
@@ -2189,7 +2212,7 @@ function ModifiersTab({t,lang,C,mod,rawList,prepList,classes:clsList,hasPerm}){
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:10}}>
           <div><label className="lbl">{t.code}</label><input value={form.code} onChange={e=>setForm({...form,code:e.target.value})}/></div>
           <div><label className="lbl">{t.name}</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>{errs.name&&<div className="err">{errs.name}</div>}</div>
-          <div><label className="lbl">{t.class}</label><select value={form.class} onChange={e=>setForm({...form,class:e.target.value})}><option value="">—</option>{clsList.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+          <div><label className="lbl">{t.class}</label><select value={form.class} onChange={e=>setForm({...form,class:e.target.value})}><option value="">—</option>{allClasses.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
         </div>
         <div style={{marginBottom:10}}>
           <label className="lbl">{lang==="ar"?"سعر الإضافة":"Add-on Price"}</label>
@@ -2216,30 +2239,30 @@ function ModifiersTab({t,lang,C,mod,rawList,prepList,classes:clsList,hasPerm}){
 }
 
 // ==================== SALES TAB ====================
-function SalesTab({t,lang,C,mod,prodList,modList,rawList,hasPerm,selectedMonth,selectedYear}){
+function SalesTab({t,lang,C,mod,prodList,prepList=[],modList,rawList,hasPerm,selectedMonth,selectedYear}){
   const SK_S="tc_sales_v1";
   const SK_MP="tc_monthly_prices_v1";
-  const [list,setList]=React.useState(()=>{try{return JSON.parse(localStorage.getItem(SK_S)||"[]")}catch{return []}});
-  const [monthlyPrices,setMonthlyPrices]=React.useState(()=>{try{return JSON.parse(localStorage.getItem(SK_MP)||"{}")}catch{return {}}});
-  const [showForm,setShowForm]=React.useState(false);
-  const [editId,setEditId]=React.useState(null);
-  const [delId,setDelId]=React.useState(null);
-  const [showImport,setShowImport]=React.useState(false);
-  const [showMPUpload,setShowMPUpload]=React.useState(false);
-  const [mpMonth,setMpMonth]=React.useState(String(selectedMonth||new Date().getMonth()+1).padStart(2,"0"));
-  const [mpYear,setMpYear]=React.useState(String(selectedYear||new Date().getFullYear()));
-  const [filterChannel,setFilterChannel]=React.useState("");
-  const [filterProduct,setFilterProduct]=React.useState("");
-  const [filterMonth,setFilterMonth]=React.useState("");
-  const [filterYear,setFilterYear]=React.useState("");
+  const [list,setList]=useState(()=>{try{return JSON.parse(localStorage.getItem(SK_S)||"[]")}catch{return []}});
+  const [monthlyPrices,setMonthlyPrices]=useState(()=>{try{return JSON.parse(localStorage.getItem(SK_MP)||"{}")}catch{return {}}});
+  const [showForm,setShowForm]=useState(false);
+  const [editId,setEditId]=useState(null);
+  const [delId,setDelId]=useState(null);
+  const [showImport,setShowImport]=useState(false);
+  const [showMPUpload,setShowMPUpload]=useState(false);
+  const [mpMonth,setMpMonth]=useState(String(selectedMonth||new Date().getMonth()+1).padStart(2,"0"));
+  const [mpYear,setMpYear]=useState(String(selectedYear||new Date().getFullYear()));
+  const [filterChannel,setFilterChannel]=useState("");
+  const [filterProduct,setFilterProduct]=useState("");
+  const [filterMonth,setFilterMonth]=useState("");
+  const [filterYear,setFilterYear]=useState("");
   const blank={productCode:"",productName:"",channel:"POS",qty:"1",revenue:"",month:String(new Date().getMonth()+1).padStart(2,"0"),year:String(new Date().getFullYear()),notes:""};
-  const [form,setForm]=React.useState(blank);
-  const [errs,setErrs]=React.useState({});
+  const [form,setForm]=useState(blank);
+  const [errs,setErrs]=useState({});
 
   const persist=arr=>{setList(arr);localStorage.setItem(SK_S,JSON.stringify(arr));};
   const persistMP=mp=>{setMonthlyPrices(mp);localStorage.setItem(SK_MP,JSON.stringify(mp));};
 
-  const getProductCost=React.useCallback((productCode)=>{
+  const getProductCost=useCallback((productCode)=>{
     const prod=prodList.find(p=>p.code===productCode);
     if(!prod||!prod.ingredients)return 0;
     return prod.ingredients.reduce((s,ing)=>{
@@ -2257,7 +2280,7 @@ function SalesTab({t,lang,C,mod,prodList,modList,rawList,hasPerm,selectedMonth,s
     },0);
   },[prodList,rawList,prepList]);
 
-  const getStdCost=React.useCallback((productCode)=>{
+  const getStdCost=useCallback((productCode)=>{
     const prod=prodList.find(p=>p.code===productCode);
     return parseFloat(prod?.stdCost||0);
   },[prodList]);
@@ -2575,11 +2598,11 @@ function SalesTab({t,lang,C,mod,prodList,modList,rawList,hasPerm,selectedMonth,s
 // ==================== CLASSES TAB ====================
 function ClassesTab({t,lang,C,mod,classes:clsObj,setClasses:setClsObj,hasPerm}){
   // classes is an object: {raw:[], prep:[], products:[]}
-  const [showForm,setShowForm]=React.useState(false);
-  const [newClass,setNewClass]=React.useState("");
-  const [activeSection,setActiveSection]=React.useState("products");
-  const [editIdx,setEditIdx]=React.useState(null);
-  const [err,setErr]=React.useState("");
+  const [showForm,setShowForm]=useState(false);
+  const [newClass,setNewClass]=useState("");
+  const [activeSection,setActiveSection]=useState("products");
+  const [editIdx,setEditIdx]=useState(null);
+  const [err,setErr]=useState("");
   const ar=lang==="ar";
 
   const sections=[
@@ -2651,12 +2674,12 @@ function UsersTab({t,lang,C,users:usersList,setUsers:setUsersList,currentUserId}
   const mod="users";
   const currentUser=usersList.find(u=>u.id===currentUserId);
   const hasPerm=(_m,_a)=>true; // users tab only shown to admin
-  const [showForm,setShowForm]=React.useState(false);
-  const [editId,setEditId]=React.useState(null);
-  const [delId,setDelId]=React.useState(null);
+  const [showForm,setShowForm]=useState(false);
+  const [editId,setEditId]=useState(null);
+  const [delId,setDelId]=useState(null);
   const blank={id:"",pin:"",name:"",role:"viewer",permissions:{}};
-  const [form,setForm]=React.useState(blank);
-  const [errs,setErrs]=React.useState({});
+  const [form,setForm]=useState(blank);
+  const [errs,setErrs]=useState({});
 
   const persist=arr=>{setUsersList(arr);localStorage.setItem("tc_users_v1",JSON.stringify(arr));};
 
