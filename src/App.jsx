@@ -150,7 +150,8 @@ const defaultUsers = [
 const defaultClasses = {
   raw:["Food Item","Package Item","Cleaning Item"],
   prep:["Sauce","Dough","Mix","Marinade"],
-  products:["Main Dish","Beverage","Dessert","Appetizer"]
+  products:["Main Dish","Beverage","Dessert","Appetizer"],
+  modifiers:["Add-on","Upgrade","Side","Extra"]
 };
 
 const MONTHS_AR_FULL = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
@@ -368,7 +369,7 @@ export default function App() {
       <div style={{width:sideOpen?220:0,minWidth:sideOpen?220:0,background:DARK.sidebar,borderRight:`1px solid ${DARK.border}`,display:"flex",flexDirection:"column",transition:"all .2s",overflow:"hidden",position:"sticky",top:0,height:"100vh",flexShrink:0}}>
         <div style={{padding:"20px 16px 12px"}}>
           <div style={{fontWeight:900,fontSize:16,color:C.accent,letterSpacing:"1px"}}>{t.appName}</div>
-          <div style={{fontSize:10,color:C.muted,marginTop:2,letterSpacing:".5px"}}>SYSTEM v2.2</div>
+          <div style={{fontSize:10,color:C.muted,marginTop:2,letterSpacing:".5px"}}>SYSTEM v2.3</div>
         </div>
         <div style={{height:1,background:C.border,margin:"0 12px 10px"}}/>
         <div style={{flex:1,padding:"0 8px",overflowY:"auto"}}>
@@ -403,7 +404,7 @@ export default function App() {
           {tab==="raw"       && (hasPerm("raw","view")?<RawTab t={t} lang={lang} C={C} rawList={rawList} setRawList={setRawList} classes={classes} prepList={prepList} prodList={prodList} showToast={showToast} hasPerm={hasPerm} mod="raw"/>:<NoPerm t={t}/>)}
           {tab==="prep"      && (hasPerm("prep","view")?<PrepTab t={t} lang={lang} C={C} prepList={prepList} setPrepList={setPrepList} rawList={rawList} prodList={prodList} classes={classes} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="prep"/>:<NoPerm t={t}/>)}
           {tab==="products"  && (hasPerm("products","view")?<ProductsTab t={t} lang={lang} C={C} prodList={prodList} setProdList={setProdList} rawList={rawList} prepList={prepList} classes={classes} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost} showToast={showToast} hasPerm={hasPerm} mod="products"/>:<NoPerm t={t}/>)}
-          {tab==="modifiers" && (hasPerm("modifiers","view")?<ModifiersTab t={t} lang={lang} C={C} rawList={rawList} prepList={prepList} classes={classes} modList={modList} setModList={setModList} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="modifiers"/>:<NoPerm t={t}/>)}
+          {tab==="modifiers" && (hasPerm("modifiers","view")?<ModifiersTab t={t} lang={lang} C={C} rawList={rawList} prepList={prepList} classes={classes} modList={modList} setModList={setModList} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="modifiers" setClasses={setClasses}/>:<NoPerm t={t}/>)}
           {tab==="sales"     && (hasPerm("sales","view")?<SalesTab t={t} lang={lang} C={C} prodList={prodList} prepList={prepList} modList={modList} rawList={rawList} salesList={salesList} setSalesList={setSalesList} monthlyPrices={monthlyPrices} setMonthlyPrices={setMonthlyPrices} calcProductCost={calcProductCost} showToast={showToast} hasPerm={hasPerm} mod="sales"/>:<NoPerm t={t}/>)}
           {tab==="classes"   && (hasPerm("classes","view")?<ClassesTab t={t} lang={lang} C={C} classes={classes} setClasses={setClasses} showToast={showToast} hasPerm={hasPerm} mod="classes"/>:<NoPerm t={t}/>)}
           {tab==="users"     && currentUser.role==="admin" && <UsersTab t={t} lang={lang} C={C} users={users} setUsers={setUsers} showToast={showToast} currentUserId={currentUser.id}/>}
@@ -585,8 +586,8 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
           {label:ar?"إجمالي المنتجات":"Total Products",value:prodList.length,color:C.accent},
           {label:ar?"إجمالي الخام":"Total Raw",value:rawList.length,color:"#a78bfa"},
           {label:ar?"إجمالي Prep":"Total Prep",value:prepList.length,color:C.blue},
-          {label:ar?"متوسط الهامش POS 🏪":"Avg Margin POS 🏪",value:avgPOSMargin.toFixed(1)+"%",color:avgPOSMargin>30?C.green:avgPOSMargin>15?C.yellow:C.red,sub:ar?`متوسط تكلفة: ${avgPOSCost.toFixed(2)}`:`Avg cost: ${avgPOSCost.toFixed(2)}`},
-          {label:ar?"متوسط الهامش AGG 🛵":"Avg Margin AGG 🛵",value:avgAGGMargin.toFixed(1)+"%",color:avgAGGMargin>30?C.green:avgAGGMargin>15?C.yellow:C.red,sub:ar?`متوسط تكلفة: ${avgAGGCost.toFixed(2)}`:`Avg cost: ${avgAGGCost.toFixed(2)}`},
+          {label:ar?"متوسط الهامش POS":"Avg Margin POS",value:avgPOSMargin.toFixed(1)+"%",color:avgPOSMargin>30?C.green:avgPOSMargin>15?C.yellow:C.red,sub:ar?`متوسط تكلفة: ${avgPOSCost.toFixed(2)}`:`Avg cost: ${avgPOSCost.toFixed(2)}`},
+          {label:ar?"متوسط الهامش AGG":"Avg Margin AGG",value:avgAGGMargin.toFixed(1)+"%",color:avgAGGMargin>30?C.green:avgAGGMargin>15?C.yellow:C.red,sub:ar?`متوسط تكلفة: ${avgAGGCost.toFixed(2)}`:`Avg cost: ${avgAGGCost.toFixed(2)}`},
           {label:ar?"أعلى تكلفة":"Max Cost",value:maxCost.toFixed(2),color:"#f87171",sub:ar?`أقل: ${minCost.toFixed(2)}`:`Min: ${minCost.toFixed(2)}`},
           {label:t.productsOverBudget,value:overBudget.length,color:overBudget.length>0?C.red:C.green,sub:withStd.length>0?`/ ${withStd.length} ${ar?"لهم معياري":"with target"}`:""},
         ].map((k,i)=>(
@@ -873,7 +874,7 @@ function ImportModal({t,lang,C=DARK,type,onClose,onFileSelect,onDownloadTemplate
       </div>
 
       {showDatePicker&&<div style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:10,padding:"12px 14px",marginBottom:12}}>
-        <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:10}}>📅 {ar?"تحديد تاريخ الأسعار":"Select Price Period"}</div>
+        <div style={{fontSize:12,fontWeight:700,color:C.accent,marginBottom:10}}>{ar?"تحديد تاريخ الأسعار":"Select Price Period"}</div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
           <div>
             <label style={{fontSize:10,color:C.muted,display:"block",marginBottom:3,fontWeight:700,textTransform:"uppercase"}}>{ar?"الشهر":"Month"}</label>
@@ -1009,7 +1010,7 @@ function DupDeleteModal({t,lang,C=DARK,items,onDelete,onClose}) {
       <div style={{display:"flex",gap:8,flexShrink:0,borderTop:`1px solid ${C.border}`,paddingTop:12}}>
         <button className="btn-sm-d" style={{flex:2,padding:"9px",fontSize:13,borderRadius:7,opacity:selectedCount===0?0.5:1,cursor:selectedCount===0?"not-allowed":"pointer"}}
           onClick={()=>{if(selectedCount>0)onDelete(Object.keys(toDelete).filter(id=>toDelete[id]));}}>
-          🗑 {ar?`حذف ${selectedCount} سجل`:`Delete ${selectedCount}`}
+          {ar?`حذف ${selectedCount} سجل`:`Delete ${selectedCount}`}
         </button>
         <button className="btn btn-secondary" style={{flex:1}} onClick={onClose}>{t.cancel}</button>
       </div>
@@ -1076,8 +1077,8 @@ function IngRow({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
         {open&&<div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:200,background:C.card,border:`1px solid ${C.border}`,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.6)",marginTop:2}}>
           <div style={{padding:6}}><input ref={inputRef} autoFocus placeholder={lang==="ar"?"بحث...":"Search..."} value={q} onChange={e=>setQ(e.target.value)} onMouseDown={e=>e.stopPropagation()} onClick={e=>e.stopPropagation()} style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:5,padding:"6px 10px",fontSize:11,outline:"none",width:"100%"}}/></div>
           <div style={{maxHeight:200,overflowY:"auto"}}>
-            <div onMouseDown={(e)=>{e.preventDefault();handleMaterialSelect("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>—</div>
-            {filtered.map(r=><div key={r.id} onMouseDown={(e)=>{e.preventDefault();handleMaterialSelect(r.id);}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:String(r.id)===String(ing.rawId)?C.accent:C.text,background:String(r.id)===String(ing.rawId)?C.accent+"15":"transparent"}}>{r.name} <span style={{color:C.muted,fontSize:10}}>({r.code})</span> <span style={{color:C.blue,fontSize:10}}>[{r.unit}]</span></div>)}
+            <div onMouseDown={(e)=>{e.preventDefault();e.stopPropagation();handleMaterialSelect("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>—</div>
+            {filtered.map(r=><div key={r.id} onMouseDown={(e)=>{e.preventDefault();e.stopPropagation();handleMaterialSelect(r.id);}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:String(r.id)===String(ing.rawId)?C.accent:C.text,background:String(r.id)===String(ing.rawId)?C.accent+"15":"transparent"}}>{r.name} <span style={{color:C.muted,fontSize:10}}>({r.code})</span> <span style={{color:C.blue,fontSize:10}}>[{r.unit}]</span></div>)}
             {filtered.length===0&&<div style={{padding:"7px 10px",color:C.muted,fontSize:11}}>{t.noData}</div>}
           </div>
         </div>}
@@ -1135,7 +1136,7 @@ function IngRowProd({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
   // FIX: Changing unit does NOT change material
   const handleUnitChange=(iu)=>{ onUpdate("inputUnit",iu); };
   const handleMaterialSelect=(id)=>{
-    onUpdate("srcId",id);
+    onUpdate("srcId", id ? String(id) : "");
     onUpdate("inputUnit","");
     setOpen(false);
     setQ("");
@@ -1159,8 +1160,8 @@ function IngRowProd({ing,rawList,prepList,lang,t,C=DARK,onUpdate,onRemove}) {
         {open&&<div style={{position:"absolute",top:"100%",left:0,right:0,zIndex:200,background:C.card,border:`1px solid ${C.border}`,borderRadius:8,boxShadow:"0 8px 32px rgba(0,0,0,.6)",marginTop:2}}>
           <div style={{padding:6}}><input autoFocus placeholder={lang==="ar"?"بحث...":"Search..."} value={q} onChange={e=>setQ(e.target.value)} onMouseDown={e=>e.stopPropagation()} onClick={e=>e.stopPropagation()} style={{background:C.surface,border:`1px solid ${C.border}`,color:C.text,borderRadius:5,padding:"6px 10px",fontSize:11,outline:"none",width:"100%"}}/></div>
           <div style={{maxHeight:200,overflowY:"auto"}}>
-            <div onMouseDown={(e)=>{e.preventDefault();handleMaterialSelect("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>—</div>
-            {filtered.map(r=><div key={r.id} onMouseDown={(e)=>{e.preventDefault();handleMaterialSelect(r.id);}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:String(r.id)===String(ing.srcId)?C.accent:C.text,background:String(r.id)===String(ing.srcId)?C.accent+"15":"transparent"}}>{r.name} <span style={{color:C.muted,fontSize:10}}>({r.code})</span> <span style={{color:C.blue,fontSize:10}}>[{r.unit}]</span></div>)}
+            <div onMouseDown={(e)=>{e.preventDefault();e.stopPropagation();handleMaterialSelect("");}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:C.muted}}>—</div>
+            {filtered.map(r=><div key={r.id} onMouseDown={(e)=>{e.preventDefault();e.stopPropagation();handleMaterialSelect(r.id);}} style={{padding:"7px 10px",cursor:"pointer",fontSize:12,color:String(r.id)===String(ing.srcId)?C.accent:C.text,background:String(r.id)===String(ing.srcId)?C.accent+"15":"transparent"}}>{r.name} <span style={{color:C.muted,fontSize:10}}>({r.code})</span> <span style={{color:C.blue,fontSize:10}}>[{r.unit}]</span></div>)}
             {filtered.length===0&&<div style={{padding:"7px 10px",color:C.muted,fontSize:11}}>{t.noData}</div>}
           </div>
         </div>}
@@ -1341,7 +1342,7 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
             {[5,10,20].map(n=><button key={n} onClick={()=>{setPageSize(n);setShowCount(n);}} style={{background:pageSize===n?C.accent:"transparent",color:pageSize===n?"#080b14":C.muted,border:"none",borderRadius:5,padding:"3px 8px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{n}</button>)}
           </div>
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
-          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
+          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>{t.importXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
         </div>
       </div>
@@ -1349,7 +1350,7 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
         <span style={{fontSize:13,color:"#fca5a5",fontWeight:700}}>{lang==="ar"?`تم تحديد ${selected.size} صنف`:`${selected.size} selected`}</span>
         <div style={{display:"flex",gap:7}}>
           <button onClick={()=>setSelected(new Set())} style={{background:"transparent",color:C.muted,border:`1px solid ${C.border}`,borderRadius:6,padding:"5px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>{lang==="ar"?"إلغاء":"Deselect"}</button>
-          <button onClick={bulkDelete} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"5px 14px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>🗑 {lang==="ar"?`حذف ${selected.size}`:`Delete ${selected.size}`}</button>
+          <button onClick={bulkDelete} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"5px 14px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>{lang==="ar"?`حذف ${selected.size}`:`Delete ${selected.size}`}</button>
         </div>
       </div>}
       <div style={{display:"flex",gap:7,marginBottom:12,flexWrap:"wrap",alignItems:"center"}}>
@@ -1570,7 +1571,7 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
         <input style={{maxWidth:240}} placeholder={t.search} value={search} onChange={e=>{setSearch(e.target.value);setSelected(new Set());}}/>
         <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
-          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
+          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>{t.importXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
         </div>
       </div>
@@ -1578,7 +1579,7 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
         <span style={{fontSize:13,color:"#fca5a5",fontWeight:700}}>{lang==="ar"?`تم تحديد ${selected.size} بريب`:`${selected.size} selected`}</span>
         <div style={{display:"flex",gap:7}}>
           <button onClick={()=>setSelected(new Set())} style={{background:"transparent",color:C.muted,border:`1px solid ${C.border}`,borderRadius:6,padding:"5px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>{lang==="ar"?"إلغاء":"Deselect"}</button>
-          <button onClick={bulkDelete} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"5px 14px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>🗑 {lang==="ar"?`حذف ${selected.size}`:`Delete ${selected.size}`}</button>
+          <button onClick={bulkDelete} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"5px 14px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>{lang==="ar"?`حذف ${selected.size}`:`Delete ${selected.size}`}</button>
         </div>
       </div>}
       <div style={{display:"flex",gap:7,marginBottom:12,flexWrap:"wrap"}}>
@@ -1852,7 +1853,7 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
             {[5,10,20].map(n=><button key={n} onClick={()=>{setPageSize(n);setShowCount(n);}} style={{background:pageSize===n?C.accent:"transparent",color:pageSize===n?"#080b14":C.muted,border:"none",borderRadius:5,padding:"3px 8px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{n}</button>)}
           </div>
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
-          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>📥 {t.importXlsx}</button>}
+          {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>{t.importXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-primary" onClick={()=>{reset();setShowForm(true);}}>+ {t.add}</button>}
         </div>
       </div>
@@ -1860,7 +1861,7 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
         <span style={{fontSize:13,color:"#fca5a5",fontWeight:700}}>{lang==="ar"?`تم تحديد ${selected.size} منتج`:`${selected.size} selected`}</span>
         <div style={{display:"flex",gap:7}}>
           <button onClick={()=>setSelected(new Set())} style={{background:"transparent",color:C.muted,border:`1px solid ${C.border}`,borderRadius:6,padding:"5px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:600}}>{lang==="ar"?"إلغاء":"Deselect"}</button>
-          <button onClick={bulkDelete} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"5px 14px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>🗑 {lang==="ar"?`حذف ${selected.size}`:`Delete ${selected.size}`}</button>
+          <button onClick={bulkDelete} style={{background:"#2a0f0f",color:"#f87171",border:"1px solid #dc262633",borderRadius:6,padding:"5px 14px",fontSize:12,cursor:"pointer",fontFamily:"inherit",fontWeight:700}}>{lang==="ar"?`حذف ${selected.size}`:`Delete ${selected.size}`}</button>
         </div>
       </div>}
       <div style={{display:"flex",gap:7,marginBottom:10,flexWrap:"wrap"}}>
@@ -1971,12 +1972,12 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:10,background:C.surface,borderRadius:9,padding:"12px 14px",border:`1px solid ${C.border}`}}>
           <div>
-            <label className="lbl" style={{color:"#22c55e"}}>🏪 {t.posSellPrice}</label>
+            <label className="lbl" style={{color:"#22c55e"}}>{t.posSellPrice}</label>
             <input type="number" min="0" step="0.01" value={form.posSellPrice} onChange={e=>setForm({...form,posSellPrice:e.target.value})} placeholder="0.00"/>
             {parseFloat(form.posSellPrice)>0&&<div style={{fontSize:11,color:"#22c55e",marginTop:3}}>{lang==="ar"?"هامش:":"Margin:"} {live.posMargin.toFixed(1)}%</div>}
           </div>
           <div>
-            <label className="lbl" style={{color:"#3b82f6"}}>🛵 {t.aggSellPrice}</label>
+            <label className="lbl" style={{color:"#3b82f6"}}>{t.aggSellPrice}</label>
             <input type="number" min="0" step="0.01" value={form.aggSellPrice} onChange={e=>setForm({...form,aggSellPrice:e.target.value})} placeholder="0.00"/>
             {parseFloat(form.aggSellPrice)>0&&<div style={{fontSize:11,color:"#3b82f6",marginTop:3}}>{lang==="ar"?"هامش:":"Margin:"} {live.aggMargin.toFixed(1)}%</div>}
           </div>
@@ -2005,7 +2006,7 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
 
 
 // ==================== MODIFIERS TAB ====================
-function ModifiersTab({t,lang,C=DARK,mod,rawList=[],prepList=[],classes:clsList,hasPerm,modList,setModList,calcPrepCost,showToast}){
+function ModifiersTab({t,lang,C=DARK,mod,rawList=[],prepList=[],classes:clsList,hasPerm,modList,setModList,calcPrepCost,showToast,setClasses}){
   const SK_M="tc_mods_v1";
   const [importDate,setImportDate]=useState({month:String(new Date().getMonth()+1).padStart(2,"0"),year:String(new Date().getFullYear())});
   const [showForm,setShowForm]=useState(false);
@@ -2032,28 +2033,18 @@ function ModifiersTab({t,lang,C=DARK,mod,rawList=[],prepList=[],classes:clsList,
   const calcCost=ings=>{
     if(!ings||!ings.length)return 0;
     return ings.reduce((s,ing)=>{
-      const qtyI=toInternal(parseFloat(ing.qty)||0,ing.inputUnit||"g");
-      if(ing.sourceType==="raw"){
-        const r=rawList.find(x=>x.code===ing.code);
-        if(!r)return s;
-        return s+(qtyI/1000)*parseFloat(r.pricePerKg||0);
-      } else {
-        if(calcPrepCost){
-          const p=prepList.find(x=>x.code===ing.code);
-          if(!p)return s;
-          const pc=calcPrepCost(p);
-          const yG=parseFloat(p.yieldOverride||p.yield||1000);
-          return s+(yG>0?qtyI*(pc/yG):0);
-        }
-        const p=prepList.find(x=>x.code===ing.code);
+      const qty=parseFloat(ing.qty)||0;
+      const waste=(parseFloat(ing.waste)||0)/100;
+      const netQty=qty*(1-waste);
+      if(ing.source==="prep"||ing.sourceType==="prep"){
+        const p=prepList.find(x=>String(x.id)===String(ing.srcId)||x.code===ing.code);
         if(!p)return s;
-        const pc=p.ingredients?p.ingredients.reduce((ps,pi)=>{
-          const pqI=toInternal(parseFloat(pi.qty)||0,pi.inputUnit||"g");
-          const pr=rawList.find(r=>r.code===pi.code||String(r.id)===String(pi.rawId||pi.srcId));
-          return ps+(pr?(pqI/1000)*parseFloat(pr.pricePerKg||0):0);
-        },0):0;
-        const yG=parseFloat(p.yieldOverride||p.yield||1000);
-        return s+(yG>0?qtyI*(pc/yG):0);
+        if(calcPrepCost){const {costPerUnit}=calcPrepCost(p);return s+(p.unit==="piece"?netQty:netQty/1000)*costPerUnit;}
+        return s;
+      } else {
+        const r=rawList.find(x=>String(x.id)===String(ing.srcId)||x.code===ing.code);
+        if(!r)return s;
+        return s+(r.unit==="piece"?netQty:netQty/1000)*parseFloat(r.price||0);
       }
     },0);
   };
@@ -2065,7 +2056,7 @@ function ModifiersTab({t,lang,C=DARK,mod,rawList=[],prepList=[],classes:clsList,
     return {cost,margin};
   },[form,rawList,prepList]);
 
-  const addI=()=>setForm(f=>({...f,ingredients:[...f.ingredients,{id:Date.now(),sourceType:"raw",code:"",name:"",qty:"1",inputUnit:"g",unit:"g"}]}));
+  const addI=()=>setForm(f=>({...f,ingredients:[...f.ingredients,{id:Date.now()+Math.random(),source:"raw",srcId:"",qty:"1",inputUnit:"g",waste:"0"}]}));
   const updI=(id,field,val)=>setForm(f=>({...f,ingredients:f.ingredients.map(i=>i.id===id?{...i,[field]:val}:i)}));
   const remI=id=>setForm(f=>({...f,ingredients:f.ingredients.filter(i=>i.id!==id)}));
 
@@ -2167,7 +2158,7 @@ function ModifiersTab({t,lang,C=DARK,mod,rawList=[],prepList=[],classes:clsList,
     XLSX.writeFile(wb,"modifiers_export.xlsx");
   };
 
-  const allClasses=[...new Set([...(clsList?.products||[]),...(clsList?.prep||[]),...(clsList?.raw||[]),...list.map(r=>r.class).filter(Boolean)])].sort();
+  const allClasses=(clsList?.modifiers||[]).concat(list.map(r=>r.class).filter(Boolean).filter(c=>!(clsList?.modifiers||[]).includes(c))).sort();
 
   const filtered=useMemo(()=>list.filter(r=>{
     if(filterClass&&r.class!==filterClass)return false;
@@ -2186,8 +2177,8 @@ function ModifiersTab({t,lang,C=DARK,mod,rawList=[],prepList=[],classes:clsList,
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8}}>
         <h2 style={{fontSize:15,fontWeight:700,color:C.accent,margin:0}}>{t.modifiers||"Modifiers"} <span style={{fontSize:12,color:C.muted}}>({list.length})</span></h2>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-          {hasPerm(mod,"import")&&<button className="btn btn-secondary" style={{fontSize:12}} onClick={()=>setShowImport(true)}>⬆ {t.import}</button>}
-          {hasPerm(mod,"export")&&<button className="btn btn-secondary" style={{fontSize:12}} onClick={doExport}>⬇ {t.export}</button>}
+          {hasPerm(mod,"import")&&<button className="btn btn-secondary" style={{fontSize:12}} onClick={()=>setShowImport(true)}>{t.import}</button>}
+          {hasPerm(mod,"export")&&<button className="btn btn-secondary" style={{fontSize:12}} onClick={doExport}>{t.export}</button>}
           {hasPerm(mod,"add")&&<button className="btn btn-primary" style={{fontSize:12}} onClick={()=>{setForm({...blank,code:nextCode()});setShowForm(true);}}>+ {t.add}</button>}
         </div>
       </div>
@@ -2263,11 +2254,11 @@ function ModifiersTab({t,lang,C=DARK,mod,rawList=[],prepList=[],classes:clsList,
                 <div style={{fontWeight:700,fontSize:12,marginBottom:8,color:C.accent}}>{t.ingredients}</div>
                 <table><thead><tr><th>{t.code}</th><th>{t.name}</th><th>{t.qty}</th><th>{t.unit}</th><th>{t.cost||"Cost"}</th></tr></thead>
                 <tbody>{viewItem.ingredients.map(ing=>{
-                  const qtyI=toInternal(parseFloat(ing.qty)||0,ing.inputUnit||"g");
-                  let ingCost=0,ingName=ing.name,ingUnit=ing.unit||ing.inputUnit||"g";
-                  if(ing.sourceType==="raw"){const r=rawList.find(x=>x.code===ing.code);if(r){ingCost=(qtyI/1000)*parseFloat(r.pricePerKg||0);ingName=r.name;}}
-                  else{const p=prepList.find(x=>x.code===ing.code);if(p){if(calcPrepCost){const pc=calcPrepCost(p);const yG=parseFloat(p.yieldOverride||p.yield||1000);ingCost=yG>0?qtyI*(pc/yG):0;}else{const pc=p.ingredients?p.ingredients.reduce((ps,pi)=>{const pqI=toInternal(parseFloat(pi.qty)||0,pi.inputUnit||"g");const pr=rawList.find(r=>r.code===pi.code);return ps+(pr?(pqI/1000)*parseFloat(pr.pricePerKg||0):0);},0):0;const yG=parseFloat(p.yieldOverride||p.yield||1000);ingCost=yG>0?qtyI*(pc/yG):0;}ingName=p.name;}}
-                  return(<tr key={ing.id}><td>{ing.code}</td><td>{ingName}</td><td>{ing.qty}</td><td>{ingUnit}</td><td style={{color:C.red}}>{ingCost.toFixed(4)}</td></tr>);
+                  let ingCost=0,ingName="—",ingCode="";
+                  const isPrep=ing.source==="prep"||ing.sourceType==="prep";
+                  if(!isPrep){const r=rawList.find(x=>String(x.id)===String(ing.srcId)||x.code===ing.code);if(r){const qty=parseFloat(ing.qty)||0;const waste=(parseFloat(ing.waste)||0)/100;const net=qty*(1-waste);ingCost=(r.unit==="piece"?net:net/1000)*parseFloat(r.price||0);ingName=r.name;ingCode=r.code;}}
+                  else{const p=prepList.find(x=>String(x.id)===String(ing.srcId)||x.code===ing.code);if(p&&calcPrepCost){const {costPerUnit}=calcPrepCost(p);const qty=parseFloat(ing.qty)||0;const waste=(parseFloat(ing.waste)||0)/100;const net=qty*(1-waste);ingCost=(p.unit==="piece"?net:net/1000)*costPerUnit;ingName=p.name;ingCode=p.code;}}
+                  return(<tr key={ing.id}><td>{ingCode||ing.code||"—"}</td><td>{ingName}</td><td>{ing.qty}</td><td>{ing.inputUnit||"g"}</td><td style={{color:C.red}}>{ingCost.toFixed(4)}</td></tr>);
                 })}</tbody></table>
               </>}
               <div style={{display:"flex",justifyContent:"flex-end",marginTop:14,gap:8}}>
@@ -2279,7 +2270,7 @@ function ModifiersTab({t,lang,C=DARK,mod,rawList=[],prepList=[],classes:clsList,
         );
       })()}
 
-      {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.modifiers||"Modifiers"} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={doImport} showDatePicker={false}/>}
+      {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.modifiers||"Modifiers"} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={e=>{if(e.target?.files?.[0])doImport(e.target.files[0]);}} showDatePicker={false}/>}
 
       {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.modifiers||"Modifiers"}</h2>
@@ -2594,23 +2585,23 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
         <h2 style={{fontSize:15,fontWeight:700,color:C.accent,margin:0}}>{t.sales||"Sales"} <span style={{fontSize:12,color:C.muted}}>({list.length})</span></h2>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
           <button className="btn btn-secondary" style={{fontSize:12,background:"#7c3aed22",borderColor:"#7c3aed",color:"#a78bfa"}} onClick={()=>setShowMPUpload(true)}>
-            📅 {ar?"المبيعات الشهرية":"Monthly Sales"}
+            {ar?"المبيعات الشهرية":"Monthly Sales"}
           </button>
-          {hasPerm(mod,"import")&&<button className="btn btn-secondary" style={{fontSize:12}} onClick={()=>setShowImport(true)}>⬆ {t.import}</button>}
-          {hasPerm(mod,"export")&&<button className="btn btn-secondary" style={{fontSize:12}} onClick={doExport}>⬇ {t.export}</button>}
+          {hasPerm(mod,"import")&&<button className="btn btn-secondary" style={{fontSize:12}} onClick={()=>setShowImport(true)}>{t.import}</button>}
+          {hasPerm(mod,"export")&&<button className="btn btn-secondary" style={{fontSize:12}} onClick={doExport}>{t.export}</button>}
           {hasPerm(mod,"add")&&<button className="btn btn-primary" style={{fontSize:12}} onClick={()=>setShowForm(true)}>+ {t.add}</button>}
         </div>
       </div>
 
-      {/* KPI Cards — 4 cards, 2-column inner layout for POS/AGG split */}
+      {/* KPI Cards — 4 cards, POS/AGG split below each */}
       <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:14}}>
         {/* Total Sales */}
-        <div className="kpi-card" style={{gridColumn:"span 1"}}>
+        <div className="kpi-card">
           <div className="kpi-label">{ar?"إجمالي المبيعات":"Total Sales"}</div>
           <div className="kpi-value" style={{color:"#22c55e"}}>{kpi.totalRev.toFixed(2)}</div>
           <div style={{display:"flex",justifyContent:"space-between",marginTop:6,paddingTop:6,borderTop:`1px solid ${C.border}`}}>
-            <span style={{fontSize:10,color:"#22c55e"}}>🏪 {kpi.rPosTot.toFixed(2)}</span>
-            <span style={{fontSize:10,color:"#60a5fa"}}>🛵 {kpi.rAggTot.toFixed(2)}</span>
+            <span style={{fontSize:10,color:"#22c55e"}}>POS: {kpi.rPosTot.toFixed(2)}</span>
+            <span style={{fontSize:10,color:"#60a5fa"}}>AGG: {kpi.rAggTot.toFixed(2)}</span>
           </div>
         </div>
         {/* Total Cost */}
@@ -2618,8 +2609,8 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
           <div className="kpi-label">{ar?"إجمالي التكلفة":"Total Cost"}</div>
           <div className="kpi-value" style={{color:C.red}}>{kpi.totalCost.toFixed(2)}</div>
           <div style={{display:"flex",justifyContent:"space-between",marginTop:6,paddingTop:6,borderTop:`1px solid ${C.border}`}}>
-            <span style={{fontSize:10,color:"#f87171"}}>🏪 {kpi.cPosTot.toFixed(2)}</span>
-            <span style={{fontSize:10,color:"#f87171"}}>🛵 {kpi.cAggTot.toFixed(2)}</span>
+            <span style={{fontSize:10,color:"#f87171"}}>POS: {kpi.cPosTot.toFixed(2)}</span>
+            <span style={{fontSize:10,color:"#f87171"}}>AGG: {kpi.cAggTot.toFixed(2)}</span>
           </div>
         </div>
         {/* Cost % */}
@@ -2632,33 +2623,33 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
         </div>
         {/* Gross Profit / Loss */}
         <div className="kpi-card">
-          <div className="kpi-label" style={{color:kpi.gp>=0?"#22c55e":"#f87171"}}>
-            {kpi.gp>=0?(ar?"مجمل الربح":"Gross Profit"):(ar?"مجمل الخسارة":"Gross Loss")}
-          </div>
+          <div className="kpi-label">{ar?"مجمل الربح":"Gross Profit"}</div>
           <div className="kpi-value" style={{color:kpi.gp>=0?"#22c55e":"#f87171"}}>{Math.abs(kpi.gp).toFixed(2)}</div>
-          <div style={{marginTop:6,paddingTop:6,borderTop:`1px solid ${C.border}`,fontSize:10,color:C.muted}}>
-            {(100-kpi.costPct).toFixed(1)}% {ar?"هامش":"margin"}
+          <div style={{marginTop:6,paddingTop:6,borderTop:`1px solid ${C.border}`,fontSize:10,color:kpi.gp>=0?"#22c55e":"#f87171",fontWeight:700}}>
+            {kpi.gp>=0?(ar?"ربح":"Profit"):(ar?"خسارة":"Loss")} · {(100-kpi.costPct).toFixed(1)}%
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
-        <input placeholder={ar?"بحث منتج/كود":"Search item/code"} value={filterProduct} onChange={e=>{setFilterProduct(e.target.value);setPage(1);}} style={{flex:1,minWidth:120}}/>
-        <select value={filterType} onChange={e=>{setFilterType(e.target.value);setPage(1);}} style={{minWidth:100}}>
-          <option value="">{ar?"منتج+مودفاير":"All Types"}</option>
-          <option value="product">🍔 {ar?"منتجات":"Products"}</option>
-          <option value="modifier">➕ {ar?"مودفاير":"Modifiers"}</option>
-        </select>
-        <select value={filterMonth} onChange={e=>{setFilterMonth(e.target.value);setPage(1);}} style={{minWidth:90}}>
-          <option value="">{ar?"كل الشهور":"All Months"}</option>
-          {MONTHS.map(m=><option key={m} value={m}>{mLabel(m,lang)}</option>)}
-        </select>
-        <select value={filterYear} onChange={e=>{setFilterYear(e.target.value);setPage(1);}} style={{minWidth:80}}>
-          <option value="">{ar?"كل السنوات":"All Years"}</option>
-          {["2024","2025","2026","2027"].map(y=><option key={y} value={y}>{y}</option>)}
-        </select>
-        {(filterType||filterProduct||filterMonth||filterYear)&&<button className="btn btn-secondary" style={{fontSize:11}} onClick={()=>{setFilterType("");setFilterProduct("");setFilterMonth("");setFilterYear("");setPage(1);}}>✕</button>}
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 14px",marginBottom:12}}>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+          <input placeholder={ar?"بحث منتج/كود":"Search item/code"} value={filterProduct} onChange={e=>{setFilterProduct(e.target.value);setPage(1);}} style={{flex:1,minWidth:140,maxWidth:240}}/>
+          <div style={{display:"flex",gap:4,alignItems:"center",background:C.surface,borderRadius:7,padding:"3px 5px",border:`1px solid ${C.border}`}}>
+            {[{v:"",l:ar?"الكل":"All"},{v:"product",l:ar?"منتجات":"Products"},{v:"modifier",l:ar?"مودفاير":"Modifiers"}].map(opt=>(
+              <button key={opt.v} onClick={()=>{setFilterType(opt.v);setPage(1);}} style={{background:filterType===opt.v?C.accent:"transparent",color:filterType===opt.v?"#080b14":C.muted,border:"none",borderRadius:5,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit",transition:"all .15s"}}>{opt.l}</button>
+            ))}
+          </div>
+          <select value={filterMonth} onChange={e=>{setFilterMonth(e.target.value);setPage(1);}} style={{minWidth:110,maxWidth:140}}>
+            <option value="">{ar?"كل الشهور":"All Months"}</option>
+            {MONTHS.map(m=><option key={m} value={m}>{mLabel(m,lang)}</option>)}
+          </select>
+          <select value={filterYear} onChange={e=>{setFilterYear(e.target.value);setPage(1);}} style={{minWidth:80,maxWidth:100}}>
+            <option value="">{ar?"كل السنوات":"All Years"}</option>
+            {["2024","2025","2026","2027"].map(y=><option key={y} value={y}>{y}</option>)}
+          </select>
+          {(filterType||filterProduct||filterMonth||filterYear)&&<button className="btn btn-secondary" style={{fontSize:11,padding:"5px 10px"}} onClick={()=>{setFilterType("");setFilterProduct("");setFilterMonth("");setFilterYear("");setPage(1);}}>{ar?"مسح":"Clear"}</button>}
+        </div>
       </div>
 
       {/* Table */}
@@ -2667,12 +2658,12 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
           <thead><tr>
             <th>{t.productName}</th>
             <th>{ar?"النوع":"Type"}</th>
-            <th>🏪 Qty</th>
-            <th>🛵 Qty</th>
-            <th>🏪 {ar?"مبيعات":"Revenue"}</th>
-            <th>🛵 {ar?"مبيعات":"Revenue"}</th>
-            <th>🏪 {ar?"تكلفة":"Cost"}</th>
-            <th>🛵 {ar?"تكلفة":"Cost"}</th>
+            <th>POS Qty</th>
+            <th>AGG Qty</th>
+            <th>POS {ar?"مبيعات":"Rev."}</th>
+            <th>AGG {ar?"مبيعات":"Rev."}</th>
+            <th>POS {ar?"تكلفة":"Cost"}</th>
+            <th>AGG {ar?"تكلفة":"Cost"}</th>
             <th>{ar?"تكلفة معيارية":"Std Cost"}</th>
             <th>{ar?"نسبة التكلفة":"Cost %"}</th>
             <th>{ar?"الشهر":"Month"}</th>
@@ -2691,7 +2682,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
               return(
                 <tr key={r.id}>
                   <td style={{fontWeight:600}}>{r.itemName||r.productName||r.itemCode}</td>
-                  <td><span style={{background:r.itemType==="modifier"?"#7c3aed22":"#22c55e22",color:r.itemType==="modifier"?"#a78bfa":"#22c55e",padding:"2px 6px",borderRadius:5,fontSize:10,fontWeight:700}}>{r.itemType==="modifier"?"➕":"🍔"}</span></td>
+                  <td><span style={{background:r.itemType==="modifier"?"#7c3aed22":"#22c55e22",color:r.itemType==="modifier"?"#a78bfa":"#22c55e",padding:"2px 8px",borderRadius:5,fontSize:10,fontWeight:700}}>{r.itemType==="modifier"?(ar?"مودفاير":"Modifier"):(ar?"منتج":"Product")}</span></td>
                   <td style={{color:C.muted}}>{r.qtyPos||0}</td>
                   <td style={{color:C.muted}}>{r.qtyAgg||0}</td>
                   <td style={{color:"#22c55e",fontWeight:600}}>{rPos.toFixed(2)}</td>
@@ -2721,7 +2712,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
       {/* Monthly Prices / Sales Upload Modal */}
       {showMPUpload&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&setShowMPUpload(false)}>
         <div className="modal">
-          <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:14}}>📅 {ar?"المبيعات الشهرية":"Monthly Sales"}</h2>
+          <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:14}}>{ar?"المبيعات الشهرية":"Monthly Sales"}</h2>
           <div style={{marginBottom:12}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
               <div><label className="lbl">{ar?"الشهر":"Month"}</label>
@@ -2748,7 +2739,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
             </div>}
             <div style={{background:C.surface,border:`2px dashed ${C.border}`,borderRadius:9,padding:"16px",textAlign:"center"}}>
               <label style={{cursor:"pointer",color:C.accent,fontSize:13}}>
-                📎 {ar?"اختر ملف Excel":"Choose Excel File"}
+                {ar?"اختر ملف Excel":"Choose Excel File"}
                 <input type="file" accept=".xlsx,.xls,.csv" style={{display:"none"}} onChange={e=>{if(e.target.files[0])handleMPFile(e.target.files[0]);}}/>
               </label>
             </div>
@@ -2779,7 +2770,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
         {/* Qty + Revenue side by side POS/AGG */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10,background:C.surface,borderRadius:9,padding:"12px 14px",border:`1px solid ${C.border}`}}>
           <div>
-            <label className="lbl" style={{color:"#22c55e"}}>🏪 POS — {ar?"الكمية":"Qty"}</label>
+            <label className="lbl" style={{color:"#22c55e"}}>POS — {ar?"الكمية":"Qty"}</label>
             <input type="number" min="0" step="1" value={form.qtyPos} onChange={e=>{
               const q=parseFloat(e.target.value)||0;
               const item=allItems.find(x=>x.code===form.itemCode);
@@ -2788,11 +2779,11 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
             }} placeholder="0"/>
           </div>
           <div>
-            <label className="lbl" style={{color:"#22c55e"}}>🏪 POS — {ar?"المبيعات":"Revenue"}</label>
+            <label className="lbl" style={{color:"#22c55e"}}>POS — {ar?"المبيعات":"Revenue"}</label>
             <input type="number" min="0" step="0.01" value={form.revenuePos} onChange={e=>setForm(f=>({...f,revenuePos:e.target.value}))} placeholder="0.00"/>
           </div>
           <div>
-            <label className="lbl" style={{color:"#60a5fa"}}>🛵 AGG — {ar?"الكمية":"Qty"}</label>
+            <label className="lbl" style={{color:"#60a5fa"}}>AGG — {ar?"الكمية":"Qty"}</label>
             <input type="number" min="0" step="1" value={form.qtyAgg} onChange={e=>{
               const q=parseFloat(e.target.value)||0;
               const item=allItems.find(x=>x.code===form.itemCode);
@@ -2801,7 +2792,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
             }} placeholder="0"/>
           </div>
           <div>
-            <label className="lbl" style={{color:"#60a5fa"}}>🛵 AGG — {ar?"المبيعات":"Revenue"}</label>
+            <label className="lbl" style={{color:"#60a5fa"}}>AGG — {ar?"المبيعات":"Revenue"}</label>
             <input type="number" min="0" step="0.01" value={form.revenueAgg} onChange={e=>setForm(f=>({...f,revenueAgg:e.target.value}))} placeholder="0.00"/>
           </div>
         </div>
@@ -2827,8 +2818,8 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
         {/* Live cost preview */}
         {form.itemCode&&<div style={{background:C.bg||"#060810",borderRadius:8,padding:"10px 13px",marginTop:4,display:"flex",gap:16,flexWrap:"wrap"}}>
           <span style={{fontSize:12,color:C.muted}}>{ar?"تكلفة الوحدة":"Unit Cost"}: <strong style={{color:C.red}}>{liveCost.unitCost.toFixed(4)}</strong></span>
-          <span style={{fontSize:12,color:C.muted}}>🏪 {ar?"تكلفة":"Cost"}: <strong style={{color:C.red}}>{liveCost.cPos.toFixed(4)}</strong></span>
-          <span style={{fontSize:12,color:C.muted}}>🛵 {ar?"تكلفة":"Cost"}: <strong style={{color:C.red}}>{liveCost.cAgg.toFixed(4)}</strong></span>
+          <span style={{fontSize:12,color:C.muted}}>POS {ar?"تكلفة":"Cost"}: <strong style={{color:C.red}}>{liveCost.cPos.toFixed(4)}</strong></span>
+          <span style={{fontSize:12,color:C.muted}}>AGG {ar?"تكلفة":"Cost"}: <strong style={{color:C.red}}>{liveCost.cAgg.toFixed(4)}</strong></span>
           {liveCost.totalRev>0&&<span style={{fontSize:12,color:C.muted}}>{ar?"نسبة التكلفة":"Cost %"}: <strong style={{color:liveCost.costPct<30?"#22c55e":liveCost.costPct<40?"#fbbf24":"#f87171"}}>{liveCost.costPct.toFixed(1)}%</strong></span>}
         </div>}
 
@@ -2857,6 +2848,7 @@ function ClassesTab({t,lang,C=DARK,mod,classes:clsObj,setClasses:setClsObj,hasPe
     {key:"products",label:ar?"منتجات":"Products"},
     {key:"prep",label:ar?"شبه مصنع":"Prep"},
     {key:"raw",label:ar?"مواد خام":"Raw"},
+    {key:"modifiers",label:ar?"موديفايرز":"Modifiers"},
   ];
 
   const curList=clsObj[activeSection]||[];
