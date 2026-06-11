@@ -1339,7 +1339,7 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
         <div style={{display:"flex",gap:7,flexWrap:"wrap",alignItems:"center"}}>
           <div style={{display:"flex",alignItems:"center",gap:5,background:C.surface,borderRadius:7,padding:"4px 8px",border:`1px solid ${C.border}`}}>
             <span style={{fontSize:11,color:C.muted}}>{t.pageSize}:</span>
-            {[5,10,20].map(n=><button key={n} onClick={()=>{setPageSize(n);setShowCount(n);}} style={{background:pageSize===n?C.accent:"transparent",color:pageSize===n?"#080b14":C.muted,border:"none",borderRadius:5,padding:"3px 8px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{n}</button>)}
+            {[20,50,100,200,300].map(n=><button key={n} onClick={()=>{setPageSize(n);setShowCount(n);}} style={{background:pageSize===n?C.accent:"transparent",color:pageSize===n?"#080b14":C.muted,border:"none",borderRadius:5,padding:"3px 8px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{n}</button>)}
           </div>
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>{t.importXlsx}</button>}
@@ -1395,7 +1395,7 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
       {usageModal&&<UsageModal t={t} C={C} usageModal={usageModal} onClose={()=>setUsageModal(null)}/>}
       {previewData&&previewData.module==="raw"&&<PreviewModal t={t} lang={lang} C={C} data={previewData} onConfirm={confirmImport} onCancel={()=>setPreviewData(null)} classes={cls} moduleType="raw"/>}
       {bulkDelModal&&bulkDelModal.module==="raw"&&<DupDeleteModal t={t} lang={lang} C={C} items={bulkDelModal.items} onDelete={ids=>{setRawList(p=>p.filter(m=>!ids.includes(m.id)));setBulkDelModal(null);showToast(lang==="ar"?`تم حذف ${ids.length} مادة مكررة`:`Deleted ${ids.length} duplicates`,"error");}} onClose={()=>setBulkDelModal(null)}/>}
-      {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal">
+      {showForm&&<div className="overlay" onClick={e=>{if(e.target===e.currentTarget)reset();}}><div className="modal" onClick={e=>e.stopPropagation()}>
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.rawMat}</h2>
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
           <div><label className="lbl">{t.name}</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>{errs.name&&<div className="err">{errs.name}</div>}</div>
@@ -1684,7 +1684,7 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
       {usageModal&&<UsageModal t={t} C={C} usageModal={usageModal} onClose={()=>setUsageModal(null)}/>}
       {previewData&&previewData.module==="prep"&&<PreviewModal t={t} lang={lang} C={C} data={previewData} onConfirm={confirmImport} onCancel={()=>setPreviewData(null)} classes={cls} moduleType="prep"/>}
       {bulkDelModal&&bulkDelModal.module==="prep"&&<DupDeleteModal t={t} lang={lang} C={C} items={bulkDelModal.items} onDelete={ids=>{setPrepList(p=>p.filter(m=>!ids.includes(m.id)));setBulkDelModal(null);showToast(lang==="ar"?`تم حذف ${ids.length} بريب مكرر`:`Deleted ${ids.length} duplicates`,"error");}} onClose={()=>setBulkDelModal(null)}/>}
-      {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
+      {showForm&&<div className="overlay" onClick={e=>{if(e.target===e.currentTarget)reset();}}><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.prepItem}</h2>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:12}}>
           <div style={{gridColumn:"1/3"}}><label className="lbl">{t.name}</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>{errs.name&&<div className="err">{errs.name}</div>}</div>
@@ -1855,7 +1855,7 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
         <div style={{display:"flex",gap:7,flexWrap:"wrap",alignItems:"center"}}>
           <div style={{display:"flex",alignItems:"center",gap:5,background:C.surface,borderRadius:7,padding:"4px 8px",border:`1px solid ${C.border}`}}>
             <span style={{fontSize:11,color:C.muted}}>{t.pageSize}:</span>
-            {[5,10,20].map(n=><button key={n} onClick={()=>{setPageSize(n);setShowCount(n);}} style={{background:pageSize===n?C.accent:"transparent",color:pageSize===n?"#080b14":C.muted,border:"none",borderRadius:5,padding:"3px 8px",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{n}</button>)}
+            {[20,50,100,200,300].map(n=><button key={n} onClick={()=>{setPageSize(n);setShowCount(n);}} style={{background:pageSize===n?C.accent:"transparent",color:pageSize===n?"#080b14":C.muted,border:"none",borderRadius:5,padding:"3px 8px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>{n}</button>)}
           </div>
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={doExport}>{t.exportXlsx}</button>}
           {hasPerm(mod,"edit")&&<button className="btn btn-secondary" onClick={()=>setShowImport(true)}>{t.importXlsx}</button>}
@@ -1896,9 +1896,9 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
                 <td style={{color:"#f87171",fontWeight:600}}>{totalCost.toFixed(2)}</td>
                 <td style={{color:C.muted,fontWeight:500}}>{m.stdCost>0?parseFloat(m.stdCost).toFixed(2):"—"}</td>
                 <td style={{color:"#4ade80",fontWeight:600}}>{posP>0?posP.toFixed(2):"—"}</td>
-                <td><span style={{color:posMargin>30?"#4ade80":posMargin>15?"#fbbf24":"#f87171",fontWeight:700}}>{posP>0?posMargin.toFixed(1)+"%":"—"}</span></td>
+                <td><span style={{color:posP>0?(posMargin>30?"#4ade80":posMargin>15?"#fbbf24":"#f87171"):"#5a6585",fontWeight:700}}>{posP>0?posMargin.toFixed(1)+"%":"—"}</span></td>
                 <td style={{color:"#60a5fa",fontWeight:600}}>{aggP>0?aggP.toFixed(2):"—"}</td>
-                <td><span style={{color:aggMargin>30?"#4ade80":aggMargin>15?"#fbbf24":"#f87171",fontWeight:700}}>{aggP>0?aggMargin.toFixed(1)+"%":"—"}</span></td>
+                <td><span style={{color:aggP>0?(aggMargin>30?"#4ade80":aggMargin>15?"#fbbf24":"#f87171"):"#5a6585",fontWeight:700}}>{aggP>0?aggMargin.toFixed(1)+"%":"—"}</span></td>
                 <td><div style={{display:"flex",gap:5}}>
                   <button className="btn-sm-v" onClick={()=>setViewItem(m)}>{t.view}</button>
                   {hasPerm(mod,"edit")&&<button className="btn-sm-e" onClick={()=>doEdit(m)}>{t.edit}</button>}
@@ -1969,7 +1969,7 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
       })()}
 
       {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.products} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={doImport} showDatePicker={true} onDateSelect={setImportDate}/>}
-      {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
+      {showForm&&<div className="overlay" onClick={e=>{if(e.target===e.currentTarget)reset();}}><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.products}</h2>
         <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:10,marginBottom:10}}>
           <div><label className="lbl">{t.productName}</label><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>{errs.name&&<div className="err">{errs.name}</div>}</div>
@@ -2277,7 +2277,7 @@ function ModifiersTab({t,lang,C=DARK,mod,rawList=[],prepList=[],classes:clsList,
 
       {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.modifiers||"Modifiers"} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={e=>{if(e.target?.files?.[0])doImport(e.target.files[0]);}} showDatePicker={false}/>}
 
-      {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
+      {showForm&&<div className="overlay" onClick={e=>{if(e.target===e.currentTarget)reset();}}><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.modifiers||"Modifiers"}</h2>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:10}}>
           <div><label className="lbl">{t.code}</label><input value={form.code} onChange={e=>setForm({...form,code:e.target.value})}/></div>
@@ -2409,17 +2409,22 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
     return {unitCost,cPos,cAgg,totalRev,totalCost,costPct};
   },[form,getItemCost]);
 
-  const handleItemSelect=code=>{
+  const handleItemSelect=useCallback((code)=>{
+    if(!code){setForm(f=>({...f,itemCode:"",itemName:"",itemType:"product"}));return;}
     const item=allItems.find(x=>x.code===code);
     if(!item)return;
     const posP=parseFloat(item.posSellPrice||item.addOnPrice||0);
     const aggP=parseFloat(item.aggSellPrice||item.addOnPrice||0);
-    setForm(f=>({...f,
-      itemCode:code,itemName:item.name,itemType:item.itemType,
-      revenuePos:posP>0&&f.qtyPos?String((posP*(parseFloat(f.qtyPos)||1)).toFixed(2)):f.revenuePos,
-      revenueAgg:aggP>0&&f.qtyAgg?String((aggP*(parseFloat(f.qtyAgg)||1)).toFixed(2)):f.revenueAgg,
-    }));
-  };
+    setForm(f=>{
+      const qPos=parseFloat(f.qtyPos)||0;
+      const qAgg=parseFloat(f.qtyAgg)||0;
+      return {...f,
+        itemCode:code,itemName:item.name,itemType:item.itemType,
+        revenuePos:posP>0&&qPos>0?String((posP*qPos).toFixed(2)):posP>0?String(posP.toFixed(2)):f.revenuePos,
+        revenueAgg:aggP>0&&qAgg>0?String((aggP*qAgg).toFixed(2)):aggP>0?String(aggP.toFixed(2)):f.revenueAgg,
+      };
+    });
+  },[allItems]);
 
   const validate=()=>{
     const e={};
@@ -2758,7 +2763,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
       {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.sales||"Sales"} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={doImport} showDatePicker={true} onDateSelect={setImportDate}/>}
 
       {/* Add/Edit Form Modal */}
-      {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
+      {showForm&&<div className="overlay" onClick={e=>{if(e.target===e.currentTarget)reset();}}><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:16}}>{editId?t.edit:t.add} — {t.sales||"Sales"}</h2>
 
         {/* Item selection */}
@@ -2984,7 +2989,7 @@ function UsersTab({t,lang,C=DARK,users:usersList,setUsers:setUsersList,currentUs
         </tbody>
       </table></div>
 
-      {showForm&&<div className="overlay" onClick={e=>e.target===e.currentTarget&&reset()}><div className="modal modal-lg">
+      {showForm&&<div className="overlay" onClick={e=>{if(e.target===e.currentTarget)reset();}}><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
         <h2 style={{fontSize:14,fontWeight:700,color:C.accent,marginBottom:14}}>{editId?t.edit:t.add} — {t.users}</h2>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:10,marginBottom:14}}>
           <div><label className="lbl">{lang==="ar"?"رقم المستخدم":"User ID"}</label><input value={form.id} disabled={!!editId} onChange={e=>setForm({...form,id:e.target.value.replace(/\D/g,"")})} placeholder="1002"/>{errs.id&&<div className="err">{errs.id}</div>}</div>
