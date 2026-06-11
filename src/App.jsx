@@ -1645,17 +1645,22 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
                 <thead><tr>{["#",lang==="ar"?"المادة":"Material",lang==="ar"?"الكمية":"Qty",lang==="ar"?"الهدر %":"Waste %",lang==="ar"?"الكمية الصافية":"Net Qty",lang==="ar"?"سعر/وحدة":"Price/Unit",lang==="ar"?"التكلفة":"Cost"].map((h,i)=><th key={i} style={{padding:"9px 12px",textAlign:lang==="ar"?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
                 <tbody>
                   {(viewItem.ingredients||[]).map((ing,i)=>{
-                    const raw=rawList.find(r=>String(r.id)===String(ing.rawId)); if(!raw) return null;
+                    const isPrep=ing.source==="prep";
+                    const raw=!isPrep?rawList.find(r=>String(r.id)===String(ing.rawId)):null;
+                    const prep=isPrep?prepList.find(p=>String(p.id)===String(ing.rawId||ing.srcId||ing.prepId)):null;
+                    if(!raw&&!prep) return null;
                     const qty=parseFloat(ing.qty)||0; const waste=(parseFloat(ing.waste)||0)/100;
-                    const netQty=qty*(1-waste); const ingCost=(raw.unit==="piece"?qty:qty/1000)*raw.price;
-                    const unit=raw.unit==="kg"?"g":raw.unit==="liter"?"ml":"pcs";
+                    const netQty=qty*(1-waste);
+                    let ingCost=0,ingName="",ingCode="",unit="g";
+                    if(raw){ingName=raw.name;ingCode=raw.code;unit=raw.unit==="kg"?"g":raw.unit==="liter"?"ml":"pcs";ingCost=(raw.unit==="piece"?qty:qty/1000)*raw.price;}
+                    else{const{costPerUnit}=calcPrepCost(prep);ingName=prep.name;ingCode=prep.code;unit=prep.unit==="kg"?"g":prep.unit==="liter"?"ml":"g";ingCost=(qty/1000)*costPerUnit;}
                     return <tr key={i} style={{borderBottom:`1px solid ${C.border}22`}}>
                       <td style={{padding:"10px 12px",color:C.muted,fontSize:11}}>{i+1}</td>
-                      <td style={{padding:"10px 12px",fontWeight:600}}>{raw.name} <span style={{color:C.muted,fontSize:11}}>({raw.code})</span></td>
+                      <td style={{padding:"10px 12px",fontWeight:600}}>{ingName} <span style={{color:C.muted,fontSize:11}}>({ingCode})</span>{isPrep&&<span style={{marginLeft:5,background:C.blue+"22",color:C.blue,padding:"1px 6px",borderRadius:10,fontSize:10,fontWeight:700}}>PREP</span>}</td>
                       <td style={{padding:"10px 12px"}}>{qty.toFixed(0)} {unit}</td>
                       <td style={{padding:"10px 12px"}}>{ing.waste>0?<span style={{background:C.yellow+"22",color:C.yellow,padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700}}>{ing.waste}%</span>:<span style={{color:C.muted}}>0%</span>}</td>
                       <td style={{padding:"10px 12px",color:C.green,fontWeight:600}}>{netQty.toFixed(0)} {unit}</td>
-                      <td style={{padding:"10px 12px",color:C.muted,fontSize:11}}>{raw.price.toFixed(2)}/{unitLbl(raw.unit,t)}</td>
+                      <td style={{padding:"10px 12px",color:C.muted,fontSize:11}}>{raw?raw.price.toFixed(2)+"/"+unitLbl(raw.unit,t):"—"}</td>
                       <td style={{padding:"10px 12px",color:C.accent,fontWeight:700}}>{ingCost.toFixed(4)}</td>
                     </tr>;
                   })}
