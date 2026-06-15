@@ -2,7 +2,7 @@
 // SUPABASE CLIENT — TALA COSTING
 // ═══════════════════════════════════════════════════════════════
 const SUPABASE_URL = "https://jdeasptreourrqkjwgdv.supabase.co";
-const SUPABASE_KEY = "sb_publishable_SRf4Mk1hIzeUJEgmj4lxyw_8h56029K";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkZWFzcHRyZW91cnJxa2p3Z2R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MzIyOTEsImV4cCI6MjA5NzEwODI5MX0._628XK35-jwGUBbH1XVTzOp4CjHNPBdu_TsYvaRSVsE";
 
 const headers = {
   "Content-Type": "application/json",
