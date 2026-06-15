@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import * as XLSX from "xlsx";
+import { loadFromCloud, saveToCloud } from "./supabase.js";
 
 // ═══════════════════════════════════════════════════════════════
 // TRANSLATIONS
@@ -210,16 +211,36 @@ export default function App() {
   const [tab,setTab]           = useState("dashboard");
   const [toast,setToast]       = useState(null);
   const [sideOpen,setSideOpen] = useState(true);
+  const [cloudReady,setCloudReady] = useState(false);
+  const initDone = useRef(false);
 
-  useEffect(()=>persist(SK.users,users),[users]);
-  useEffect(()=>persist(SK.raw,rawList),[rawList]);
-  useEffect(()=>persist(SK.prep,prepList),[prepList]);
-  useEffect(()=>persist(SK.products,prodList),[prodList]);
-  useEffect(()=>persist(SK.classes,classes),[classes]);
+  // ── Load from Supabase on startup ─────────────────────────────
+  useEffect(()=>{
+    if(initDone.current) return;
+    initDone.current = true;
+    loadFromCloud().then(d=>{
+      if(d.users)         setUsers(d.users);
+      if(d.raw?.length)   setRawList(d.raw);
+      if(d.prep?.length)  setPrepList(d.prep);
+      if(d.products?.length) setProdList(d.products);
+      if(d.classes)       setClasses(d.classes);
+      if(d.modifiers?.length) setModList(d.modifiers);
+      if(d.sales?.length) setSalesList(d.sales);
+      if(d.monthlyPrices && Object.keys(d.monthlyPrices).length) setMonthlyPrices(d.monthlyPrices);
+      setCloudReady(true);
+    }).catch(()=>{ setCloudReady(true); });
+  },[]);
+
+  // ── Save to localStorage + Supabase on every change ───────────
+  useEffect(()=>{ persist(SK.users,users); if(cloudReady) saveToCloud("users",users); },[users,cloudReady]);
+  useEffect(()=>{ persist(SK.raw,rawList); if(cloudReady) saveToCloud("raw",rawList); },[rawList,cloudReady]);
+  useEffect(()=>{ persist(SK.prep,prepList); if(cloudReady) saveToCloud("prep",prepList); },[prepList,cloudReady]);
+  useEffect(()=>{ persist(SK.products,prodList); if(cloudReady) saveToCloud("products",prodList); },[prodList,cloudReady]);
+  useEffect(()=>{ persist(SK.classes,classes); if(cloudReady) saveToCloud("classes",classes); },[classes,cloudReady]);
   useEffect(()=>persist(SK.session,session),[session]);
-  useEffect(()=>persist(SK.modifiers,modList),[modList]);
-  useEffect(()=>persist(SK.sales,salesList),[salesList]);
-  useEffect(()=>persist(SK.monthlyPrices,monthlyPrices),[monthlyPrices]);
+  useEffect(()=>{ persist(SK.modifiers,modList); if(cloudReady) saveToCloud("modifiers",modList); },[modList,cloudReady]);
+  useEffect(()=>{ persist(SK.sales,salesList); if(cloudReady) saveToCloud("sales",salesList); },[salesList,cloudReady]);
+  useEffect(()=>{ persist(SK.monthlyPrices,monthlyPrices); if(cloudReady) saveToCloud("monthlyPrices",monthlyPrices); },[monthlyPrices,cloudReady]);
 
   const showToast = useCallback((msg,type="success")=>{ setToast({msg,type}); setTimeout(()=>setToast(null),3000); },[]);
 
