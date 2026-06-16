@@ -71,3 +71,4 @@ export const saveToCloud = async (key, data) => {
   if (!table) return;
   await sbUpsert(table, { id: 1, data });
 };
+
