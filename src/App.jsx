@@ -2503,6 +2503,12 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
     XLSX.writeFile(wb,"sales_template.xlsx");
   };
 
+  const numVal=v=>{
+    if(v===undefined||v===null||v==="")return 0;
+    const n=Number(String(v).replace(/,/g,"").trim());
+    return isNaN(n)?0:n;
+  };
+
   const doImport=file=>{
     if(!file){showToast&&showToast(lang==="ar"?"لم يتم اختيار ملف":"No file selected","warning");return;}
     const reader=new FileReader();
@@ -2525,12 +2531,12 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
           const name=(row.productName||row.product_name||row.itemName||"").toString().trim();
           if(!code&&!name)return;
           const ch=(row.channel||"POS").toString().toUpperCase();
-          const qty=parseFloat(row.qty||1);
-          const rev=parseFloat(row.revenue||0);
+          const qty=numVal(row.qty)||1;
+          const rev=numVal(row.revenue);
           const m=(row.month||defMonth).toString().padStart(2,"0");
           const y=(row.year||defYear).toString();
           const item=allItems.find(x=>x.code===code||x.name===name);
-          const unitCost=item?getItemCost(item.code,item.itemType):0;
+          const unitCost=item?(numVal(getItemCost(item.code,item.itemType))):0;
           rec={id:Date.now()+Math.random(),itemCode:code,itemName:name,itemType:"product",
             qtyPos:ch==="POS"?qty:0,qtyAgg:ch==="AGG"?qty:0,
             revenuePos:ch==="POS"?rev.toFixed(2):"0",revenueAgg:ch==="AGG"?rev.toFixed(2):"0",
@@ -2541,18 +2547,19 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
           const name=(row.itemName||row.productName||"").toString().trim();
           if(!code&&!name)return;
           const type=(row.itemType||"product").toString().toLowerCase();
-          const qPos=parseFloat(row.qtyPos||0);
-          const qAgg=parseFloat(row.qtyAgg||0);
-          const rPos=parseFloat(row.revenuePos||0);
-          const rAgg=parseFloat(row.revenueAgg||0);
+          const qPos=numVal(row.qtyPos);
+          const qAgg=numVal(row.qtyAgg);
+          const rPos=numVal(row.revenuePos);
+          const rAgg=numVal(row.revenueAgg);
           const m=(row.month||defMonth).toString().padStart(2,"0");
           const y=(row.year||defYear).toString();
           const item=allItems.find(x=>x.code===code||x.name===name);
-          const unitCost=item?getItemCost(item.code||code,item.itemType||type):0;
+          const unitCost=item?numVal(getItemCost(item.code||code,item.itemType||type)):0;
+          const stdCostVal=item?numVal(getStdCost(item.code||code,item.itemType||type)):0;
           rec={id:Date.now()+Math.random(),itemCode:code,itemName:name,itemType:type,
             qtyPos:qPos,qtyAgg:qAgg,revenuePos:rPos.toFixed(2),revenueAgg:rAgg.toFixed(2),
             actualCostPos:(unitCost*qPos).toFixed(4),actualCostAgg:(unitCost*qAgg).toFixed(4),
-            stdCost:item?getStdCost(item.code||code,item.itemType||type).toFixed(4):"0",
+            stdCost:stdCostVal.toFixed(4),
             costPct:"0",month:m,year:y,notes:row.notes||""};
         }
         updated.push(rec);
