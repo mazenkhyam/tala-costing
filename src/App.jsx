@@ -1285,7 +1285,7 @@ function RawTab({t,lang,C=DARK,rawList,setRawList,classes,prepList=[],prodList=[
     const r=new FileReader();
     r.onload=ev=>{
       try{
-        const wb=XLSX.read(ev.target.result,{type:"binary"});
+        const wb=XLSX.read(ev.target.result,{type:"binary",cellFormula:false});
         const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
         if(!rows.length){showToast(t.noMatch,"warning");return;}
         const fv=(row,keys)=>{ for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v).trim();}return ""; };
@@ -1507,7 +1507,7 @@ function PrepTab({t,lang,C=DARK,prepList,setPrepList,rawList,prodList=[],classes
     const r=new FileReader();
     r.onload=ev=>{
       try{
-        const wb=XLSX.read(ev.target.result,{type:"binary"});
+        const wb=XLSX.read(ev.target.result,{type:"binary",cellFormula:false});
         const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
         if(!rows.length){showToast(t.noMatch,"warning");return;}
         const fv=(row,keys)=>{ for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v).trim();}return ""; };
@@ -1803,7 +1803,7 @@ function ProductsTab({t,lang,C=DARK,prodList,setProdList,rawList,prepList,classe
     const r=new FileReader();
     r.onload=ev=>{
       try{
-        const wb=XLSX.read(ev.target.result,{type:"binary"});
+        const wb=XLSX.read(ev.target.result,{type:"binary",cellFormula:false});
         const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
         if(!rows.length){showToast(t.noMatch,"warning");return;}
         const fv=(row,keys)=>{ for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v).trim();}return ""; };
@@ -2124,7 +2124,7 @@ function ModifiersTab({t,lang,C=DARK,mod,rawList=[],prepList=[],classes:clsList,
   const doImport=file=>{
     const reader=new FileReader();
     reader.onload=e=>{
-      const wb=XLSX.read(e.target.result,{type:"binary"});
+      const wb=XLSX.read(e.target.result,{type:"binary",cellFormula:false});
       const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
       let added=0,dupes=0;
       const updated=[...list];
@@ -2489,7 +2489,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
   const handleMPFile=file=>{
     const reader=new FileReader();
     reader.onload=e=>{
-      const wb=XLSX.read(e.target.result,{type:"binary"});
+      const wb=XLSX.read(e.target.result,{type:"binary",cellFormula:false});
       const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
       const key=`${mpYear}-${mpMonth}`;
       const prices={};
@@ -2523,7 +2523,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
     reader.onerror=()=>{showToast&&showToast(lang==="ar"?"فشل قراءة الملف":"Failed to read file","warning");};
     reader.onload=e=>{
      try{
-      const wb=XLSX.read(e.target.result,{type:"binary"});
+      const wb=XLSX.read(e.target.result,{type:"binary",cellFormula:false});
       const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
       if(!rows.length){showToast&&showToast(lang==="ar"?"الملف فارغ أو بدون بيانات صالحة":"File is empty or has no valid rows","warning");return;}
       let added=0,updatedCount=0;
