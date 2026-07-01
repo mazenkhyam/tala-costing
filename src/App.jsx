@@ -2400,7 +2400,11 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
     }
     if(calcProductCost){
       const p=prodList.find(x=>x.code===code);
-      return p?calcProductCost(p):0;
+      if(!p)return 0;
+      const res=calcProductCost(p);
+      const calcCost=parseFloat(res?.totalCost||0);
+      // Fallback to the product's manually-set standard cost when there's no recipe/ingredients to calculate from
+      return calcCost>0?calcCost:parseFloat(p.stdCost||0);
     }
     const prod=prodList.find(p=>p.code===code);
     if(!prod||!prod.ingredients)return 0;
@@ -2617,6 +2621,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
   };
 
   const filtered=useMemo(()=>list.filter(r=>{
+    if((parseFloat(r.qtyPos||0)+parseFloat(r.qtyAgg||0))<=0)return false;
     if(filterType&&r.itemType!==filterType)return false;
     if(filterProduct){const q=filterProduct.toLowerCase();if(!(r.itemName||"").toLowerCase().includes(q)&&!(r.itemCode||"").includes(q))return false;}
     if(filterMonth&&r.month!==filterMonth)return false;
@@ -2644,6 +2649,11 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
   const paged=filtered.slice((page-1)*PAGE_SIZE,page*PAGE_SIZE);
 
   const ar=lang==="ar";
+  const nf=(v,d=2)=>{
+    const n=Number(v);
+    if(isNaN(n))return(0).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+    return n.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+  };
 
   return(
     <div>
@@ -2666,19 +2676,19 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
         {/* Total Sales */}
         <div className="kpi-card">
           <div className="kpi-label">{ar?"إجمالي المبيعات":"Total Sales"}</div>
-          <div className="kpi-value" style={{color:"#22c55e"}}>{kpi.totalRev.toFixed(2)}</div>
+          <div className="kpi-value" style={{color:"#22c55e"}}>{nf(kpi.totalRev)}</div>
           <div style={{display:"flex",justifyContent:"space-between",marginTop:6,paddingTop:6,borderTop:`1px solid ${C.border}`}}>
-            <span style={{fontSize:10,color:"#22c55e"}}>POS: {kpi.rPosTot.toFixed(2)}</span>
-            <span style={{fontSize:10,color:"#60a5fa"}}>AGG: {kpi.rAggTot.toFixed(2)}</span>
+            <span style={{fontSize:10,color:"#22c55e"}}>POS: {nf(kpi.rPosTot)}</span>
+            <span style={{fontSize:10,color:"#60a5fa"}}>AGG: {nf(kpi.rAggTot)}</span>
           </div>
         </div>
         {/* Total Cost */}
         <div className="kpi-card">
           <div className="kpi-label">{ar?"إجمالي التكلفة":"Total Cost"}</div>
-          <div className="kpi-value" style={{color:C.red}}>{kpi.totalCost.toFixed(2)}</div>
+          <div className="kpi-value" style={{color:C.red}}>{nf(kpi.totalCost)}</div>
           <div style={{display:"flex",justifyContent:"space-between",marginTop:6,paddingTop:6,borderTop:`1px solid ${C.border}`}}>
-            <span style={{fontSize:10,color:"#f87171"}}>POS: {kpi.cPosTot.toFixed(2)}</span>
-            <span style={{fontSize:10,color:"#f87171"}}>AGG: {kpi.cAggTot.toFixed(2)}</span>
+            <span style={{fontSize:10,color:"#f87171"}}>POS: {nf(kpi.cPosTot)}</span>
+            <span style={{fontSize:10,color:"#f87171"}}>AGG: {nf(kpi.cAggTot)}</span>
           </div>
         </div>
         {/* Cost % */}
@@ -2692,7 +2702,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
         {/* Gross Profit / Loss */}
         <div className="kpi-card">
           <div className="kpi-label">{ar?"مجمل الربح":"Gross Profit"}</div>
-          <div className="kpi-value" style={{color:kpi.gp>=0?"#22c55e":"#f87171"}}>{Math.abs(kpi.gp).toFixed(2)}</div>
+          <div className="kpi-value" style={{color:kpi.gp>=0?"#22c55e":"#f87171"}}>{nf(Math.abs(kpi.gp))}</div>
           <div style={{marginTop:6,paddingTop:6,borderTop:`1px solid ${C.border}`,fontSize:10,color:kpi.gp>=0?"#22c55e":"#f87171",fontWeight:700}}>
             {kpi.gp>=0?(ar?"ربح":"Profit"):(ar?"خسارة":"Loss")} · {(100-kpi.costPct).toFixed(1)}%
           </div>
@@ -2759,13 +2769,13 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
                   }}/></td>
                   <td style={{fontWeight:600}}>{r.itemName||r.productName||r.itemCode}</td>
                   <td><span style={{background:r.itemType==="modifier"?"#7c3aed22":"#22c55e22",color:r.itemType==="modifier"?"#a78bfa":"#22c55e",padding:"2px 8px",borderRadius:5,fontSize:10,fontWeight:700}}>{r.itemType==="modifier"?(ar?"مودفاير":"Modifier"):(ar?"منتج":"Product")}</span></td>
-                  <td style={{color:C.muted}}>{r.qtyPos||0}</td>
-                  <td style={{color:C.muted}}>{r.qtyAgg||0}</td>
-                  <td style={{color:"#22c55e",fontWeight:600}}>{rPos.toFixed(2)}</td>
-                  <td style={{color:"#60a5fa",fontWeight:600}}>{rAgg.toFixed(2)}</td>
-                  <td style={{color:C.red,fontSize:11}}>{cPos.toFixed(4)}</td>
-                  <td style={{color:C.red,fontSize:11}}>{cAgg.toFixed(4)}</td>
-                  <td style={{color:C.muted,fontSize:11}}>{parseFloat(r.stdCost||0).toFixed(4)}</td>
+                  <td style={{color:C.muted}}>{nf(r.qtyPos||0,0)}</td>
+                  <td style={{color:C.muted}}>{nf(r.qtyAgg||0,0)}</td>
+                  <td style={{color:"#22c55e",fontWeight:600}}>{nf(rPos)}</td>
+                  <td style={{color:"#60a5fa",fontWeight:600}}>{nf(rAgg)}</td>
+                  <td style={{color:C.red,fontSize:11}}>{nf(cPos,4)}</td>
+                  <td style={{color:C.red,fontSize:11}}>{nf(cAgg,4)}</td>
+                  <td style={{color:C.muted,fontSize:11}}>{nf(parseFloat(r.stdCost||0),4)}</td>
                   <td><span style={{color:costPct<30?"#22c55e":costPct<40?"#fbbf24":"#f87171",fontWeight:700}}>{costPct.toFixed(1)}%</span></td>
                   <td style={{color:C.muted,fontSize:11}}>{mLabel(r.month,lang)} {r.year}</td>
                   <td>
