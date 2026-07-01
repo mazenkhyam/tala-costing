@@ -2504,10 +2504,14 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
   };
 
   const doImport=file=>{
+    if(!file){showToast&&showToast(lang==="ar"?"لم يتم اختيار ملف":"No file selected","warning");return;}
     const reader=new FileReader();
+    reader.onerror=()=>{showToast&&showToast(lang==="ar"?"فشل قراءة الملف":"Failed to read file","warning");};
     reader.onload=e=>{
+     try{
       const wb=XLSX.read(e.target.result,{type:"binary"});
       const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+      if(!rows.length){showToast&&showToast(lang==="ar"?"الملف فارغ أو بدون بيانات صالحة":"File is empty or has no valid rows","warning");return;}
       let added=0;
       const updated=[...list];
       const defMonth=importDate?.month||String(new Date().getMonth()+1).padStart(2,"0");
@@ -2519,6 +2523,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
         if(isOldFmt){
           const code=(row.productCode||row.product_code||row.itemCode||"").toString().trim();
           const name=(row.productName||row.product_name||row.itemName||"").toString().trim();
+          if(!code&&!name)return;
           const ch=(row.channel||"POS").toString().toUpperCase();
           const qty=parseFloat(row.qty||1);
           const rev=parseFloat(row.revenue||0);
@@ -2534,6 +2539,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
         } else {
           const code=(row.itemCode||row.productCode||"").toString().trim();
           const name=(row.itemName||row.productName||"").toString().trim();
+          if(!code&&!name)return;
           const type=(row.itemType||"product").toString().toLowerCase();
           const qPos=parseFloat(row.qtyPos||0);
           const qAgg=parseFloat(row.qtyAgg||0);
@@ -2555,6 +2561,10 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
       persist(updated);
       showToast&&showToast(`${lang==="ar"?"تم الاستيراد:":"Imported:"} ${added}`);
       setShowImport(false);
+     }catch(err){
+      console.error(err);
+      showToast&&showToast(lang==="ar"?"تعذر استيراد الملف - تأكد أنه بصيغة Excel صحيحة":"Could not import file - make sure it's a valid Excel file","warning");
+     }
     };
     reader.readAsBinaryString(file);
   };
@@ -2781,7 +2791,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
         </div>
       </div>}
 
-      {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.sales||"Sales"} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={doImport} showDatePicker={true} onDateSelect={setImportDate}/>}
+      {showImport&&<ImportModal t={t} lang={lang} C={C} type={t.sales||"Sales"} onClose={()=>setShowImport(false)} onDownloadTemplate={doDownloadTemplate} onFileSelect={e=>{if(e.target?.files?.[0])doImport(e.target.files[0]);}} showDatePicker={true} onDateSelect={setImportDate}/>}
 
       {/* Add/Edit Form Modal */}
       {showForm&&<div className="overlay" onClick={e=>{if(e.target===e.currentTarget)reset();}}><div className="modal modal-lg" onClick={e=>e.stopPropagation()}>
