@@ -2365,6 +2365,8 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
   const [filterYear,setFilterYear]=useState("");
   const [page,setPage]=useState(1);
   const PAGE_SIZE=25;
+  const [selectedIds,setSelectedIds]=useState([]);
+  const [showBulkDel,setShowBulkDel]=useState(false);
 
   // Combined catalog: products + modifiers
   const allItems=useMemo(()=>[
@@ -2477,6 +2479,12 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
   const reset=()=>{setForm(blank);setEditId(null);setShowForm(false);setErrs({});};
   const doEdit=item=>{setForm({...item});setEditId(item.id);setShowForm(true);};
   const doDelete=id=>{persist(list.filter(r=>r.id!==id));setDelId(null);showToast&&showToast(lang==="ar"?"تم الحذف":"Deleted","red");};
+  const doBulkDelete=()=>{
+    persist(list.filter(r=>!selectedIds.includes(r.id)));
+    showToast&&showToast(`${lang==="ar"?"تم حذف":"Deleted"} ${selectedIds.length}`,"red");
+    setSelectedIds([]);
+    setShowBulkDel(false);
+  };
 
   const handleMPFile=file=>{
     const reader=new FileReader();
@@ -2518,55 +2526,66 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
       const wb=XLSX.read(e.target.result,{type:"binary"});
       const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
       if(!rows.length){showToast&&showToast(lang==="ar"?"الملف فارغ أو بدون بيانات صالحة":"File is empty or has no valid rows","warning");return;}
-      let added=0;
+      let added=0,updatedCount=0;
       const updated=[...list];
       const defMonth=importDate?.month||String(new Date().getMonth()+1).padStart(2,"0");
       const defYear=importDate?.year||String(new Date().getFullYear());
+      // Find an existing row for the same item + period, so re-importing UPDATES instead of duplicating
+      const findExistingIdx=(code,name,type,m,y)=>updated.findIndex(x=>x.month===m&&x.year===y&&(x.itemType||"product")===type&&((code&&x.itemCode===code)||(!code&&x.itemName===name)));
       rows.forEach(row=>{
         // Support old format: productCode/channel/qty/revenue
         const isOldFmt=!!(row.channel||row.Channel);
-        let rec;
+        let rec,code,name,type,m,y;
         if(isOldFmt){
-          const code=(row.productCode||row.product_code||row.itemCode||"").toString().trim();
-          const name=(row.productName||row.product_name||row.itemName||"").toString().trim();
+          code=(row.productCode||row.product_code||row.itemCode||"").toString().trim();
+          name=(row.productName||row.product_name||row.itemName||"").toString().trim();
           if(!code&&!name)return;
+          type="product";
           const ch=(row.channel||"POS").toString().toUpperCase();
           const qty=numVal(row.qty)||1;
-          const rev=numVal(row.revenue);
-          const m=(row.month||defMonth).toString().padStart(2,"0");
-          const y=(row.year||defYear).toString();
+          m=(row.month||defMonth).toString().padStart(2,"0");
+          y=(row.year||defYear).toString();
           const item=allItems.find(x=>x.code===code||x.name===name);
-          const unitCost=item?(numVal(getItemCost(item.code,item.itemType))):0;
-          rec={id:Date.now()+Math.random(),itemCode:code,itemName:name,itemType:"product",
+          const unitCost=item?numVal(getItemCost(item.code,item.itemType)):0;
+          const price=ch==="POS"?numVal(item?.posSellPrice):numVal(item?.aggSellPrice);
+          const rev=numVal(row.revenue)||(price*qty);
+          rec={itemCode:code,itemName:name,itemType:"product",
             qtyPos:ch==="POS"?qty:0,qtyAgg:ch==="AGG"?qty:0,
             revenuePos:ch==="POS"?rev.toFixed(2):"0",revenueAgg:ch==="AGG"?rev.toFixed(2):"0",
             actualCostPos:ch==="POS"?(unitCost*qty).toFixed(4):"0",actualCostAgg:ch==="AGG"?(unitCost*qty).toFixed(4):"0",
             stdCost:"0",costPct:"0",month:m,year:y,notes:row.notes||""};
         } else {
-          const code=(row.itemCode||row.productCode||"").toString().trim();
-          const name=(row.itemName||row.productName||"").toString().trim();
+          code=(row.itemCode||row.productCode||"").toString().trim();
+          name=(row.itemName||row.productName||"").toString().trim();
           if(!code&&!name)return;
-          const type=(row.itemType||"product").toString().toLowerCase();
+          type=(row.itemType||"product").toString().toLowerCase();
           const qPos=numVal(row.qtyPos);
           const qAgg=numVal(row.qtyAgg);
-          const rPos=numVal(row.revenuePos);
-          const rAgg=numVal(row.revenueAgg);
-          const m=(row.month||defMonth).toString().padStart(2,"0");
-          const y=(row.year||defYear).toString();
+          m=(row.month||defMonth).toString().padStart(2,"0");
+          y=(row.year||defYear).toString();
           const item=allItems.find(x=>x.code===code||x.name===name);
+          // If revenue columns are blank, auto-calculate from the item's POS/AGG selling price (Products/Modifiers modules)
+          const rPos=row.revenuePos!==undefined&&row.revenuePos!==""?numVal(row.revenuePos):numVal(item?.posSellPrice)*qPos;
+          const rAgg=row.revenueAgg!==undefined&&row.revenueAgg!==""?numVal(row.revenueAgg):numVal(item?.aggSellPrice)*qAgg;
           const unitCost=item?numVal(getItemCost(item.code||code,item.itemType||type)):0;
           const stdCostVal=item?numVal(getStdCost(item.code||code,item.itemType||type)):0;
-          rec={id:Date.now()+Math.random(),itemCode:code,itemName:name,itemType:type,
+          rec={itemCode:code,itemName:name,itemType:type,
             qtyPos:qPos,qtyAgg:qAgg,revenuePos:rPos.toFixed(2),revenueAgg:rAgg.toFixed(2),
             actualCostPos:(unitCost*qPos).toFixed(4),actualCostAgg:(unitCost*qAgg).toFixed(4),
             stdCost:stdCostVal.toFixed(4),
             costPct:"0",month:m,year:y,notes:row.notes||""};
         }
-        updated.push(rec);
-        added++;
+        const existingIdx=findExistingIdx(code,name,type,m,y);
+        if(existingIdx>=0){
+          updated[existingIdx]={...updated[existingIdx],...rec,id:updated[existingIdx].id};
+          updatedCount++;
+        } else {
+          updated.push({...rec,id:Date.now()+Math.random()});
+          added++;
+        }
       });
       persist(updated);
-      showToast&&showToast(`${lang==="ar"?"تم الاستيراد:":"Imported:"} ${added}`);
+      showToast&&showToast(`${lang==="ar"?"مُضاف:":"Added:"} ${added} | ${lang==="ar"?"مُحدّث:":"Updated:"} ${updatedCount}`);
       setShowImport(false);
      }catch(err){
       console.error(err);
@@ -2635,6 +2654,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
           <button className="btn btn-secondary" style={{fontSize:12,background:"#7c3aed22",borderColor:"#7c3aed",color:"#a78bfa"}} onClick={()=>setShowMPUpload(true)}>
             {ar?"المبيعات الشهرية":"Monthly Sales"}
           </button>
+          {selectedIds.length>0&&hasPerm(mod,"delete")&&<button className="btn btn-danger" style={{fontSize:12}} onClick={()=>setShowBulkDel(true)}>{ar?`حذف المحدد (${selectedIds.length})`:`Delete Selected (${selectedIds.length})`}</button>}
           {hasPerm(mod,"import")&&<button className="btn btn-secondary" style={{fontSize:12}} onClick={()=>setShowImport(true)}>{t.import}</button>}
           {hasPerm(mod,"export")&&<button className="btn btn-secondary" style={{fontSize:12}} onClick={doExport}>{t.export}</button>}
           {hasPerm(mod,"add")&&<button className="btn btn-primary" style={{fontSize:12}} onClick={()=>setShowForm(true)}>+ {t.add}</button>}
@@ -2704,6 +2724,10 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
       <div className="table-wrap">
         <table>
           <thead><tr>
+            <th style={{width:32}}><input type="checkbox" checked={paged.length>0&&paged.every(r=>selectedIds.includes(r.id))} onChange={e=>{
+              if(e.target.checked)setSelectedIds(prev=>[...new Set([...prev,...paged.map(r=>r.id)])]);
+              else setSelectedIds(prev=>prev.filter(id=>!paged.some(r=>r.id===id)));
+            }}/></th>
             <th>{t.productName}</th>
             <th>{ar?"النوع":"Type"}</th>
             <th>POS Qty</th>
@@ -2718,7 +2742,7 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
             <th>{t.actions}</th>
           </tr></thead>
           <tbody>
-            {paged.length===0&&<tr><td colSpan={12} style={{textAlign:"center",color:C.muted,padding:20}}>{t.noData}</td></tr>}
+            {paged.length===0&&<tr><td colSpan={13} style={{textAlign:"center",color:C.muted,padding:20}}>{t.noData}</td></tr>}
             {paged.map(r=>{
               const rPos=parseFloat(r.revenuePos||0);
               const rAgg=parseFloat(r.revenueAgg||0);
@@ -2729,6 +2753,10 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
               const costPct=totalRev>0?(totalCost/totalRev)*100:0;
               return(
                 <tr key={r.id}>
+                  <td><input type="checkbox" checked={selectedIds.includes(r.id)} onChange={e=>{
+                    if(e.target.checked)setSelectedIds(prev=>[...prev,r.id]);
+                    else setSelectedIds(prev=>prev.filter(id=>id!==r.id));
+                  }}/></td>
                   <td style={{fontWeight:600}}>{r.itemName||r.productName||r.itemCode}</td>
                   <td><span style={{background:r.itemType==="modifier"?"#7c3aed22":"#22c55e22",color:r.itemType==="modifier"?"#a78bfa":"#22c55e",padding:"2px 8px",borderRadius:5,fontSize:10,fontWeight:700}}>{r.itemType==="modifier"?(ar?"مودفاير":"Modifier"):(ar?"منتج":"Product")}</span></td>
                   <td style={{color:C.muted}}>{r.qtyPos||0}</td>
@@ -2878,6 +2906,13 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
       </div></div>}
 
       {delId&&<DelModal t={t} onOk={()=>doDelete(delId)} onCancel={()=>setDelId(null)}/>}
+      {showBulkDel&&<div className="overlay"><div className="modal" style={{maxWidth:320,textAlign:"center"}}>
+        <p style={{marginBottom:20,color:C.text,fontSize:14}}>{ar?`هل تريد حذف ${selectedIds.length} سجل مبيعات؟`:`Delete ${selectedIds.length} sales records?`}</p>
+        <div style={{display:"flex",gap:10,justifyContent:"center"}}>
+          <button className="btn-sm-d" style={{padding:"8px 20px",fontSize:13}} onClick={doBulkDelete}>{t.delete}</button>
+          <button className="btn btn-secondary" style={{padding:"8px 20px",fontSize:13}} onClick={()=>setShowBulkDel(false)}>{t.cancel}</button>
+        </div>
+      </div></div>}
     </div>
   );
 }
