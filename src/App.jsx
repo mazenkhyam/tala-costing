@@ -66,6 +66,23 @@ const T = {
     grossProfit:"مجمل الربح", grossLoss:"مجمل الخسارة",
     import:"استيراد", export:"تصدير",
     cost:"التكلفة",
+    reports:"التقارير", reportsModule:"تقارير المبيعات الشهرية",
+    monthlyReport:"تقرير شهري", comparisonReport:"مقارنة الشهور",
+    totalRevenue:"إجمالي الإيرادات", totalCostAll:"إجمالي التكلفة",
+    overallMargin:"الهامش الإجمالي", itemsSold:"عدد الأصناف المباعة",
+    topSellers:"الأكثر مبيعاً (إيراد)", atRiskItems:"أصناف بهامش منخفض",
+    categoryBreakdown:"توزيع حسب النوع", productsRevenue:"إيرادات المنتجات",
+    modifiersRevenue:"إيرادات الموديفايرز", monthlyTrend:"اتجاه المبيعات الشهري",
+    periodA:"الفترة الأولى", periodB:"الفترة الثانية", growth:"النمو",
+    revenueGrowth:"نمو الإيرادات", costGrowth:"نمو التكلفة", marginChange:"تغير الهامش",
+    topGainers:"الأكثر نمواً", topDecliners:"الأكثر تراجعاً",
+    printReport:"طباعة / PDF", noDataPeriod:"لا توجد بيانات لهذه الفترة",
+    reportSummary:"ملخص التقرير", fullBreakdown:"التفصيل الكامل الشهري",
+    comparePeriods:"مقارنة", vsLbl:"مقابل", selectPeriod:"اختر الفترة",
+    posRevenue:"إيرادات POS", aggRevenue:"إيرادات AGG",
+    generatedOn:"تم إنشاؤه بتاريخ", exportExcel:"تصدير Excel",
+    salesAnalysisSec:"تحليل المبيعات", noSalesData:"لا توجد بيانات مبيعات — أضف بيانات من صفحة المبيعات",
+    top:"أعلى",
   },
   en: {
     dir:"ltr", font:"'DM Sans',sans-serif",
@@ -127,6 +144,23 @@ const T = {
     grossProfit:"Gross Profit", grossLoss:"Gross Loss",
     import:"Import", export:"Export",
     cost:"Cost",
+    reports:"Reports", reportsModule:"Monthly Sales Reports",
+    monthlyReport:"Monthly Report", comparisonReport:"Month Comparison",
+    totalRevenue:"Total Revenue", totalCostAll:"Total Cost",
+    overallMargin:"Overall Margin", itemsSold:"Items Sold",
+    topSellers:"Top Sellers (Revenue)", atRiskItems:"Low Margin Items",
+    categoryBreakdown:"By Type", productsRevenue:"Products Revenue",
+    modifiersRevenue:"Modifiers Revenue", monthlyTrend:"Monthly Sales Trend",
+    periodA:"Period A", periodB:"Period B", growth:"Growth",
+    revenueGrowth:"Revenue Growth", costGrowth:"Cost Growth", marginChange:"Margin Change",
+    topGainers:"Top Gainers", topDecliners:"Top Decliners",
+    printReport:"Print / PDF", noDataPeriod:"No data for this period",
+    reportSummary:"Report Summary", fullBreakdown:"Full Monthly Breakdown",
+    comparePeriods:"Compare", vsLbl:"vs", selectPeriod:"Select Period",
+    posRevenue:"POS Revenue", aggRevenue:"AGG Revenue",
+    generatedOn:"Generated on", exportExcel:"Export Excel",
+    salesAnalysisSec:"Sales Analysis", noSalesData:"No sales data — add data from the Sales page",
+    top:"Top",
   }
 };
 
@@ -146,7 +180,8 @@ const defaultUsers = [
   { id:"1001", pin:"11111", name:"Admin", role:"admin", lang:"ar",
     perms:{ raw:{view:true,edit:true,delete:true}, prep:{view:true,edit:true,delete:true},
             products:{view:true,edit:true,delete:true}, classes:{view:true,edit:true,delete:true},
-            modifiers:{view:true,edit:true,delete:true}, sales:{view:true,edit:true,delete:true} } }
+            modifiers:{view:true,edit:true,delete:true}, sales:{view:true,edit:true,delete:true},
+            reports:{view:true,edit:true,delete:true} } }
 ];
 const defaultClasses = {
   raw:["Food Item","Package Item","Cleaning Item"],
@@ -314,6 +349,7 @@ export default function App() {
     {id:"products",  label:t.products,  perm:"products"},
     {id:"modifiers", label:t.modifiers, perm:"modifiers"},
     {id:"sales",     label:t.sales,     perm:"sales"},
+    {id:"reports",   label:t.reports,   perm:"reports"},
     {id:"classes",   label:t.classes,   perm:"classes"},
     ...(currentUser.role==="admin"?[{id:"users",label:t.users}]:[]),
   ];
@@ -384,6 +420,21 @@ export default function App() {
         .sales-kpi-main{font-size:26px;font-weight:800;line-height:1;margin-bottom:6px}
         .sales-kpi-sub{display:flex;gap:10px;font-size:12px}
         table{width:100%;border-collapse:collapse}
+        .rep-tabbtn{background:${DARK.surface};border:1px solid ${DARK.border};color:${DARK.muted};padding:8px 16px;font-size:13px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:700;transition:all .14s}
+        .rep-tabbtn.active{background:${DARK.accent};color:#080b14;border-color:${DARK.accent}}
+        .rep-kpi{background:${DARK.card};border:1px solid ${DARK.border};border-radius:12px;padding:16px 18px}
+        .rep-kpi-lbl{font-size:10px;color:${DARK.muted};font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+        .rep-kpi-val{font-size:24px;font-weight:800;line-height:1}
+        @media print{
+          body *{visibility:hidden}
+          .print-area,.print-area *{visibility:visible}
+          .print-area{position:absolute;top:0;left:0;width:100%;padding:16px;background:#fff!important;color:#000!important}
+          .print-area .card,.print-area .rep-kpi{border:1px solid #ccc!important;background:#fff!important;break-inside:avoid}
+          .print-area *{color:#000!important;background-color:transparent!important}
+          .print-area table{color:#000!important}
+          .print-area th{background:#f0f0f0!important;color:#000!important}
+          .no-print{display:none!important}
+        }
       `}</style>
 
       {/* SIDEBAR */}
@@ -427,6 +478,7 @@ export default function App() {
           {tab==="products"  && (hasPerm("products","view")?<ProductsTab t={t} lang={lang} C={C} prodList={prodList} setProdList={setProdList} rawList={rawList} prepList={prepList} classes={classes} calcPrepCost={calcPrepCost} calcProductCost={calcProductCost} showToast={showToast} hasPerm={hasPerm} mod="products"/>:<NoPerm t={t}/>)}
           {tab==="modifiers" && (hasPerm("modifiers","view")?<ModifiersTab t={t} lang={lang} C={C} rawList={rawList} prepList={prepList} classes={classes} modList={modList} setModList={setModList} calcPrepCost={calcPrepCost} showToast={showToast} hasPerm={hasPerm} mod="modifiers" setClasses={setClasses}/>:<NoPerm t={t}/>)}
           {tab==="sales"     && (hasPerm("sales","view")?<SalesTab t={t} lang={lang} C={C} prodList={prodList} prepList={prepList} modList={modList} rawList={rawList} salesList={salesList} setSalesList={setSalesList} monthlyPrices={monthlyPrices} setMonthlyPrices={setMonthlyPrices} calcProductCost={calcProductCost} showToast={showToast} hasPerm={hasPerm} mod="sales"/>:<NoPerm t={t}/>)}
+          {tab==="reports"   && (hasPerm("reports","view")?<ReportsTab t={t} lang={lang} C={C} salesList={salesList} appName={t.appName}/>:<NoPerm t={t}/>)}
           {tab==="classes"   && (hasPerm("classes","view")?<ClassesTab t={t} lang={lang} C={C} classes={classes} setClasses={setClasses} showToast={showToast} hasPerm={hasPerm} mod="classes"/>:<NoPerm t={t}/>)}
           {tab==="users"     && currentUser.role==="admin" && <UsersTab t={t} lang={lang} C={C} users={users} setUsers={setUsers} showToast={showToast} currentUserId={currentUser.id}/>}
         </div>
@@ -517,6 +569,7 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
   const [section,setSection]=useState("all");
   const [relModal,setRelModal]=useState(null);
   const ar=lang==="ar";
+  const nfmt=(v,d=2)=>{const n=Number(v);return isNaN(n)?(0).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d}):n.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});};
 
   const prodCalc=useMemo(()=>prodList.map(p=>({...p,...calcProductCost(p)})),[prodList,calcProductCost]);
   const prepCalc=useMemo(()=>prepList.map(p=>({...p,...calcPrepCost(p)})),[prepList,calcPrepCost]);
@@ -814,6 +867,69 @@ function DashboardTab({t,lang,C=DARK,rawList,prepList,prodList,modList,salesList
             </div>)}
           </div>
         </div>}
+      </div>}
+
+      {/* === CARD 9: Sales Analysis === */}
+      {show("salesAnalysis")&&<div className="card" style={{padding:18,marginBottom:16}}>
+        <SecHd c={t.salesAnalysisSec} sub={ar?"أداء المبيعات الفعلي من بيانات المبيعات المرفوعة":"Actual sales performance from uploaded sales data"}/>
+        {salesList.length===0?<div style={{color:C.muted,fontSize:13,textAlign:"center",padding:"24px 0"}}>{t.noSalesData}</div>:(()=>{
+          // group by year-month
+          const monthMap={};
+          salesList.forEach(s=>{
+            const key=`${s.year}-${s.month}`;
+            if(!monthMap[key])monthMap[key]={rev:0,cost:0,year:s.year,month:s.month};
+            const rPos=parseFloat(s.revenuePos||0),rAgg=parseFloat(s.revenueAgg||0);
+            const cPos=parseFloat(s.actualCostPos||0),cAgg=parseFloat(s.actualCostAgg||0);
+            monthMap[key].rev+=rPos+rAgg;
+            monthMap[key].cost+=cPos+cAgg;
+          });
+          const months=Object.values(monthMap).sort((a,b)=>(String(a.year)+String(a.month)).localeCompare(String(b.year)+String(b.month))).slice(-12);
+          const maxRev=Math.max(...months.map(m=>m.rev),1);
+          return (<>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:10,marginBottom:18}}>
+              {[
+                {label:t.totalRevenue,value:nfmt(totalRev),color:C.green,sub:ar?`POS: ${nfmt(totalRevPOS)} · AGG: ${nfmt(totalRevAGG)}`:`POS: ${nfmt(totalRevPOS)} · AGG: ${nfmt(totalRevAGG)}`},
+                {label:t.totalCostAll,value:nfmt(totalCostSales),color:C.red},
+                {label:t.overallMargin,value:overallSalesMargin.toFixed(1)+"%",color:overallSalesMargin>30?C.green:overallSalesMargin>15?C.yellow:C.red},
+                {label:grossPL>=0?t.grossProfit:t.grossLoss,value:nfmt(Math.abs(grossPL)),color:grossPL>=0?C.green:C.red},
+              ].map((k,i)=>(
+                <div key={i} className="card" style={{padding:"14px 16px"}}>
+                  <div style={{fontSize:22,fontWeight:800,color:k.color,lineHeight:1}}>{k.value}</div>
+                  <div style={{fontSize:11,color:C.muted,marginTop:4}}>{k.label}</div>
+                  {k.sub&&<div style={{fontSize:10,color:C.muted,marginTop:2}}>{k.sub}</div>}
+                </div>
+              ))}
+            </div>
+            {months.length>1&&<div style={{marginBottom:18}}>
+              <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:12}}>{t.monthlyTrend}</div>
+              <div style={{display:"flex",alignItems:"flex-end",gap:8,height:120,padding:"0 4px"}}>
+                {months.map((m,i)=>(
+                  <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+                    <div style={{fontSize:9,color:C.muted,fontWeight:700}}>{m.rev>0?nfmt(m.rev,0):""}</div>
+                    <div style={{width:"100%",maxWidth:36,height:Math.max((m.rev/maxRev)*90,2),background:`linear-gradient(180deg,${C.accent},${C.accentDark})`,borderRadius:"4px 4px 0 0"}}/>
+                    <div style={{fontSize:9,color:C.muted,whiteSpace:"nowrap"}}>{mLabel(m.month,lang).slice(0,3)} {String(m.year).slice(2)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>}
+            {atRisk.length>0&&<div>
+              <div style={{fontSize:11,color:C.muted,fontWeight:700,textTransform:"uppercase",marginBottom:10}}>{t.atRiskItems}</div>
+              <div style={{overflowX:"auto"}}>
+                <table style={{borderCollapse:"collapse"}}>
+                  <thead><tr>{[t.productName,t.totalCost,ar?"سعر POS":"POS Price",t.posMargin].map((h,i)=><th key={i} style={{padding:"9px 12px",textAlign:ar?"right":"left",fontSize:10,fontWeight:700,color:C.muted,textTransform:"uppercase",background:C.surface,whiteSpace:"nowrap"}}>{h}</th>)}</tr></thead>
+                  <tbody>{atRisk.slice(0,topN).map(p=>(
+                    <tr key={p.id} style={{borderBottom:`1px solid ${C.border}22`}}>
+                      <td style={{padding:"10px 12px",fontWeight:600}}>{p.name}</td>
+                      <td style={{padding:"10px 12px",color:"#f87171"}}>{p.totalCost.toFixed(2)}</td>
+                      <td style={{padding:"10px 12px",color:C.muted}}>{parseFloat(p.posSellPrice||p.sellingPrice||0).toFixed(2)}</td>
+                      <td style={{padding:"10px 12px"}}><span style={{background:C.red+"22",color:C.red,padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700}}>{getMargin(p).toFixed(1)}%</span></td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              </div>
+            </div>}
+          </>);
+        })()}
       </div>}
 
       {/* RelModal */}
@@ -2928,6 +3044,282 @@ function SalesTab({t,lang,C=DARK,mod,prodList=[],prepList=[],modList=[],rawList=
 }
 
 
+// ==================== REPORTS TAB (Monthly Sales Reports) ====================
+function ReportsTab({t,lang,C=DARK,salesList=[],appName}){
+  const ar=lang==="ar";
+  const now=new Date();
+  const curM=String(now.getMonth()+1).padStart(2,"0");
+  const curY=String(now.getFullYear());
+  const YEARS=["2023","2024","2025","2026","2027"];
+
+  const [repType,setRepType]=useState("monthly"); // "monthly" | "comparison"
+  const [month,setMonth]=useState(curM);
+  const [year,setYear]=useState(curY);
+  const [monthA,setMonthA]=useState(curM);
+  const [yearA,setYearA]=useState(curY);
+  const [monthB,setMonthB]=useState(String(now.getMonth()===0?12:now.getMonth()).padStart(2,"0"));
+  const [yearB,setYearB]=useState(now.getMonth()===0?String(now.getFullYear()-1):curY);
+
+  const nf=(v,d=2)=>{const n=Number(v);return isNaN(n)?(0).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d}):n.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});};
+  const pctStr=v=>(v>=0?"+":"")+v.toFixed(1)+"%";
+
+  // Build aggregate + itemized data for a given month/year
+  const buildPeriod=useCallback((m,y)=>{
+    const rows=salesList.filter(s=>s.month===m&&String(s.year)===String(y)&&((parseFloat(s.qtyPos||0)+parseFloat(s.qtyAgg||0))>0));
+    let revPos=0,revAgg=0,costPos=0,costAgg=0,prodRev=0,modRev=0;
+    const items=rows.map(r=>{
+      const rPos=parseFloat(r.revenuePos||0),rAgg=parseFloat(r.revenueAgg||0);
+      const cPos=parseFloat(r.actualCostPos||0),cAgg=parseFloat(r.actualCostAgg||0);
+      const rev=rPos+rAgg, cost=cPos+cAgg;
+      revPos+=rPos; revAgg+=rAgg; costPos+=cPos; costAgg+=cAgg;
+      if(r.itemType==="modifier")modRev+=rev; else prodRev+=rev;
+      return {code:r.itemCode,name:r.itemName,type:r.itemType,qtyPos:r.qtyPos,qtyAgg:r.qtyAgg,rev,cost,costPct:rev>0?(cost/rev)*100:0};
+    }).sort((a,b)=>b.rev-a.rev);
+    const totalRev=revPos+revAgg, totalCost=costPos+costAgg;
+    const margin=totalRev>0?((totalRev-totalCost)/totalRev)*100:0;
+    return {m,y,revPos,revAgg,costPos,costAgg,totalRev,totalCost,margin,gp:totalRev-totalCost,items,prodRev,modRev,count:items.length};
+  },[salesList]);
+
+  const monthly=useMemo(()=>buildPeriod(month,year),[buildPeriod,month,year]);
+  const pA=useMemo(()=>buildPeriod(monthA,yearA),[buildPeriod,monthA,yearA]);
+  const pB=useMemo(()=>buildPeriod(monthB,yearB),[buildPeriod,monthB,yearB]);
+  const growth=(a,b)=>a===0?(b===0?0:100):((b-a)/Math.abs(a))*100;
+
+  const compareItems=useMemo(()=>{
+    const map={};
+    pA.items.forEach(i=>{map[i.code]={code:i.code,name:i.name,revA:i.rev,costA:i.cost,revB:0,costB:0};});
+    pB.items.forEach(i=>{
+      if(!map[i.code])map[i.code]={code:i.code,name:i.name,revA:0,costA:0,revB:0,costB:0};
+      map[i.code].revB=i.rev; map[i.code].costB=i.cost;
+    });
+    return Object.values(map).map(x=>({...x,g:growth(x.revA,x.revB)})).sort((a,b)=>b.revB-a.revB);
+  },[pA,pB]);
+  const topGainers=useMemo(()=>[...compareItems].filter(x=>x.g>0).sort((a,b)=>b.g-a.g).slice(0,8),[compareItems]);
+  const topDecliners=useMemo(()=>[...compareItems].filter(x=>x.g<0).sort((a,b)=>a.g-b.g).slice(0,8),[compareItems]);
+
+  const exportMonthly=()=>{
+    const rows=monthly.items.map(i=>({Code:i.code,Name:i.name,Type:i.type,"POS Qty":i.qtyPos,"AGG Qty":i.qtyAgg,Revenue:i.rev.toFixed(2),Cost:i.cost.toFixed(4),"Cost %":i.costPct.toFixed(1)+"%"}));
+    const ws=XLSX.utils.json_to_sheet(rows);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Monthly Report");
+    XLSX.writeFile(wb,`sales_report_${year}_${month}.xlsx`);
+  };
+  const exportComparison=()=>{
+    const rows=compareItems.map(i=>({Code:i.code,Name:i.name,[`Rev ${mLabel(monthA,lang)} ${yearA}`]:i.revA.toFixed(2),[`Rev ${mLabel(monthB,lang)} ${yearB}`]:i.revB.toFixed(2),"Growth %":i.g.toFixed(1)+"%"}));
+    const ws=XLSX.utils.json_to_sheet(rows);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Comparison");
+    XLSX.writeFile(wb,`sales_comparison_${yearA}${monthA}_vs_${yearB}${monthB}.xlsx`);
+  };
+
+  const KpiCard=({label,value,color,sub})=>(
+    <div className="rep-kpi">
+      <div className="rep-kpi-lbl">{label}</div>
+      <div className="rep-kpi-val" style={{color}}>{value}</div>
+      {sub&&<div style={{fontSize:11,color:C.muted,marginTop:6}}>{sub}</div>}
+    </div>
+  );
+
+  const SecHd=({c,sub})=>(<div style={{marginBottom:14}}><div style={{fontWeight:700,fontSize:14,color:C.text}}>{c}</div>{sub&&<div style={{fontSize:11,color:C.muted,marginTop:2}}>{sub}</div>}<div style={{height:2,background:C.border,marginTop:8}}/></div>);
+
+  return (
+    <div style={{maxWidth:1100,margin:"0 auto"}}>
+      {/* Controls (hidden on print) */}
+      <div className="no-print" style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:10}}>
+        <div style={{display:"flex",gap:8}}>
+          <button className={`rep-tabbtn${repType==="monthly"?" active":""}`} onClick={()=>setRepType("monthly")}>{t.monthlyReport}</button>
+          <button className={`rep-tabbtn${repType==="comparison"?" active":""}`} onClick={()=>setRepType("comparison")}>{t.comparisonReport}</button>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          <button className="btn btn-secondary" style={{fontSize:12}} onClick={()=>window.print()}>🖨️ {t.printReport}</button>
+          <button className="btn btn-primary" style={{fontSize:12}} onClick={repType==="monthly"?exportMonthly:exportComparison}>⬇ {t.exportExcel}</button>
+        </div>
+      </div>
+
+      {repType==="monthly"?(
+        <>
+          <div className="no-print" style={{display:"flex",gap:8,marginBottom:16,background:C.card,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 14px"}}>
+            <select value={month} onChange={e=>setMonth(e.target.value)} style={{maxWidth:160}}>
+              {MONTHS_LIST.map(m=><option key={m} value={m}>{mLabel(m,lang)}</option>)}
+            </select>
+            <select value={year} onChange={e=>setYear(e.target.value)} style={{maxWidth:110}}>
+              {YEARS.map(y=><option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+
+          <div className="print-area">
+            <div style={{display:"none"}} className="print-only">
+              <h1>{appName} — {t.monthlyReport}</h1>
+            </div>
+            <div style={{marginBottom:16}}>
+              <div style={{fontWeight:800,fontSize:16,color:C.accent}}>{t.reportSummary} — {mLabel(month,lang)} {year}</div>
+              <div style={{fontSize:11,color:C.muted,marginTop:2}}>{t.generatedOn}: {new Date().toLocaleDateString(ar?"ar-EG":"en-US")}</div>
+            </div>
+
+            {monthly.count===0?<div style={{color:C.muted,fontSize:13,textAlign:"center",padding:"30px 0"}}>{t.noDataPeriod}</div>:(
+              <>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(160px,1fr))",gap:10,marginBottom:16}}>
+                  <KpiCard label={t.totalRevenue} value={nf(monthly.totalRev)} color={C.green} sub={`POS: ${nf(monthly.revPos)} · AGG: ${nf(monthly.revAgg)}`}/>
+                  <KpiCard label={t.totalCostAll} value={nf(monthly.totalCost)} color={C.red}/>
+                  <KpiCard label={t.overallMargin} value={monthly.margin.toFixed(1)+"%"} color={monthly.margin>30?C.green:monthly.margin>15?C.yellow:C.red}/>
+                  <KpiCard label={monthly.gp>=0?t.grossProfit:t.grossLoss} value={nf(Math.abs(monthly.gp))} color={monthly.gp>=0?C.green:C.red}/>
+                  <KpiCard label={t.itemsSold} value={monthly.count} color={C.blue}/>
+                </div>
+
+                <div className="card" style={{padding:18,marginBottom:16}}>
+                  <SecHd c={t.categoryBreakdown}/>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                    <div style={{background:C.surface,borderRadius:10,padding:"12px 14px",border:`1px solid ${C.border}`}}>
+                      <div style={{fontSize:11,color:C.muted,fontWeight:700}}>{t.productsRevenue}</div>
+                      <div style={{fontSize:20,fontWeight:800,color:C.accent,marginTop:4}}>{nf(monthly.prodRev)}</div>
+                    </div>
+                    <div style={{background:C.surface,borderRadius:10,padding:"12px 14px",border:`1px solid ${C.border}`}}>
+                      <div style={{fontSize:11,color:C.muted,fontWeight:700}}>{t.modifiersRevenue}</div>
+                      <div style={{fontSize:20,fontWeight:800,color:"#a78bfa",marginTop:4}}>{nf(monthly.modRev)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card" style={{padding:18,marginBottom:16}}>
+                  <SecHd c={t.topSellers}/>
+                  <div className="table-wrap"><table>
+                    <thead><tr><th>{t.productName}</th><th>{ar?"النوع":"Type"}</th><th>{t.totalRevenue}</th><th>{t.cost}</th><th>{ar?"نسبة التكلفة":"Cost %"}</th></tr></thead>
+                    <tbody>{monthly.items.slice(0,10).map((i,idx)=>(
+                      <tr key={idx}><td style={{fontWeight:600}}>{i.name}</td><td style={{color:C.muted}}>{i.type}</td><td style={{color:C.green,fontWeight:600}}>{nf(i.rev)}</td><td style={{color:C.red}}>{nf(i.cost)}</td><td>{i.costPct.toFixed(1)}%</td></tr>
+                    ))}</tbody>
+                  </table></div>
+                </div>
+
+                {(()=>{const risky=[...monthly.items].filter(i=>i.costPct>=50).sort((a,b)=>b.costPct-a.costPct).slice(0,10);
+                  return risky.length>0&&<div className="card" style={{padding:18,marginBottom:16}}>
+                    <SecHd c={t.atRiskItems} sub={ar?"نسبة تكلفة 50% فأعلى":"Cost % of 50% or higher"}/>
+                    <div className="table-wrap"><table>
+                      <thead><tr><th>{t.productName}</th><th>{t.totalRevenue}</th><th>{t.cost}</th><th>{ar?"نسبة التكلفة":"Cost %"}</th></tr></thead>
+                      <tbody>{risky.map((i,idx)=>(
+                        <tr key={idx}><td style={{fontWeight:600}}>{i.name}</td><td style={{color:C.green}}>{nf(i.rev)}</td><td style={{color:C.red}}>{nf(i.cost)}</td><td><span style={{background:C.red+"22",color:C.red,padding:"2px 8px",borderRadius:20,fontSize:12,fontWeight:700}}>{i.costPct.toFixed(1)}%</span></td></tr>
+                      ))}</tbody>
+                    </table></div>
+                  </div>;
+                })()}
+
+                <div className="card" style={{padding:18,marginBottom:16}}>
+                  <SecHd c={t.fullBreakdown}/>
+                  <div className="table-wrap" style={{maxHeight:500,overflowY:"auto"}}><table>
+                    <thead><tr><th>{t.productName}</th><th>{ar?"النوع":"Type"}</th><th>POS Qty</th><th>AGG Qty</th><th>{t.totalRevenue}</th><th>{t.cost}</th><th>{ar?"نسبة التكلفة":"Cost %"}</th></tr></thead>
+                    <tbody>{monthly.items.map((i,idx)=>(
+                      <tr key={idx}><td style={{fontWeight:600}}>{i.name}</td><td style={{color:C.muted}}>{i.type}</td><td>{i.qtyPos||0}</td><td>{i.qtyAgg||0}</td><td style={{color:C.green}}>{nf(i.rev)}</td><td style={{color:C.red}}>{nf(i.cost)}</td><td>{i.costPct.toFixed(1)}%</td></tr>
+                    ))}</tbody>
+                  </table></div>
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      ):(
+        <>
+          <div className="no-print" style={{display:"flex",gap:16,marginBottom:16,background:C.card,border:`1px solid ${C.border}`,borderRadius:10,padding:"12px 14px",flexWrap:"wrap"}}>
+            <div>
+              <div style={{fontSize:10,color:C.muted,fontWeight:700,marginBottom:4}}>{t.periodA}</div>
+              <div style={{display:"flex",gap:6}}>
+                <select value={monthA} onChange={e=>setMonthA(e.target.value)} style={{maxWidth:150}}>{MONTHS_LIST.map(m=><option key={m} value={m}>{mLabel(m,lang)}</option>)}</select>
+                <select value={yearA} onChange={e=>setYearA(e.target.value)} style={{maxWidth:100}}>{YEARS.map(y=><option key={y} value={y}>{y}</option>)}</select>
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:10,color:C.muted,fontWeight:700,marginBottom:4}}>{t.periodB}</div>
+              <div style={{display:"flex",gap:6}}>
+                <select value={monthB} onChange={e=>setMonthB(e.target.value)} style={{maxWidth:150}}>{MONTHS_LIST.map(m=><option key={m} value={m}>{mLabel(m,lang)}</option>)}</select>
+                <select value={yearB} onChange={e=>setYearB(e.target.value)} style={{maxWidth:100}}>{YEARS.map(y=><option key={y} value={y}>{y}</option>)}</select>
+              </div>
+            </div>
+          </div>
+
+          <div className="print-area">
+            <div style={{marginBottom:16}}>
+              <div style={{fontWeight:800,fontSize:16,color:C.accent}}>{t.reportSummary} — {mLabel(monthA,lang)} {yearA} {t.vsLbl} {mLabel(monthB,lang)} {yearB}</div>
+              <div style={{fontSize:11,color:C.muted,marginTop:2}}>{t.generatedOn}: {new Date().toLocaleDateString(ar?"ar-EG":"en-US")}</div>
+            </div>
+
+            {pA.count===0&&pB.count===0?<div style={{color:C.muted,fontSize:13,textAlign:"center",padding:"30px 0"}}>{t.noDataPeriod}</div>:(
+              <>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12,marginBottom:16}}>
+                  {[
+                    {label:t.revenueGrowth,a:pA.totalRev,b:pB.totalRev,goodUp:true},
+                    {label:t.costGrowth,a:pA.totalCost,b:pB.totalCost,goodUp:false},
+                    {label:t.grossProfit,a:pA.gp,b:pB.gp,goodUp:true},
+                  ].map((k,i)=>{
+                    const g=growth(k.a,k.b);
+                    const good=k.goodUp?g>=0:g<=0;
+                    return (
+                      <div key={i} className="card" style={{padding:"14px 16px"}}>
+                        <div style={{fontSize:11,color:C.muted,fontWeight:700,marginBottom:8}}>{k.label}</div>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
+                          <span style={{fontSize:11,color:C.muted}}>{mLabel(monthA,lang)} {yearA}</span>
+                          <span style={{fontWeight:700,fontSize:15}}>{nf(k.a)}</span>
+                        </div>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:8}}>
+                          <span style={{fontSize:11,color:C.muted}}>{mLabel(monthB,lang)} {yearB}</span>
+                          <span style={{fontWeight:700,fontSize:15}}>{nf(k.b)}</span>
+                        </div>
+                        <div style={{textAlign:"center",background:(good?C.green:C.red)+"18",color:good?C.green:C.red,borderRadius:20,padding:"3px 10px",fontWeight:800,fontSize:13}}>{pctStr(g)}</div>
+                      </div>
+                    );
+                  })}
+                  <div className="card" style={{padding:"14px 16px"}}>
+                    <div style={{fontSize:11,color:C.muted,fontWeight:700,marginBottom:8}}>{t.marginChange}</div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:4}}>
+                      <span style={{fontSize:11,color:C.muted}}>{mLabel(monthA,lang)} {yearA}</span>
+                      <span style={{fontWeight:700,fontSize:15}}>{pA.margin.toFixed(1)}%</span>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:8}}>
+                      <span style={{fontSize:11,color:C.muted}}>{mLabel(monthB,lang)} {yearB}</span>
+                      <span style={{fontWeight:700,fontSize:15}}>{pB.margin.toFixed(1)}%</span>
+                    </div>
+                    <div style={{textAlign:"center",background:((pB.margin-pA.margin)>=0?C.green:C.red)+"18",color:(pB.margin-pA.margin)>=0?C.green:C.red,borderRadius:20,padding:"3px 10px",fontWeight:800,fontSize:13}}>
+                      {(pB.margin-pA.margin)>=0?"+":""}{(pB.margin-pA.margin).toFixed(1)} pt
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+                  <div className="card" style={{padding:18}}>
+                    <SecHd c={t.topGainers}/>
+                    {topGainers.length===0?<div style={{fontSize:12,color:C.muted}}>—</div>:topGainers.map((i,idx)=>(
+                      <div key={idx} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:`1px solid ${C.border}22`}}>
+                        <span style={{fontSize:12,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i.name}</span>
+                        <span style={{fontSize:12,color:C.green,fontWeight:700}}>{pctStr(i.g)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="card" style={{padding:18}}>
+                    <SecHd c={t.topDecliners}/>
+                    {topDecliners.length===0?<div style={{fontSize:12,color:C.muted}}>—</div>:topDecliners.map((i,idx)=>(
+                      <div key={idx} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:`1px solid ${C.border}22`}}>
+                        <span style={{fontSize:12,fontWeight:600,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{i.name}</span>
+                        <span style={{fontSize:12,color:C.red,fontWeight:700}}>{pctStr(i.g)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="card" style={{padding:18,marginBottom:16}}>
+                  <SecHd c={t.fullBreakdown}/>
+                  <div className="table-wrap" style={{maxHeight:500,overflowY:"auto"}}><table>
+                    <thead><tr><th>{t.productName}</th><th>{mLabel(monthA,lang)} {yearA}</th><th>{mLabel(monthB,lang)} {yearB}</th><th>{t.growth}</th></tr></thead>
+                    <tbody>{compareItems.map((i,idx)=>(
+                      <tr key={idx}><td style={{fontWeight:600}}>{i.name}</td><td>{nf(i.revA)}</td><td>{nf(i.revB)}</td><td style={{color:i.g>=0?C.green:C.red,fontWeight:700}}>{pctStr(i.g)}</td></tr>
+                    ))}</tbody>
+                  </table></div>
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ==================== CLASSES TAB ====================
 function ClassesTab({t,lang,C=DARK,mod,classes:clsObj,setClasses:setClsObj,hasPerm}){
   const [showForm,setShowForm]=useState(false);
@@ -3002,7 +3394,7 @@ function ClassesTab({t,lang,C=DARK,mod,classes:clsObj,setClasses:setClsObj,hasPe
 }
 
 // ==================== USERS TAB ====================
-const ALL_PERMS=["raw","prep","products","modifiers","sales","classes"];
+const ALL_PERMS=["raw","prep","products","modifiers","sales","reports","classes"];
 function UsersTab({t,lang,C=DARK,users:usersList,setUsers:setUsersList,currentUserId}){
   const mod="users";
   const currentUser=usersList.find(u=>u.id===currentUserId);
